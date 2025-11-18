@@ -1,6 +1,7 @@
 import { useGetAllMenuItemsQuery, useToggleMenuAvailabilityMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { ChefHat, ToggleLeft, ToggleRight, MessageCircle } from "lucide-react";
+import { ChefHat, ToggleLeft, ToggleRight, MessageCircle, Plus, Edit } from "lucide-react";
+import MenuItemModal from "../components/MenuItemModal";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
 import OrderSearchModal from "../components/OrderSearchModal";
@@ -12,6 +13,8 @@ const MenuManager = () => {
   const [toggleAvailability] = useToggleMenuAvailabilityMutation();
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
+  const [showMenuModal, setShowMenuModal] = useState(false);
+  const [editingMenuItem, setEditingMenuItem] = useState(null);
   const navigate = useNavigate();
   
   const user = JSON.parse(sessionStorage.getItem("restaurantUser") || "{}");
@@ -29,14 +32,39 @@ const MenuManager = () => {
     }
   };
 
+  const handleAddMenuItem = () => {
+    setEditingMenuItem(null);
+    setShowMenuModal(true);
+  };
+
+  const handleEditMenuItem = (menuItem) => {
+    setEditingMenuItem(menuItem);
+    setShowMenuModal(true);
+  };
+
+  const handleMenuModalClose = () => {
+    setShowMenuModal(false);
+    setEditingMenuItem(null);
+  };
+
+  const handleMenuSuccess = () => {
+    refetch();
+  };
+
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+
   const handleLogout = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
     sessionStorage.removeItem("restaurantUser");
     navigate("/restaurant/login");
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar user={user} onLogout={handleLogout} />
+      <RestaurantSidebar user={user} onLogout={confirmLogout} />
       
       <div className="flex-1 ml-64 p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
@@ -46,6 +74,13 @@ const MenuManager = () => {
           </div>
 
           <div className="mb-6 flex gap-4">
+            <button
+              onClick={handleAddMenuItem}
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Menu Item
+            </button>
             <button
               onClick={() => setShowSearchModal(true)}
               className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
@@ -149,15 +184,25 @@ const MenuManager = () => {
                             </span>
                           </td>
                           <td className="py-3">
-                            <button
-                              onClick={() => handleToggleAvailability(menu._id, menu.available)}
-                              className="text-blue-600 hover:text-blue-800"
-                            >
-                              {menu.available ? 
-                                <ToggleRight className="w-6 h-6" /> : 
-                                <ToggleLeft className="w-6 h-6" />
-                              }
-                            </button>
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => handleEditMenuItem(menu)}
+                                className="text-gray-600 hover:text-gray-800"
+                                title="Edit menu item"
+                              >
+                                <Edit className="w-5 h-5" />
+                              </button>
+                              <button
+                                onClick={() => handleToggleAvailability(menu._id, menu.available)}
+                                className="text-blue-600 hover:text-blue-800"
+                                title="Toggle availability"
+                              >
+                                {menu.available ? 
+                                  <ToggleRight className="w-6 h-6" /> : 
+                                  <ToggleLeft className="w-6 h-6" />
+                                }
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -197,6 +242,38 @@ const MenuManager = () => {
           </div>
         </div>
       )}
+      
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4">Confirm Logout</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Menu Item Modal */}
+      <MenuItemModal
+        isOpen={showMenuModal}
+        onClose={handleMenuModalClose}
+        menuItem={editingMenuItem}
+        onSuccess={handleMenuSuccess}
+      />
     </div>
   );
 };

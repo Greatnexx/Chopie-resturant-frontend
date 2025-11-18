@@ -1,19 +1,22 @@
 import { useState } from "react";
-import { useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation } from "../slices/restaurantSlice";
+import { useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation, useDeleteUserMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { Users, Plus, Star, ToggleLeft, ToggleRight } from "lucide-react";
+import { Users, Plus, Star, ToggleLeft, ToggleRight, Trash2 } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
 
 const UserManagement = () => {
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", email: "", role: "SubUser" });
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const navigate = useNavigate();
 
   const { data: usersData, refetch } = useGetAllUsersQuery();
   const [toggleUserStatus] = useToggleUserStatusMutation();
   const [awardStar] = useAwardStarMutation();
   const [createUser, { isLoading: creating }] = useCreateUserMutation();
+  const [deleteUser, { isLoading: deleting }] = useDeleteUserMutation();
 
   const users = usersData?.data || [];
 
@@ -41,12 +44,24 @@ const UserManagement = () => {
     e.preventDefault();
     try {
       await createUser(newUser).unwrap();
-      toast.success("User created successfully!");
+      toast.success("User created successfully! Login credentials sent via email.");
       setNewUser({ name: "", email: "", role: "SubUser" });
       setShowCreateUser(false);
       refetch();
     } catch (error) {
       toast.error(error?.data?.message || "Failed to create user");
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    try {
+      await deleteUser(userToDelete._id).unwrap();
+      toast.success("User deleted successfully!");
+      setShowDeleteModal(false);
+      setUserToDelete(null);
+      refetch();
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to delete user");
     }
   };
 
@@ -132,12 +147,25 @@ const UserManagement = () => {
                               </button>
                             )}
                             {user.role !== 'SuperAdmin' && (
-                              <button
-                                onClick={() => handleAwardStar(user._id)}
-                                className="text-yellow-600 hover:text-yellow-800"
-                              >
-                                <Star className="w-5 h-5" />
-                              </button>
+                              <>
+                                <button
+                                  onClick={() => handleAwardStar(user._id)}
+                                  className="text-yellow-600 hover:text-yellow-800"
+                                  title="Award star"
+                                >
+                                  <Star className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setUserToDelete(user);
+                                    setShowDeleteModal(true);
+                                  }}
+                                  className="text-red-600 hover:text-red-800"
+                                  title="Delete user"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </>
                             )}
                           </div>
                         </td>
@@ -200,6 +228,36 @@ const UserManagement = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          )}
+
+          {/* Delete User Confirmation Modal */}
+          {showDeleteModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                <h3 className="text-lg font-semibold mb-4 text-red-600">⚠️ Delete User</h3>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to delete <strong>{userToDelete?.name}</strong>? This action cannot be undone.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => {
+                      setShowDeleteModal(false);
+                      setUserToDelete(null);
+                    }}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteUser}
+                    disabled={deleting}
+                    className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+                  >
+                    {deleting ? "Deleting..." : "Delete"}
+                  </button>
+                </div>
               </div>
             </div>
           )}

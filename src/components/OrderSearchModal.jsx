@@ -67,7 +67,7 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
                         </div>
                         <div className="flex items-center gap-1">
                           <DollarSign className="w-4 h-4" />
-                          <span>${order.totalAmount.toFixed(2)}</span>
+                          <span>${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
                         </div>
                       </div>
                     </div>
@@ -95,7 +95,7 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
                       {order.items.map((item, index) => (
                         <div key={index} className="flex justify-between text-sm">
                           <span>{item.name} × {item.quantity}</span>
-                          <span>${item.totalPrice.toFixed(2)}</span>
+                          <span>${item.totalPrice ? item.totalPrice.toFixed(2) : '0.00'}</span>
                         </div>
                       ))}
                     </div>

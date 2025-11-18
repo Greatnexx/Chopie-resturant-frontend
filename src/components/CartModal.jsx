@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useCart } from "../Context/CartContext";
 import Modal from "../components/Modal";
-import { User, Mail, Phone, ShoppingCart, Trash2 } from "lucide-react";
+import { User, Mail, Phone, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCreateOrderMutation } from "../slices/orderSlice";
 import { toast } from "sonner";
+
 
 const CartModal = ({ isOpen, onClose }) => {
   const [customerInfo, setCustomerInfo] = useState({
@@ -16,6 +17,7 @@ const CartModal = ({ isOpen, onClose }) => {
   const [tableNumber, setTableNumber] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
+
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
   const handleInputChange = (e) => {
@@ -77,10 +79,20 @@ const CartModal = ({ isOpen, onClose }) => {
     if (validateForm() && cartItems.length > 0) {
       try {
         const orderData = { ...createOrderData(), confirmDuplicate };
-        const result = await createOrder(orderData).unwrap();
+        
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Request timeout')), 10000)
+        );
+        
+        const result = await Promise.race([
+          createOrder(orderData).unwrap(),
+          timeoutPromise
+        ]);
         
         toast.success("Order placed successfully!", {
-          description: `Order #${result.data.orderNumber} has been created.`,
+          description: `Order #${result.data.orderNumber} has been sent to the kitchen. You can track your order status anytime.`,
+          duration: 4000,
         });
         
         clearCart();
@@ -94,13 +106,20 @@ const CartModal = ({ isOpen, onClose }) => {
           setDuplicateOrderInfo(error.data.existingOrder);
           setShowDuplicateModal(true);
         } else {
+          const errorMessage = error.message === 'Request timeout' 
+            ? "Order is taking longer than expected. Please check your connection and try again."
+            : error?.data?.message || "Something went wrong. Please try again.";
+          
           toast.error("Failed to place order", {
-            description: error?.data?.message || "Something went wrong. Please try again.",
+            description: errorMessage,
+            duration: 6000,
           });
         }
       }
     }
   };
+
+
 
   const { cartItems, removeFromCart, clearCart } = useCart();
 
@@ -109,12 +128,13 @@ const CartModal = ({ isOpen, onClose }) => {
     .toFixed(2);
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center border"
-    >
-      <div className="bg-white w-full max-h-[80vh] rounded-2xl shadow-md flex flex-col relative">
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
+        <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col relative border border-gray-200">
         {/* Header - Fixed at top */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-2xl z-20 flex-shrink-0">
           <div className="flex items-center justify-between">
@@ -203,7 +223,7 @@ const CartModal = ({ isOpen, onClose }) => {
                     </p>
                   </div>
 
-                  <div className="space-y-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Table Number Field */}
                     <div className="space-y-2">
                       <label
@@ -311,8 +331,8 @@ const CartModal = ({ isOpen, onClose }) => {
                       )}
                     </div>
 
-                    {/* Phone Field */}
-                    <div className="space-y-2">
+                    {/* Phone Field - Full Width */}
+                    <div className="space-y-2 md:col-span-2">
                       <label
                         htmlFor="phone"
                         className="block text-sm font-medium text-gray-700"
@@ -344,8 +364,9 @@ const CartModal = ({ isOpen, onClose }) => {
                     <button
                       onClick={() => handlePlaceOrder(false)}
                       disabled={cartItems.length === 0 || isLoading}
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-3 px-4 rounded-lg hover:from-green-700 hover:to-emerald-700 focus:ring-4 focus:ring-green-200 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl hover:from-green-700 hover:to-emerald-700 focus:ring-4 focus:ring-green-200 focus:outline-none transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg flex items-center justify-center gap-2"
                     >
+                      {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                       {isLoading
                         ? "Placing Order..."
                         : cartItems.length === 0
@@ -358,6 +379,7 @@ const CartModal = ({ isOpen, onClose }) => {
             )}
           </div>
         </div>
+        </div>
 
         {/* Footer - Fixed at bottom */}
         <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex-shrink-0 z-20">
@@ -366,7 +388,7 @@ const CartModal = ({ isOpen, onClose }) => {
             parties.
           </p>
         </div>
-      </div>
+      </Modal>
 
       {/* Duplicate Order Modal */}
       {showDuplicateModal && (
@@ -395,7 +417,9 @@ const CartModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
-    </Modal>
+      
+
+    </>
   );
 };
 

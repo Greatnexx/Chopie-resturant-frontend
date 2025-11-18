@@ -23,7 +23,7 @@ const TrackOrder = () => {
   const [showChat, setShowChat] = useState(false);
   
   // RTK Query hook - skip until search is triggered
-  const { data: trackingData, isLoading: isSearching, error: trackingError } = useTrackOrderQuery(
+  const { data: trackingData, isLoading: isSearching, error: trackingError, refetch } = useTrackOrderQuery(
     orderNumber.trim(),
     { skip: !searchTriggered || !orderNumber.trim() }
   );
@@ -90,14 +90,11 @@ const TrackOrder = () => {
   };
 
   const handleRefresh = async () => {
-    if (!orderNumber.trim()) return;
+    if (!orderNumber.trim() || !refetch) return;
     setIsRefreshing(true);
 
     try {
-      // Force refetch by toggling search trigger
-      setSearchTriggered(false);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      setSearchTriggered(true);
+      await refetch();
     } finally {
       setTimeout(() => setIsRefreshing(false), 1000);
     }

@@ -92,6 +92,33 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Users"],
     }),
+    createMenuItem: builder.mutation({
+      query: (menuData) => ({
+        url: "/menu",
+        method: "POST",
+        body: menuData,
+      }),
+      invalidatesTags: ["MenuItems"],
+    }),
+    updateMenuItem: builder.mutation({
+      query: ({ menuId, ...menuData }) => ({
+        url: `/menu/${menuId}`,
+        method: "PATCH",
+        body: menuData,
+      }),
+      invalidatesTags: ["MenuItems"],
+    }),
+    getCategories: builder.query({
+      query: () => "/categories",
+      providesTags: ["Categories"],
+    }),
+    deleteUser: builder.mutation({
+      query: (userId) => ({
+        url: `/restaurant/users/${userId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Users"],
+    }),
   }),
 });
 
@@ -112,4 +139,8 @@ export const {
   useChangePasswordMutation,
   useGetAllMenuItemsQuery,
   useToggleMenuAvailabilityMutation,
+  useCreateMenuItemMutation,
+  useUpdateMenuItemMutation,
+  useGetCategoriesQuery,
+  useDeleteUserMutation,
 } = restaurantApiSlice;

@@ -17,8 +17,18 @@ import NotificationBell from "./NotificationBell";
 const RestaurantSidebar = ({ user, onLogout }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearchModal, setShowSearchModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleLogoutClick = () => {
+    setShowLogoutModal(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutModal(false);
+    onLogout();
+  };
 
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/restaurant/dashboard", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager", "SubUser"] },
@@ -104,7 +114,7 @@ const RestaurantSidebar = ({ user, onLogout }) => {
           </div>
         </div>
         <button
-          onClick={onLogout}
+          onClick={handleLogoutClick}
           className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
           <LogOut className="w-4 h-4" />
@@ -116,6 +126,30 @@ const RestaurantSidebar = ({ user, onLogout }) => {
         isOpen={showSearchModal} 
         onClose={() => setShowSearchModal(false)} 
       />
+      
+      {/* Logout Confirmation Modal */}
+      {showLogoutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4">Confirm Logout</h3>
+            <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutModal(false)}
+                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmLogout}
+                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

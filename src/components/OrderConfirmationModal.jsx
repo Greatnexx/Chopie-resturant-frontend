@@ -1,11 +1,9 @@
-import { CheckCircle, Clock, ShoppingBag, Eye, Receipt } from "lucide-react";
+import { CheckCircle, Clock, ShoppingBag, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-import ReceiptModal from "./ReceiptModal";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) => {
   const navigate = useNavigate();
-  const [showReceipt, setShowReceipt] = useState(false);
 
   if (!isOpen || !orderData) return null;
 
@@ -64,14 +62,14 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
                       </p>
                     )}
                   </div>
-                  <p className="font-medium text-gray-800">${item.totalPrice?.toFixed(2)}</p>
+                  <p className="font-medium text-gray-800">{formatCurrency(item.totalPrice)}</p>
                 </div>
               ))}
             </div>
             <div className="border-t border-gray-200 pt-3 mt-3">
               <div className="flex justify-between items-center">
                 <p className="font-bold text-lg text-gray-800">Total</p>
-                <p className="font-bold text-lg text-gray-800">${orderData.totalAmount?.toFixed(2)}</p>
+                <p className="font-bold text-lg text-gray-800">{formatCurrency(orderData.totalAmount)}</p>
               </div>
             </div>
           </div>
@@ -101,13 +99,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
               Track Order
             </button>
             
-            <button
-              onClick={() => setShowReceipt(true)}
-              className="w-full flex items-center justify-center gap-2 bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 transition-colors font-medium shadow-md hover:shadow-lg"
-            >
-              <Receipt className="w-4 h-4" />
-              View Receipt
-            </button>
+
             
             <button
               onClick={onPlaceAnother}
@@ -125,12 +117,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
           </div>
         </div>
       </div>
-      
-      <ReceiptModal 
-        isOpen={showReceipt} 
-        onClose={() => setShowReceipt(false)} 
-        orderData={orderData} 
-      />
+
     </div>
   );
 };

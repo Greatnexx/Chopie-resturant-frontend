@@ -3,12 +3,25 @@ import { toast } from "sonner";
 
 
 const getBaseUrl = () => {
-  const storedURL = localStorage.getItem('VITE_BASE_URL');
-  return storedURL || import.meta.env.VITE_BASE_URL || 'https://backend-chopie-project.onrender.com/api/v1';
+  // Check for manual override in localStorage
+  const useRemote = localStorage.getItem('USE_REMOTE_SERVER');
+  
+  if (useRemote === 'true') {
+    return 'https://backend-chopie-project.onrender.com/api/v1';
+  }
+  
+  // Check if running locally (localhost:3000 or localhost:5173)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8000/api/v1';
+  }
+  
+  const storedURL = localStorage.getItem('RENDER_URL');
+  return import.meta.env.RENDER_URL || storedURL || 'https://backend-chopie-project.onrender.com/api/v1';
 };
 
 const baseQuery = fetchBaseQuery({
   baseUrl: getBaseUrl(),
+  timeout: 60000, // 60 second timeout for Render cold starts
   prepareHeaders: (headers) => {
     // Check for regular user token
     const userInfo = sessionStorage.getItem("userInfo");

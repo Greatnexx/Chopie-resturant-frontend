@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGetAllOrdersQuery } from "../slices/orderSlice";
 import { Clock, CheckCircle, ChefHat, XCircle } from "lucide-react";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const OrderManagement = () => {
   const { data: ordersData, isLoading, error, refetch } = useGetAllOrdersQuery();
@@ -127,7 +128,7 @@ const OrderManagement = () => {
                           </p>
                         )}
                       </div>
-                      <span className="font-medium">${item.totalPrice.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(item.totalPrice)}</span>
                     </div>
                   ))}
                 </div>
@@ -142,7 +143,7 @@ const OrderManagement = () => {
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold text-gray-800">
-                    Total: ${order.totalAmount.toFixed(2)}
+                    Total: {formatCurrency(order.totalAmount)}
                   </p>
                 </div>
               </div>

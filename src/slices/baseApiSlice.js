@@ -9,7 +9,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     registerUser: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/register`,
+        url: `${import.meta.env.RENDER_URL}/users/register`,
         method: "POST",
         body: data,
         headers: {
@@ -21,7 +21,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
     confirmReg: builder.mutation({
       query: ({ data }) => ({
         url: `${
-          import.meta.env.VITE_BASE_URL
+          import.meta.env.RENDER_URL
         }/users/register/confirm-registration`,
         method: "PUT",
         body: data,
@@ -34,7 +34,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     login: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/auth`,
+        url: `${import.meta.env.RENDER_URL}/users/auth`,
         method: "POST",
         body: data,
         headers: {
@@ -46,7 +46,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     adminLogin: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/admin/auth`,
+        url: `${import.meta.env.RENDER_URL}/admin/auth`,
         method: "POST",
         body: data,
         headers: {
@@ -58,7 +58,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     updateUser: builder.mutation({
       query: (id) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/${id}`,
+        url: `${import.meta.env.RENDER_URL}/users/${id}`,
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -69,7 +69,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     updateUserProfile: builder.mutation({
       query: ({ id, data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/profile/${id}`,
+        url: `${import.meta.env.RENDER_URL}/users/profile/${id}`,
         method: "PUT",
         body: data,
         headers: {
@@ -81,7 +81,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     validateAccount: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/validate-account`,
+        url: `${import.meta.env.RENDER_URL}/users/validate-account`,
         method: "POST",
         body: data,
         headers: {
@@ -93,7 +93,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     verifyOtp: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/verifyOtp`,
+        url: `${import.meta.env.RENDER_URL}/users/verifyOtp`,
         method: "POST",
         body: data,
         headers: {
@@ -105,7 +105,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     resetPassword: builder.mutation({
       query: ({ data }) => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/reset-password`,
+        url: `${import.meta.env.RENDER_URL}/users/reset-password`,
         method: "POST",
         body: data,
         headers: {
@@ -117,7 +117,7 @@ export const baseApiSlice = apiSlice.injectEndpoints({
 
     logout: builder.mutation({
       query: () => ({
-        url: `${import.meta.env.VITE_BASE_URL}/users/logout`,
+        url: `${import.meta.env.RENDER_URL}/users/logout`,
         method: "POST",
         headers: {
           "Content-Type": "application/json",

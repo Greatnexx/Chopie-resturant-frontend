@@ -4,9 +4,10 @@ import Modal from "../components/Modal";
 import { User, Mail, Phone, ShoppingCart, Trash2, Loader2 } from "lucide-react";
 import { useCreateOrderMutation } from "../slices/orderSlice";
 import { toast } from "sonner";
+import { formatCurrency } from "../utils/formatCurrency";
 
 
-const CartModal = ({ isOpen, onClose }) => {
+const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     email: "",
@@ -17,6 +18,7 @@ const CartModal = ({ isOpen, onClose }) => {
   const [tableNumber, setTableNumber] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
+
 
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
@@ -80,20 +82,50 @@ const CartModal = ({ isOpen, onClose }) => {
       try {
         const orderData = { ...createOrderData(), confirmDuplicate };
         
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Request timeout')), 10000)
-        );
+        const result = await createOrder(orderData).unwrap();
         
-        const result = await Promise.race([
-          createOrder(orderData).unwrap(),
-          timeoutPromise
-        ]);
+        // Prepare receipt data immediately
+        const receiptData = {
+          orderNumber: result.data?.orderNumber || result.orderNumber || 'N/A',
+          customerName: customerInfo.name,
+          customerEmail: customerInfo.email,
+          customerPhone: customerInfo.phone,
+          tableNumber,
+          items: cartItems,
+          totalAmount: parseFloat(total),
+          createdAt: new Date().toISOString()
+        };
         
-        toast.success("Order placed successfully!", {
-          description: `Order #${result.data.orderNumber} has been sent to the kitchen. You can track your order status anytime.`,
-          duration: 4000,
-        });
+        // Show receipt immediately
+        if (onOrderSuccess) {
+          onOrderSuccess(receiptData);
+        }
+        
+        // Show appropriate toast based on email status
+        const emailSent = result.emailSent || result.data?.emailSent;
+        const orderNumber = result.data?.orderNumber || result.orderNumber;
+        
+        if (emailSent) {
+          toast.success("🎉 Order placed successfully!", {
+            description: `Order #${orderNumber} confirmed! Check your email (${customerInfo.email}) for order details and tracking info.`,
+            duration: 5000,
+          });
+        } else {
+          toast.success("✅ Order placed successfully!", {
+            description: `Order #${orderNumber} has been sent to the kitchen. Email confirmation may be delayed - you can track your order anytime.`,
+            duration: 5000,
+          });
+          
+          // Show additional info about email issue
+          if (result.emailError || result.data?.emailError) {
+            setTimeout(() => {
+              toast.info("📧 Email notification info", {
+                description: "Order confirmation email is being processed. You'll receive it shortly.",
+                duration: 3000,
+              });
+            }, 1000);
+          }
+        }
         
         clearCart();
         setCustomerInfo({ name: "", email: "", phone: "" });
@@ -106,13 +138,16 @@ const CartModal = ({ isOpen, onClose }) => {
           setDuplicateOrderInfo(error.data.existingOrder);
           setShowDuplicateModal(true);
         } else {
-          const errorMessage = error.message === 'Request timeout' 
-            ? "Order is taking longer than expected. Please check your connection and try again."
-            : error?.data?.message || "Something went wrong. Please try again.";
+          let errorMessage;
+          if (error?.status === 'TIMEOUT_ERROR' || error?.message === 'Request timeout') {
+            errorMessage = "⏰ Server is starting up (this can take 60+ seconds on first request). Please wait and try again.";
+          } else {
+            errorMessage = error?.data?.message || "❌ Something went wrong. Please try again.";
+          }
           
           toast.error("Failed to place order", {
             description: errorMessage,
-            duration: 6000,
+            duration: 8000,
           });
         }
       }
@@ -127,29 +162,36 @@ const CartModal = ({ isOpen, onClose }) => {
     .reduce((sum, item) => sum + item.totalPrice, 0)
     .toFixed(2);
 
+  if (!isOpen) return null;
+
   return (
     <>
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div className="bg-white w-full max-w-4xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col relative border border-gray-200">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
+        <div className="bg-white w-full max-w-2xl max-h-[75vh] rounded-xl shadow-2xl flex flex-col relative border border-gray-200 z-10">
         {/* Header - Fixed at top */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-2xl z-20 flex-shrink-0">
+        <div className="sticky top-0 bg-gradient-to-r from-red-500 to-red-600 border-b border-red-300 p-6 rounded-t-xl z-20 flex-shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
                 <ShoppingCart className="w-5 h-5 text-white" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-800">Your Cart</h2>
+              <h2 className="text-2xl font-bold text-white">Your Cart</h2>
             </div>
+            <button
+              onClick={onClose}
+              className="text-white hover:text-red-200 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto relative z-10">
-          <div className="p-6">
+          <div className="p-8">
             {/* Cart Items */}
             {cartItems.length === 0 ? (
               <div className="text-center py-8">
@@ -167,7 +209,7 @@ const CartModal = ({ isOpen, onClose }) => {
                   {cartItems.map((item, cardId) => (
                     <div
                       key={item.cartId}
-                      className="flex justify-between items-start p-4 bg-gray-50 rounded-lg"
+                      className="flex justify-between items-start p-4 bg-gray-50 rounded-lg border border-gray-100"
                     >
                       <div className="flex-1">
                         <p className="font-semibold text-gray-800">
@@ -182,7 +224,7 @@ const CartModal = ({ isOpen, onClose }) => {
                       </div>
                       <div className="text-right ml-4">
                         <p className="font-semibold text-gray-800">
-                          ${item.totalPrice.toFixed(2)}
+                          {formatCurrency(item.totalPrice)}
                         </p>
                         <button
                           onClick={() => removeFromCart(cardId)}
@@ -200,7 +242,7 @@ const CartModal = ({ isOpen, onClose }) => {
                 <div className="border-t border-gray-200 pt-4 mb-6">
                   <div className="flex justify-between items-center">
                     <span className="text-xl font-bold text-gray-800">
-                      Total: ${total}
+                      Total: {formatCurrency(total)}
                     </span>
                     <button
                       onClick={clearCart}
@@ -223,7 +265,7 @@ const CartModal = ({ isOpen, onClose }) => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div className="grid gap-6">
                     {/* Table Number Field */}
                     <div className="space-y-2">
                       <label
@@ -237,7 +279,7 @@ const CartModal = ({ isOpen, onClose }) => {
                           type="text"
                           id="tableNumber"
                           name="tableNumber"
-                          placeholder="Enter your table number"
+                          placeholder="Enter table number"
                           value={tableNumber}
                           onChange={(e) => {
                             setTableNumber(e.target.value);
@@ -246,7 +288,7 @@ const CartModal = ({ isOpen, onClose }) => {
                             }
                           }}
                           required
-                          className={`block w-full px-3 py-2.5 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                          className={`block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
                             errors.tableNumber
                               ? "border-red-300 bg-red-50"
                               : "border-gray-300 bg-white"
@@ -254,8 +296,7 @@ const CartModal = ({ isOpen, onClose }) => {
                         />
                       </div>
                       {errors.tableNumber && (
-                        <p className="text-red-600 text-xs flex items-center gap-1">
-                          <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                        <p className="text-red-600 text-sm">
                           {errors.tableNumber}
                         </p>
                       )}
@@ -270,7 +311,7 @@ const CartModal = ({ isOpen, onClose }) => {
                         Full Name *
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                           <User className="h-4 w-4 text-gray-400" />
                         </div>
                         <input
@@ -281,7 +322,7 @@ const CartModal = ({ isOpen, onClose }) => {
                           value={customerInfo.name}
                           onChange={handleInputChange}
                           required
-                          className={`relative z-0 block w-full pl-9 pr-3 py-2.5 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
                             errors.name
                               ? "border-red-300 bg-red-50"
                               : "border-gray-300 bg-white"
@@ -289,8 +330,7 @@ const CartModal = ({ isOpen, onClose }) => {
                         />
                       </div>
                       {errors.name && (
-                        <p className="text-red-600 text-xs flex items-center gap-1">
-                          <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                        <p className="text-red-600 text-sm">
                           {errors.name}
                         </p>
                       )}
@@ -305,18 +345,18 @@ const CartModal = ({ isOpen, onClose }) => {
                         Email Address *
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                           <Mail className="h-4 w-4 text-gray-400" />
                         </div>
                         <input
                           type="email"
                           id="email"
                           name="email"
-                          placeholder="Enter your email address"
+                          placeholder="Enter your email"
                           value={customerInfo.email}
                           onChange={handleInputChange}
                           required
-                          className={`relative z-0 block w-full pl-9 pr-3 py-2.5 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-sm ${
+                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
                             errors.email
                               ? "border-red-300 bg-red-50"
                               : "border-gray-300 bg-white"
@@ -324,38 +364,34 @@ const CartModal = ({ isOpen, onClose }) => {
                         />
                       </div>
                       {errors.email && (
-                        <p className="text-red-600 text-xs flex items-center gap-1">
-                          <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                        <p className="text-red-600 text-sm">
                           {errors.email}
                         </p>
                       )}
                     </div>
 
-                    {/* Phone Field - Full Width */}
-                    <div className="space-y-2 md:col-span-2">
+                    {/* Phone Field */}
+                    <div className="space-y-2">
                       <label
                         htmlFor="phone"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Phone Number
+                        Phone Number (Optional)
                       </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
                           <Phone className="h-4 w-4 text-gray-400" />
                         </div>
                         <input
                           type="tel"
                           id="phone"
                           name="phone"
-                          placeholder="Enter your phone number"
+                          placeholder="Enter phone number"
                           value={customerInfo.phone}
                           onChange={handleInputChange}
-                          className="relative z-0 block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors text-sm"
+                          className="relative z-0 block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white transition-colors"
                         />
                       </div>
-                      <p className="text-gray-500 text-xs">
-                        Optional - for order updates and support
-                      </p>
                     </div>
                   </div>
 
@@ -364,14 +400,14 @@ const CartModal = ({ isOpen, onClose }) => {
                     <button
                       onClick={() => handlePlaceOrder(false)}
                       disabled={cartItems.length === 0 || isLoading}
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-4 px-6 rounded-xl hover:from-green-700 hover:to-emerald-700 focus:ring-4 focus:ring-green-200 focus:outline-none transition-all duration-200 font-semibold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg flex items-center justify-center gap-2"
+                      className="w-full bg-gradient-to-r from-red-500 to-red-600 text-[15px] text-white py-4 px-8 rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all duration-200 font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                       {isLoading
                         ? "Placing Order..."
                         : cartItems.length === 0
                         ? "Cart is Empty"
-                        : `Place Order - $${total}`}
+                        : `Place Order - ${formatCurrency(total)}`}
                     </button>
                   </div>
                 </div>
@@ -379,16 +415,14 @@ const CartModal = ({ isOpen, onClose }) => {
             )}
           </div>
         </div>
-        </div>
-
         {/* Footer - Fixed at bottom */}
-        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex-shrink-0 z-20">
-          <p className="text-xs text-gray-500 text-center">
-            Your information is secure and will never be shared with third
-            parties.
+        <div className="bg-gray-50 px-8 py-4 rounded-b-xl flex-shrink-0 z-20">
+          <p className="text-sm text-gray-500 text-center">
+            🔒 Your information is secure and protected
           </p>
         </div>
-      </Modal>
+        </div>
+      </div>
 
       {/* Duplicate Order Modal */}
       {showDuplicateModal && (
@@ -417,6 +451,8 @@ const CartModal = ({ isOpen, onClose }) => {
           </div>
         </div>
       )}
+
+
       
 
     </>

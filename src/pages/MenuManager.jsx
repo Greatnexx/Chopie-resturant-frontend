@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import OrderSearchModal from "../components/OrderSearchModal";
 import SimpleStaffChat from "../components/SimpleStaffChat";
 import { useState } from "react";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const MenuManager = () => {
   const { data: menuData, refetch, isLoading } = useGetAllMenuItemsQuery();
@@ -173,7 +174,7 @@ const MenuManager = () => {
                             </div>
                           </td>
                           <td className="py-3">{menu.category?.name || 'N/A'}</td>
-                          <td className="py-3">${menu.price?.toFixed(2) || '0.00'}</td>
+                          <td className="py-3">{formatCurrency(menu.price || 0)}</td>
                           <td className="py-3">
                             <span className={`px-2 py-1 rounded text-xs font-medium ${
                               menu.available 

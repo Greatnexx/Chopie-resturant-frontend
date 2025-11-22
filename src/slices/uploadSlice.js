@@ -46,7 +46,7 @@ export const upload =
       formData.append("file", file);
 
       const { data } = await axios.put(
-        `${import.meta.env.VITE_BASE_URL}/user/update-profile-picture/${id}`,
+        `${import.meta.env.RENDER_URL}/user/update-profile-picture/${id}`,
         formData,
         {
           headers: {

@@ -2,6 +2,7 @@ import { useState } from "react";
 import Modal from "./Modal";
 import { toast } from "sonner";
 import { useCart } from "../Context/CartContext";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const MenuItem = ({ item }) => {
   if (!item) {
@@ -83,7 +84,7 @@ toast.success("Added to cart", {
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-xl font-semibold text-gray-800">{item.name}</h3>
             <span className="text-2xl font-bold text-red-500">
-              ${item.price.toFixed(2)}
+              {formatCurrency(item.price)}
             </span>
           </div>
 
@@ -141,7 +142,7 @@ toast.success("Added to cart", {
             <p className="font-bold text-lg mb-2">{item.name}</p>
             <p className="text-gray-600 mb-2">Quantity: {quantity}</p>
             <p className="text-gray-600">
-              Unit Price: ${item.price.toFixed(2)}
+              Unit Price: {formatCurrency(item.price)}
             </p>
           </div>
 
@@ -160,7 +161,7 @@ toast.success("Added to cart", {
           {/* Total and Actions */}
           <div className="border-t pt-4">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-2xl font-bold">Total:  ${totalPrice}</span>
+              <span className="text-2xl font-bold">Total:  {formatCurrency(totalPrice)}</span>
             </div>
 
             <div className="flex space-x-3">

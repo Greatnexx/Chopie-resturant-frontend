@@ -19,7 +19,7 @@ const MenuPage = () => {
     isLoading: menuLoading,
     error: menuError,
   } = useGetMenuItemsQuery(activeCategory, {
-    skip: !activeCategory, // Don't make the request if no active category
+    skip: !activeCategory || activeCategory === 'undefined', // Don't make the request if no active category
   });
 
 
@@ -29,7 +29,11 @@ const MenuPage = () => {
   // Set first category as active by default when categories are loaded
   useEffect(() => {
     if (categories.length > 0 && !activeCategory) {
-      setActiveCategory(categories[0]._id); // Set first category as active
+      console.log('Categories:', categories);
+      console.log('First category:', categories[0]);
+      const firstCategoryId = categories[0]._id || categories[0].id;
+      console.log('Setting active category to:', firstCategoryId);
+      setActiveCategory(firstCategoryId);
     }
   }, [categories, activeCategory]);
 

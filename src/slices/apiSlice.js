@@ -16,7 +16,7 @@ const getBaseUrl = () => {
   }
   
   const storedURL = localStorage.getItem('RENDER_URL');
-  return import.meta.env.RENDER_URL || storedURL || 'https://backend-chopie-project.onrender.com/api/v1';
+  return import.meta.env.VITE_BASE_URL || storedURL || 'https://backend-chopie-project.onrender.com/api/v1';
 };
 
 const baseQuery = fetchBaseQuery({

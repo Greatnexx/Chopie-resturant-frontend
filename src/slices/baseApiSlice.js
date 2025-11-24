@@ -132,7 +132,11 @@ export const baseApiSlice = apiSlice.injectEndpoints({
     }),
 
     getMenuItems: builder.query({
-      query: (categoryId) => `/menus/${categoryId}`,
+      query: (categoryId) => {
+        // Extract _id if categoryId is an object, otherwise use as is
+        const id = typeof categoryId === 'object' ? categoryId._id : categoryId;
+        return `/menus/${id}`;
+      },
     }),
 
     trackOrder: builder.query({

@@ -15,7 +15,7 @@ const RestaurantDashboard = () => {
   const [loadingOrderId, setLoadingOrderId] = useState(null);
   const navigate = useNavigate();
   
-  const { data: ordersData, refetch } = useGetRestaurantOrdersQuery();
+  const { data: ordersData, refetch } = useGetRestaurantOrdersQuery(undefined, { skip: !user });
   const [acceptOrder] = useAcceptOrderMutation();
   const [rejectOrder] = useRejectOrderMutation();
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
@@ -49,7 +49,7 @@ const RestaurantDashboard = () => {
     });
 
     return () => socket.disconnect();
-  }, [navigate, refetch]);
+  }, [navigate]);
 
   const handleAcceptOrder = async (orderId) => {
     try {

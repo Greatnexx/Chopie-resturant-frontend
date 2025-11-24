@@ -1,15 +1,74 @@
-import { CheckCircle, Clock, ShoppingBag, Eye } from "lucide-react";
+import { CheckCircle, Clock, ShoppingBag, Eye, Copy, Download, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../utils/formatCurrency";
+import { useState } from "react";
 
 const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) => {
   const navigate = useNavigate();
+  const [copied, setCopied] = useState(false);
 
   if (!isOpen || !orderData) return null;
 
   const handleTrackOrder = () => {
     navigate(`/track-order/${orderData.orderNumber}`);
     onClose();
+  };
+
+  const handleCopyOrderNumber = async () => {
+    try {
+      await navigator.clipboard.writeText(orderData.orderNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  const handleDownloadReceipt = () => {
+    const receiptContent = `
+===========================================
+           CHOPIE RESTAURANT
+           ORDER CONFIRMATION
+===========================================
+
+Order Number: ${orderData.orderNumber}
+Date: ${new Date().toLocaleDateString()}
+Time: ${new Date().toLocaleTimeString()}
+
+Customer Details:
+Name: ${orderData.customerName}
+Email: ${orderData.customerEmail}
+Phone: ${orderData.customerPhone || 'N/A'}
+Table: ${orderData.tableNumber}
+
+-------------------------------------------
+                ORDER ITEMS
+-------------------------------------------
+${orderData.items?.map(item => 
+  `${item.name} x${item.quantity} - ${formatCurrency(item.totalPrice)}${item.specialInstructions ? `\n  Note: ${item.specialInstructions}` : ''}`
+).join('\n')}
+
+-------------------------------------------
+TOTAL AMOUNT: ${formatCurrency(orderData.totalAmount)}
+-------------------------------------------
+
+Estimated Preparation Time: 20-25 minutes
+
+Thank you for choosing Chopie Restaurant!
+We appreciate your business.
+
+===========================================
+    `;
+
+    const blob = new Blob([receiptContent], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Chopie-Receipt-${orderData.orderNumber}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -29,9 +88,21 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
           {/* Order Number */}
           <div className="bg-gray-50 rounded-lg p-4 mb-6 text-center">
             <p className="text-sm text-gray-600 mb-1">Your Order Number</p>
-            <p className="text-3xl font-bold text-gray-800">#{orderData.orderNumber}</p>
-            <p className="text-sm text-gray-500 mt-2">
-              Confirmation sent to {orderData.customerEmail}
+            <div className="flex items-center justify-center gap-3 mb-3">
+              <p className="text-3xl font-bold text-gray-800">#{orderData.orderNumber}</p>
+              <button
+                onClick={handleCopyOrderNumber}
+                className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                title="Copy order number"
+              >
+                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </button>
+            </div>
+            {copied && (
+              <p className="text-sm text-green-600 mb-2">Order number copied!</p>
+            )}
+            <p className="text-sm text-gray-500">
+              Keep this number for order tracking
             </p>
           </div>
 
@@ -99,7 +170,13 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
               Track Order
             </button>
             
-
+            <button
+              onClick={handleDownloadReceipt}
+              className="w-full flex items-center justify-center gap-2 bg-purple-500 text-white py-3 px-4 rounded-lg hover:bg-purple-600 transition-colors font-medium shadow-md hover:shadow-lg"
+            >
+              <Download className="w-4 h-4" />
+              Download Receipt
+            </button>
             
             <button
               onClick={onPlaceAnother}

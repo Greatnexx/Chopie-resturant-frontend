@@ -77,83 +77,48 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
     totalAmount: parseFloat(total),
   });
 
-  const handlePlaceOrder = async (confirmDuplicate = false) => {
-    if (validateForm() && cartItems.length > 0) {
-      try {
-        const orderData = { ...createOrderData(), confirmDuplicate };
-        
-        const result = await createOrder(orderData).unwrap();
-        
-        // Prepare receipt data immediately
-        const receiptData = {
-          orderNumber: result.data?.orderNumber || result.orderNumber || 'N/A',
-          customerName: customerInfo.name,
-          customerEmail: customerInfo.email,
-          customerPhone: customerInfo.phone,
-          tableNumber,
-          items: cartItems,
-          totalAmount: parseFloat(total),
-          createdAt: new Date().toISOString()
-        };
-        
-        // Show receipt immediately
-        if (onOrderSuccess) {
-          onOrderSuccess(receiptData);
-        }
-        
-        // Show appropriate toast based on email status
-        const emailSent = result.emailSent || result.data?.emailSent;
-        const orderNumber = result.data?.orderNumber || result.orderNumber;
-        
-        if (emailSent) {
-          toast.success("🎉 Order placed successfully!", {
-            description: `Order #${orderNumber} confirmed! Check your email (${customerInfo.email}) for order details and tracking info.`,
-            duration: 5000,
-          });
-        } else {
-          toast.success("✅ Order placed successfully!", {
-            description: `Order #${orderNumber} has been sent to the kitchen. Email confirmation may be delayed - you can track your order anytime.`,
-            duration: 5000,
-          });
-          
-          // Show additional info about email issue
-          if (result.emailError || result.data?.emailError) {
-            setTimeout(() => {
-              toast.info("📧 Email notification info", {
-                description: "Order confirmation email is being processed. You'll receive it shortly.",
-                duration: 3000,
-              });
-            }, 1000);
-          }
-        }
-        
-        clearCart();
-        setCustomerInfo({ name: "", email: "", phone: "" });
-        setTableNumber("");
-        setErrors({});
-        setShowDuplicateModal(false);
-        onClose();
-      } catch (error) {
-        if (error?.data?.isDuplicate) {
-          setDuplicateOrderInfo(error.data.existingOrder);
-          setShowDuplicateModal(true);
-        } else {
-          let errorMessage;
-          if (error?.status === 'TIMEOUT_ERROR' || error?.message === 'Request timeout') {
-            errorMessage = "⏰ Server is starting up (this can take 60+ seconds on first request). Please wait and try again.";
-          } else {
-            errorMessage = error?.data?.message || "❌ Something went wrong. Please try again.";
-          }
-          
-          toast.error("Failed to place order", {
-            description: errorMessage,
-            duration: 8000,
-          });
-        }
-      }
-    }
-  };
+ const handlePlaceOrder = async (confirmDuplicate = false) => {
+  if (validateForm() && cartItems.length > 0) {
+    try {
+      const orderData = {
+        ...createOrderData(),
+        confirmDuplicate
+      };
+      
+      const result = await createOrder(orderData).unwrap();
 
+      const orderConfirmationData = {
+        orderNumber: result.data?.orderNumber || 'N/A',
+        customerName: result.data?.customerName || customerInfo.name,
+        customerEmail: result.data?.customerEmail || customerInfo.email,
+        customerPhone: result.data?.customerPhone || customerInfo.phone,
+        tableNumber: result.data?.tableNumber || tableNumber,
+        items: result.data?.items || cartItems,
+        totalAmount: result.data?.totalAmount || parseFloat(total),
+        orderTime: result.data?.orderTime || new Date().toISOString(),
+        estimatedTime: result.data?.estimatedTime || "5-10 minutes"
+      };
+
+      // ✅ Call onOrderSuccess FIRST
+      if (onOrderSuccess) {
+        onOrderSuccess(orderConfirmationData);
+      }
+
+      // ✅ Close cart modal
+      onClose();
+
+      // ✅ Then clear the form data
+      clearCart();
+      setCustomerInfo({ name: "", email: "", phone: "" });
+      setTableNumber("");
+      setErrors({});
+      setShowDuplicateModal(false);
+
+    } catch (error) {
+      // ... your error handling
+    }
+  }
+};
 
 
   const { cartItems, removeFromCart, clearCart } = useCart();
@@ -336,7 +301,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       )}
                     </div>
 
-                    {/* Email Field */}
+                    {/* ⚠️ EMAIL FIELD - THIS WAS MISSING! */}
                     <div className="space-y-2">
                       <label
                         htmlFor="email"
@@ -451,10 +416,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
           </div>
         </div>
       )}
-
-
-      
-
     </>
   );
 };

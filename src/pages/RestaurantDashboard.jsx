@@ -31,7 +31,7 @@ const RestaurantDashboard = () => {
 
     // Only create Socket.IO connection for order management if user can accept orders
     if (parsedUser.role === 'SuperAdmin' || parsedUser.role === 'MenuManager') {
-      const socketUrl = import.meta.env.VITE_BASE_URL.replace('/api/v1', '');
+      const socketUrl = import.meta.env.VITE_API_URL.replace('/api/v1', '');
       console.log('🔌 RestaurantDashboard connecting to Socket.IO server:', socketUrl, 'User:', parsedUser.name, 'Role:', parsedUser.role);
       
       const socket = io(socketUrl, {

@@ -12,6 +12,9 @@ export const orderApiSlice = apiSlice.injectEndpoints({
     trackOrder: builder.query({
       query: (orderNumber) => `/order/${orderNumber}/track`,
     }),
+    searchOrder: builder.query({
+      query: (searchTerm) => `/order/search/${searchTerm}`,
+    }),
     getAllOrders: builder.query({
       query: () => "/order",
     }),
@@ -21,5 +24,6 @@ export const orderApiSlice = apiSlice.injectEndpoints({
 export const {
   useCreateOrderMutation,
   useTrackOrderQuery,
+  useSearchOrderQuery,
   useGetAllOrdersQuery,
 } = orderApiSlice;

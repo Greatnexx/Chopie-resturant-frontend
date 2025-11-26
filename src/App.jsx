@@ -19,7 +19,7 @@ import AuditTrail from "./pages/AuditTrail";
 import MenuManager from "./pages/MenuManager";
 import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
-import EnvSwitcher from "./components/EnvSwitcher";
+  
 
 const App = () => {
   const router = createBrowserRouter(
@@ -44,7 +44,7 @@ const App = () => {
   return (
     <>
       <RouterProvider router={router} />
-      <EnvSwitcher />
+    
     </>
   );
 }

@@ -115,7 +115,17 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       setShowDuplicateModal(false);
 
     } catch (error) {
-      // ... your error handling
+      console.error('Order creation error:', error);
+      
+      // Handle duplicate order detection
+      if (error.status === 409 && error.data?.isDuplicate) {
+        setDuplicateOrderInfo(error.data.existingOrder);
+        setShowDuplicateModal(true);
+        return;
+      }
+      
+      // Handle other errors
+      toast.error(error.data?.message || "Failed to place order. Please try again.");
     }
   }
 };

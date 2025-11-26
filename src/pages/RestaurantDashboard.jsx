@@ -15,7 +15,7 @@ const RestaurantDashboard = () => {
   const [loadingOrderId, setLoadingOrderId] = useState(null);
   const navigate = useNavigate();
   
-  const { data: ordersData, refetch } = useGetRestaurantOrdersQuery(undefined, { skip: !user });
+  const { data: ordersData, isLoading: ordersLoading, refetch } = useGetRestaurantOrdersQuery(undefined, { skip: !user });
   const [acceptOrder] = useAcceptOrderMutation();
   const [rejectOrder] = useRejectOrderMutation();
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
@@ -26,30 +26,86 @@ const RestaurantDashboard = () => {
       navigate("/restaurant/login");
       return;
     }
-    setUser(JSON.parse(userData));
+    const parsedUser = JSON.parse(userData);
+    setUser(parsedUser);
 
-    const socket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''));
-    
-    socket.on('newOrder', (orderData) => {
-      setNotifications(prev => [...prev, { ...orderData, type: 'new', timestamp: Date.now() }]);
-      setShowNotification(orderData);
-      refetch();
-    });
+    // Only create Socket.IO connection for order management if user can accept orders
+    if (parsedUser.role === 'SuperAdmin' || parsedUser.role === 'MenuManager') {
+      const socketUrl = import.meta.env.VITE_BASE_URL.replace('/api/v1', '');
+      console.log('🔌 RestaurantDashboard connecting to Socket.IO server:', socketUrl, 'User:', parsedUser.name, 'Role:', parsedUser.role);
+      
+      const socket = io(socketUrl, {
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+        forceNew: true
+      });
+      
+      socket.on('connect', () => {
+        console.log('✅ RestaurantDashboard Socket.IO connected successfully:', socket.id, 'for user:', parsedUser.name);
+      });
+      
+      socket.on('disconnect', (reason) => {
+        console.log('❌ RestaurantDashboard Socket.IO disconnected:', reason);
+        if (reason === 'io server disconnect') {
+          socket.connect()
+        }
+      });
+      
+      socket.on('connect_error', (error) => {
+        console.error('🚨 RestaurantDashboard Socket.IO connection error:', error);
+      });
+      
+      socket.on('newOrder', (orderData) => {
+        console.log('📦 RestaurantDashboard received new order for', parsedUser.role, ':', orderData);
+        setNotifications(prev => [...prev, { ...orderData, type: 'new', timestamp: Date.now() }]);
+        setShowNotification(orderData);
+        refetch();
+      });
 
-    socket.on('orderAccepted', (data) => {
-      setNotifications(prev => prev.filter(n => n.orderId !== data.orderId));
-      if (showNotification?.orderId === data.orderId) {
-        setShowNotification(null);
-      }
-      refetch();
-    });
+      socket.on('orderAccepted', (data) => {
+        console.log('✅ Order accepted:', data);
+        setNotifications(prev => prev.filter(n => n.orderId !== data.orderId));
+        if (showNotification?.orderId === data.orderId) {
+          setShowNotification(null);
+        }
+        refetch();
+      });
 
-    socket.on('orderRejected', (data) => {
-      refetch();
-    });
+      socket.on('orderRejected', (data) => {
+        console.log('❌ Order rejected:', data);
+        refetch();
+      });
+      
+      socket.on('orderStatusUpdated', (data) => {
+        console.log('🔄 Order status updated:', data);
+        refetch();
+      });
 
-    return () => socket.disconnect();
-  }, [navigate]);
+      socket.on('orderAccepted', (data) => {
+        console.log('✅ Order accepted:', data);
+        setNotifications(prev => prev.filter(n => n.orderId !== data.orderId));
+        if (showNotification?.orderId === data.orderId) {
+          setShowNotification(null);
+        }
+        refetch();
+      });
+
+      socket.on('orderRejected', (data) => {
+        console.log('❌ Order rejected:', data);
+        refetch();
+      });
+      
+      socket.on('orderStatusUpdated', (data) => {
+        console.log('🔄 Order status updated:', data);
+        refetch();
+      });
+
+      return () => {
+        console.log('🔌 RestaurantDashboard disconnecting Socket.IO for user:', parsedUser.name);
+        socket.disconnect();
+      };
+    }
+  }, [navigate, refetch]);
 
   const handleAcceptOrder = async (orderId) => {
     try {
@@ -143,7 +199,12 @@ const RestaurantDashboard = () => {
           <p className="text-gray-600">Manage incoming orders and track progress</p>
         </div>
 
-        {orders.length === 0 ? (
+        {ordersLoading ? (
+          <div className="text-center py-12">
+            <div className="w-16 h-16 border-4 border-red-200 border-t-red-500 rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-500 text-lg">Loading orders...</p>
+          </div>
+        ) : orders.length === 0 ? (
           <div className="text-center py-12">
             <ChefHat className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg">No orders yet</p>
@@ -161,7 +222,10 @@ const RestaurantDashboard = () => {
                       {order.customerName} • Table {order.tableNumber}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleString()}
+                      {order.createdAt && typeof order.createdAt === 'string' ? 
+                        new Date(order.createdAt).toLocaleString() : 
+                        'Date not available'
+                      }
                     </p>
                   </div>
                   <div className="flex items-center space-x-2">

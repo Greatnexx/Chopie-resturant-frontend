@@ -10,7 +10,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
   if (!isOpen || !orderData) return null;
 
   const handleTrackOrder = () => {
-    navigate(`/track-order/${orderData.orderNumber}`);
+    navigate(`/trackorder`);
     onClose();
   };
 
@@ -52,7 +52,7 @@ ${orderData.items?.map(item =>
 TOTAL AMOUNT: ${formatCurrency(orderData.totalAmount)}
 -------------------------------------------
 
-Estimated Preparation Time: 20-25 minutes
+Estimated Preparation Time: 5-10 minutes
 
 Thank you for choosing Chopie Restaurant!
 We appreciate your business.

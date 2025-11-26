@@ -12,20 +12,20 @@ import {
   RefreshCcwDot,
   MessageCircle,
 } from "lucide-react";
-import { useTrackOrderQuery } from "../slices/orderSlice";
+import { useSearchOrderQuery } from "../slices/orderSlice";
 import LoadingBtn from "../components/LoadingBtn";
 import SimpleLiveChat from "../components/SimpleLiveChat";
 
 const TrackOrder = () => {
-  const [orderNumber, setOrderNumber] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTriggered, setSearchTriggered] = useState(false);
   const [showChat, setShowChat] = useState(false);
   
   // RTK Query hook - skip until search is triggered
-  const { data: trackingData, isLoading: isSearching, error: trackingError, refetch } = useTrackOrderQuery(
-    orderNumber.trim(),
-    { skip: !searchTriggered || !orderNumber.trim() }
+  const { data: trackingData, isLoading: isSearching, error: trackingError, refetch } = useSearchOrderQuery(
+    searchTerm.trim(),
+    { skip: !searchTriggered || !searchTerm.trim() }
   );
 
   // Extract search result and error from RTK Query response
@@ -33,14 +33,14 @@ const TrackOrder = () => {
 
   // Handle different types of errors
   const getErrorMessage = () => {
-    if (!orderNumber.trim() && isSearching) {
-      return "Please enter an order number";
+    if (!searchTerm.trim() && isSearching) {
+      return "Please enter an order number, email, or phone number";
     }
     if (trackingError) {
       if (trackingError.status === 404) {
         return (
           trackingError?.data?.message ||
-          "Order not found. Please check your tracking number and try again."
+          "Order not found. Please check your order number, email, or phone number and try again."
         );
       }
       return (
@@ -84,13 +84,13 @@ const TrackOrder = () => {
   };
 
   const handleSearch = () => {
-    if (orderNumber.trim()) {
+    if (searchTerm.trim()) {
       setSearchTriggered(true);
     }
   };
 
   const handleRefresh = async () => {
-    if (!orderNumber.trim() || !refetch) return;
+    if (!searchTerm.trim() || !refetch) return;
     setIsRefreshing(true);
 
     try {
@@ -123,8 +123,7 @@ const TrackOrder = () => {
             Track Your Order
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Use the tracking number provided in your order confirmation to check
-            the real-time status of your order.
+            Enter your order number, email address, or phone number to track your order status.
           </p>
         </div>
 
@@ -132,10 +131,10 @@ const TrackOrder = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="max-w-2xl mx-auto">
             <label
-              htmlFor="orderNumber"
+              htmlFor="searchTerm"
               className="block text-sm font-medium text-gray-700 mb-3"
             >
-              Order Tracking Number
+              Order Number, Email, or Phone
             </label>
             <div className="flex gap-4">
               <div className="flex-1 relative">
@@ -144,18 +143,18 @@ const TrackOrder = () => {
                 </div>
                 <input
                   type="text"
-                  id="orderNumber"
-                  value={orderNumber}
-                  onChange={(e) => setOrderNumber(e.target.value)}
+                  id="searchTerm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter your order number"
+                  placeholder="Enter order number, email, or phone"
                   className="block w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                   disabled={isSearching}
                 />
               </div>
               <button
                 onClick={handleSearch}
-                disabled={isSearching || !orderNumber.trim()}
+                disabled={isSearching || !searchTerm.trim()}
                 className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:ring-red-200 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 text-lg"
               >
                 {isSearching ? (
@@ -410,9 +409,9 @@ const TrackOrder = () => {
       <SimpleLiveChat
         isOpen={showChat}
         onClose={() => setShowChat(false)}
-        customerName={searchResult?.customerInfo?.name || `Customer-${orderNumber}`}
+        customerName={searchResult?.customerInfo?.name || `Customer-${searchTerm}`}
         customerEmail={searchResult?.customerInfo?.email || ''}
-        orderNumber={orderNumber}
+        orderNumber={searchResult?.orderNumber || searchTerm}
       />
     </div>
   );

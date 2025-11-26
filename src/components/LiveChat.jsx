@@ -26,8 +26,15 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   useEffect(() => {
     if (chatId) {
-      const newSocket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''));
+      const newSocket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''), {
+        transports: ['websocket', 'polling'],
+        timeout: 20000,
+      });
       setSocket(newSocket);
+      
+      newSocket.on('connect_error', (error) => {
+        console.log('Socket connection error:', error);
+      });
 
       newSocket.emit('joinChat', chatId);
 
@@ -65,7 +72,9 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
       });
 
       return () => {
-        newSocket.emit('leaveChat', chatId);
+        if (newSocket.connected) {
+          newSocket.emit('leaveChat', chatId);
+        }
         newSocket.disconnect();
       };
     }

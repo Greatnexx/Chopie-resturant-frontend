@@ -8,19 +8,48 @@ const NotificationBell = ({ user }) => {
   const [showDropdown, setShowDropdown] = useState(false);
 
   useEffect(() => {
-    const socket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''));
+    if (!user) return;
     
-    // Listen for new orders (for all roles)
-    socket.on('newOrder', (orderData) => {
-      setNotifications(prev => [...prev, {
-        id: `order-${orderData.orderId}-${Date.now()}`,
-        type: 'order',
-        title: 'New Order',
-        message: `Order #${orderData.orderNumber} from ${orderData.customerName}`,
-        timestamp: Date.now(),
-        data: orderData
-      }]);
+    const socketUrl = import.meta.env.VITE_BASE_URL.replace('/api/v1', '');
+    console.log('🔔 NotificationBell connecting to Socket.IO:', socketUrl, 'User role:', user.role);
+    
+    const socket = io(socketUrl, {
+      transports: ['websocket', 'polling'],
+      timeout: 20000,
+      forceNew: true
     });
+    
+    socket.on('connect', () => {
+      console.log('✅ NotificationBell Socket.IO connected:', socket.id, 'User:', user.name, 'Role:', user.role);
+    });
+    
+    socket.on('disconnect', (reason) => {
+      console.log('❌ NotificationBell Socket.IO disconnected:', reason);
+    });
+    
+    socket.on('connect_error', (error) => {
+      console.error('🚨 NotificationBell Socket.IO connection error:', error);
+    });
+    
+    // Listen for new orders (for SuperAdmin and MenuManager roles)
+    if (user.role === 'SuperAdmin' || user.role === 'MenuManager') {
+      socket.on('newOrder', (orderData) => {
+        console.log('🔔 NotificationBell received new order for', user.role, ':', orderData);
+        setNotifications(prev => [...prev, {
+          id: `order-${orderData.orderId}-${Date.now()}`,
+          type: 'order',
+          title: 'New Order',
+          message: `Order #${orderData.orderNumber} from ${orderData.customerName}`,
+          timestamp: Date.now(),
+          data: orderData
+        }]);
+        
+        // Show toast notification
+        toast.success(`New order #${orderData.orderNumber} from ${orderData.customerName}`, {
+          duration: 5000
+        });
+      });
+    }
 
     // Listen for new chat requests (only for MenuManager)
     if (user?.role === 'MenuManager') {
@@ -93,8 +122,11 @@ const NotificationBell = ({ user }) => {
       });
     }
 
-    return () => socket.disconnect();
-  }, [user?.role, user?.name]);
+    return () => {
+      console.log('🔌 NotificationBell disconnecting Socket.IO for user:', user.name);
+      socket.disconnect();
+    };
+  }, [user]);
 
   const removeNotification = (id) => {
     setNotifications(prev => prev.filter(n => n.id !== id));

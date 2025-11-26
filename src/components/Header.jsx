@@ -78,12 +78,21 @@ const Header = () => {
                 setCartOpen(true);
               }
             }}
-            className="fixed bottom-20 right-4 bg-gray-900 text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 flex items-center space-x-3 z-40"
+            className="fixed bottom-8 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center space-x-2 z-40 animate-pulse hover:animate-none border-2 border-white/20 backdrop-blur-sm font-bold group"
           >
-            🛒 View Cart {count}
+            <span className="text-xl animate-bounce group-hover:animate-none">🛒</span>
+            <span>View Cart ({count})</span>
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-ping">
+              {count}
+            </div>
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {count}
+            </div>
           </button>
-          
-          {/* Cart Modal */}
+        </div>
+      )}
+
+                {/* Cart Modal */}
           <CartModal 
             isOpen={cartOpen} 
             onClose={() => setCartOpen(false)}
@@ -98,8 +107,6 @@ const Header = () => {
             onClose={handleCloseConfirmation}
             onPlaceAnother={handlePlaceAnother}
           />
-        </div>
-      )}
     </>
   );
 }

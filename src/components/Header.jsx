@@ -58,15 +58,6 @@ const Header = () => {
               <span className="hidden sm:inline">Track Order</span>
               <span className="sm:hidden">Track</span>
             </Link>
-           
-            <Link
-              to="/restaurant/login"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium flex items-center justify-center gap-1 lg:gap-2 transition-all duration-200 hover:scale-105 whitespace-nowrap"
-            >
-              <span className="text-sm lg:text-base">👨🍳</span>
-              <span className="hidden sm:inline">Restaurant</span>
-              <span className="sm:hidden">Admin</span>
-            </Link>
           </div>
         </div>
       </header>

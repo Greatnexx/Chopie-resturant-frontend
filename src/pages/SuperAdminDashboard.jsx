@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGetAnalyticsQuery, useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { DollarSign, Users, Clock, Zap, Star, Plus, ToggleLeft, ToggleRight, Menu } from "lucide-react";
+import { formatCurrency } from "../utils/formatCurrency";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
 
@@ -113,7 +114,7 @@ const SuperAdminDashboard = () => {
                 <DollarSign className="w-8 h-8 text-green-500" />
                 <div className="ml-4">
                   <p className="text-sm text-gray-600">Revenue</p>
-                  <p className="text-2xl font-bold">${stats.totalRevenue?.toFixed(2) || 0}</p>
+                  <p className="text-2xl font-bold">{formatCurrency(stats.totalRevenue || 0)}</p>
                 </div>
               </div>
             </div>

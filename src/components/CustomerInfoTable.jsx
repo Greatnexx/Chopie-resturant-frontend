@@ -35,14 +35,7 @@ const CustomerInfoTable = () => {
   };
 
   if (!customerInfo.name && !customerInfo.email && !customerInfo.phone) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4">Customer Information</h3>
-        <p className="text-gray-500 text-center py-4">
-          No customer information available. Scan QR code to load your details.
-        </p>
-      </div>
-    );
+    return null;
   }
 
   return (

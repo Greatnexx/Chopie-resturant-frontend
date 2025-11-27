@@ -5,7 +5,7 @@ import { User, Mail, Phone, ShoppingCart, Trash2, Loader2, QrCode } from "lucide
 import { useCreateOrderMutation } from "../slices/orderSlice";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/formatCurrency";
-import QRScanner from "./QRScanner";
+
 
 
 const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
@@ -18,7 +18,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   const [errors, setErrors] = useState({});
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
-  const [showQRScanner, setShowQRScanner] = useState(false);
+
 
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
@@ -280,16 +280,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                               : "border-gray-300"
                           }`}
                         />
-                        {!tableNumber && (
-                          <button
-                            type="button"
-                            onClick={() => setShowQRScanner(true)}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
-                          >
-                            <QrCode className="w-3 h-3" />
-                            Scan QR
-                          </button>
-                        )}
+
                       </div>
                       {errors.tableNumber && (
                         <p className="text-red-600 text-sm">
@@ -420,37 +411,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
         </div>
       </div>
 
-      {/* QR Scanner Modal */}
-      {showQRScanner && (
-        <QRScanner
-          onScanSuccess={(scannedTableNumber) => {
-            try {
-              // Try to parse as JSON (QR code format)
-              const qrData = JSON.parse(scannedTableNumber);
-              if (qrData.type === 'table' && qrData.tableNumber) {
-                setTableNumber(qrData.tableNumber);
-                toast.success(`Table ${qrData.tableNumber} selected! Customer info loaded.`);
-              } else {
-                throw new Error('Invalid QR format');
-              }
-            } catch {
-              // If not JSON, treat as plain table number
-              setTableNumber(scannedTableNumber);
-              toast.success(`Table ${scannedTableNumber} selected! Customer info loaded.`);
-            }
-            
-            // Auto-populate customer info after QR scan
-            const savedCustomerInfo = localStorage.getItem('customerInfo');
-            if (savedCustomerInfo) {
-              const parsedInfo = JSON.parse(savedCustomerInfo);
-              setCustomerInfo(parsedInfo);
-            }
-            
-            setShowQRScanner(false);
-          }}
-          onClose={() => setShowQRScanner(false)}
-        />
-      )}
+
 
       {/* Duplicate Order Modal */}
       {showDuplicateModal && (

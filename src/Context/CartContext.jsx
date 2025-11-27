@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
  import { v4 as uuidv4 } from "uuid";
 
 
@@ -18,6 +18,28 @@ export const CartProvider = ({ children }) => {
     }
     return sessionStorage.getItem('tableNumber') || '';
   });
+
+  // Monitor URL changes for table number
+  useEffect(() => {
+    const checkUrlForTable = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlTable = urlParams.get('table');
+      if (urlTable && urlTable !== tableNumber) {
+        setTableNumber(urlTable);
+        sessionStorage.setItem('tableNumber', urlTable);
+      }
+    };
+
+    // Check on mount and when URL changes
+    checkUrlForTable();
+    
+    // Listen for URL changes (back/forward navigation)
+    window.addEventListener('popstate', checkUrlForTable);
+    
+    return () => {
+      window.removeEventListener('popstate', checkUrlForTable);
+    };
+  }, [tableNumber]);
 
 
  const addToCart = (item) => {

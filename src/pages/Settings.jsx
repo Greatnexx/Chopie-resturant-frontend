@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useChangePasswordMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { Lock, Eye, EyeOff } from "lucide-react";
+import { Lock, Eye, EyeOff, Menu } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
+import QRGenerator from "../components/QRGenerator";
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +18,7 @@ const Settings = () => {
     confirm: false,
   });
   const [changePassword, { isLoading }] = useChangePasswordMutation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   
   const user = JSON.parse(sessionStorage.getItem("restaurantUser") || "{}");
@@ -60,13 +62,33 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar user={user} onLogout={confirmLogout} />
+      <RestaurantSidebar 
+        user={user} 
+        onLogout={confirmLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       
-      <div className="flex-1 ml-64 p-6 overflow-y-auto">
+      <div className="flex-1 lg:ml-64 p-4 lg:p-6 overflow-y-auto">
         <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-            <p className="text-gray-600">Manage your account settings</p>
+          <div className="mb-6 lg:mb-8">
+            <div className="flex items-center gap-4 mb-2">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
+              >
+                <Menu className="w-6 h-6 text-gray-600" />
+              </button>
+              <div className="flex-1">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Settings</h1>
+                <p className="text-gray-600 text-sm lg:text-base">Manage your account settings</p>
+              </div>
+            </div>
+          </div>
+
+          {/* QR Code Generator Section */}
+          <div className="bg-white rounded-lg shadow mb-6">
+            <QRGenerator />
           </div>
 
           <div className="bg-white rounded-lg shadow">

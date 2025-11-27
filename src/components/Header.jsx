@@ -39,30 +39,33 @@ const Header = () => {
 
   return (
     <>
-      <header className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-4 sticky top-0 z-50 shadow-lg">
+      <header className="bg-gradient-to-r from-red-500 to-pink-500 text-white p-3 lg:p-4 sticky top-0 z-50 shadow-lg">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <Link
             to={"/"}
             className="flex items-center space-x-2 cursor-pointer"
           >
-            <span className="text-2xl">🍽️</span>
-            <h1 className="text-2xl font-bold">Chopie</h1>
+            <span className="text-xl lg:text-2xl">🍽️</span>
+            <h1 className="text-xl lg:text-2xl font-bold">Chopie</h1>
           </Link>
           
-          <div className="flex space-x-4">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
             <Link
               to="/trackorder"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-all duration-200 hover:scale-105"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium flex items-center justify-center gap-1 lg:gap-2 transition-all duration-200 hover:scale-105 whitespace-nowrap"
             >
-              <Search className="w-4 h-4" />
-              Track Order
+              <Search className="w-3 h-3 lg:w-4 lg:h-4" />
+              <span className="hidden sm:inline">Track Order</span>
+              <span className="sm:hidden">Track</span>
             </Link>
            
             <Link
               to="/restaurant/login"
-              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 transition-all duration-200 hover:scale-105"
+              className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium flex items-center justify-center gap-1 lg:gap-2 transition-all duration-200 hover:scale-105 whitespace-nowrap"
             >
-              👨‍🍳 Restaurant
+              <span className="text-sm lg:text-base">👨🍳</span>
+              <span className="hidden sm:inline">Restaurant</span>
+              <span className="sm:hidden">Admin</span>
             </Link>
           </div>
         </div>
@@ -78,14 +81,15 @@ const Header = () => {
                 setCartOpen(true);
               }
             }}
-            className="fixed bottom-8 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center space-x-2 z-40 animate-pulse hover:animate-none border-2 border-white/20 backdrop-blur-sm font-bold group"
+            className="fixed bottom-4 lg:bottom-8 right-4 bg-gradient-to-r from-green-500 to-green-600 text-white px-4 lg:px-6 py-2 lg:py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center space-x-1 lg:space-x-2 z-40 animate-pulse hover:animate-none border-2 border-white/20 backdrop-blur-sm font-bold group text-sm lg:text-base"
           >
-            <span className="text-xl animate-bounce group-hover:animate-none">🛒</span>
-            <span>View Cart ({count})</span>
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-ping">
+            <span className="text-lg lg:text-xl animate-bounce group-hover:animate-none">🛒</span>
+            <span className="hidden sm:inline">View Cart ({count})</span>
+            <span className="sm:hidden">({count})</span>
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center animate-ping">
               {count}
             </div>
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+            <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center">
               {count}
             </div>
           </button>

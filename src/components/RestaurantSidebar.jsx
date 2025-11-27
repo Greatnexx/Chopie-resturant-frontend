@@ -9,12 +9,13 @@ import {
   Search,
   ChefHat,
   BarChart3,
-  Shield
+  Shield,
+  X
 } from "lucide-react";
 import OrderSearchModal from "./OrderSearchModal";
 import NotificationBell from "./NotificationBell";
 
-const RestaurantSidebar = ({ user, onLogout }) => {
+const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -46,7 +47,19 @@ const RestaurantSidebar = ({ user, onLogout }) => {
   const isActive = (path) => location.pathname === path;
 
   return (
-    <div className="w-64 bg-white shadow-lg h-screen flex flex-col fixed left-0 top-0 z-40">
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          onClick={onClose}
+        />
+      )}
+      
+      {/* Sidebar */}
+      <div className={`w-64 bg-white shadow-lg h-screen flex flex-col fixed left-0 top-0 z-50 transform transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
@@ -57,7 +70,16 @@ const RestaurantSidebar = ({ user, onLogout }) => {
               <p className="text-sm text-gray-600">{user?.role}</p>
             </div>
           </div>
-          <NotificationBell user={user} />
+          <div className="flex items-center gap-2">
+            <NotificationBell user={user} />
+            {/* Mobile Close Button */}
+            <button
+              onClick={onClose}
+              className="lg:hidden p-1 hover:bg-gray-100 rounded"
+            >
+              <X className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -85,6 +107,7 @@ const RestaurantSidebar = ({ user, onLogout }) => {
               <button
                 onClick={() => {
                   navigate(item.path);
+                  onClose(); // Close sidebar on mobile after navigation
                   // Force a small delay to ensure smooth transition
                   setTimeout(() => window.scrollTo(0, 0), 100);
                 }}
@@ -150,7 +173,8 @@ const RestaurantSidebar = ({ user, onLogout }) => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

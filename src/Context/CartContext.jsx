@@ -8,6 +8,16 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [tableNumber, setTableNumber] = useState(() => {
+    // Check URL parameter first, then sessionStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlTable = urlParams.get('table');
+    if (urlTable) {
+      sessionStorage.setItem('tableNumber', urlTable);
+      return urlTable;
+    }
+    return sessionStorage.getItem('tableNumber') || '';
+  });
 
 
  const addToCart = (item) => {
@@ -42,9 +52,19 @@ export const CartProvider = ({ children }) => {
 
   const clearCart = () => setCartItems([]);
 
+  // Enhanced setTableNumber to persist to sessionStorage
+  const setTableNumberWithSession = (number) => {
+    setTableNumber(number);
+    if (number) {
+      sessionStorage.setItem('tableNumber', number);
+    } else {
+      sessionStorage.removeItem('tableNumber');
+    }
+  };
+
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, clearCart }}
+      value={{ cartItems, addToCart, removeFromCart, clearCart, tableNumber, setTableNumber: setTableNumberWithSession }}
     >
       {children}
     </CartContext.Provider>

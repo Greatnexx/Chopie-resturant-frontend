@@ -119,6 +119,23 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Users"],
     }),
+    getUserCredentials: builder.query({
+      query: (userId) => `/restaurant/users/${userId}/credentials`,
+    }),
+    resetUserPassword: builder.mutation({
+      query: (userId) => ({
+        url: `/restaurant/users/${userId}/reset-password`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["Users"],
+    }),
+    firstTimePasswordChange: builder.mutation({
+      query: (data) => ({
+        url: "/restaurant/first-time-password",
+        method: "PATCH",
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -143,4 +160,7 @@ export const {
   useUpdateMenuItemMutation,
   useGetCategoriesQuery,
   useDeleteUserMutation,
+  useGetUserCredentialsQuery,
+  useResetUserPasswordMutation,
+  useFirstTimePasswordChangeMutation,
 } = restaurantApiSlice;

@@ -1,6 +1,6 @@
 import { useGetAllMenuItemsQuery, useToggleMenuAvailabilityMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { ChefHat, ToggleLeft, ToggleRight, MessageCircle, Plus, Edit } from "lucide-react";
+import { ChefHat, ToggleLeft, ToggleRight, MessageCircle, Plus, Edit, Menu } from "lucide-react";
 import MenuItemModal from "../components/MenuItemModal";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
@@ -16,6 +16,7 @@ const MenuManager = () => {
   const [showChatModal, setShowChatModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [editingMenuItem, setEditingMenuItem] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   
   const user = JSON.parse(sessionStorage.getItem("restaurantUser") || "{}");
@@ -65,26 +66,41 @@ const MenuManager = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar user={user} onLogout={confirmLogout} />
+      <RestaurantSidebar 
+        user={user} 
+        onLogout={confirmLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       
-      <div className="flex-1 ml-64 p-6 overflow-y-auto">
+      <div className="flex-1 lg:ml-64 p-4 lg:p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Menu Management</h1>
-            <p className="text-gray-600">Manage menu item availability</p>
+          <div className="mb-6 lg:mb-8">
+            <div className="flex items-center gap-4 mb-2">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
+              >
+                <Menu className="w-6 h-6 text-gray-600" />
+              </button>
+              <div className="flex-1">
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Menu Management</h1>
+                <p className="text-gray-600 text-sm lg:text-base">Manage menu item availability</p>
+              </div>
+            </div>
           </div>
 
-          <div className="mb-6 flex gap-4">
+          <div className="mb-6 flex flex-col sm:flex-row gap-3 sm:gap-4">
             <button
               onClick={handleAddMenuItem}
-              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center gap-2"
+              className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 text-sm lg:text-base"
             >
               <Plus className="w-4 h-4" />
               Add New Menu Item
             </button>
             <button
               onClick={() => setShowSearchModal(true)}
-              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 text-sm lg:text-base"
             >
               Search Orders
             </button>
@@ -102,7 +118,7 @@ const MenuManager = () => {
                   }
                 }
               }}
-              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600"
+              className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 text-sm lg:text-base"
             >
               Clear All Chats
             </button>

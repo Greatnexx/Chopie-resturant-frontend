@@ -5,6 +5,7 @@ import {
 } from "../slices/baseApiSlice";
 import MenuList from "./MenuList";
 import CategoryTab from "./CategoryTab";
+import CustomerInfoTable from "./CustomerInfoTable";
 
 const MenuPage = () => {
   const [activeCategory, setActiveCategory] = useState("");
@@ -52,6 +53,10 @@ const MenuPage = () => {
         setActiveCategory={setActiveCategory}
         categories={categories} 
       />
+      
+      <div className="max-w-6xl mx-auto px-4">
+        <CustomerInfoTable />
+      </div>
 
       {menuLoading ? (
         <div className="flex justify-center items-center py-8">

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { Bell, Clock, CheckCircle, ChefHat, User, X, Check } from "lucide-react";
+import { Bell, Clock, CheckCircle, ChefHat, User, X, Check, Menu } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import RestaurantSidebar from "../components/RestaurantSidebar";
@@ -13,6 +13,7 @@ const RestaurantDashboard = () => {
   const [user, setUser] = useState(null);
   const [showNotification, setShowNotification] = useState(null);
   const [loadingOrderId, setLoadingOrderId] = useState(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   
   const { data: ordersData, isLoading: ordersLoading, refetch } = useGetRestaurantOrdersQuery(undefined, { skip: !user });
@@ -178,19 +179,28 @@ const RestaurantDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar user={user} onLogout={confirmLogout} />
+      <RestaurantSidebar 
+        user={user} 
+        onLogout={confirmLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       
       {/* Main Content */}
-      <div className="flex-1 ml-64 p-8 overflow-y-auto">
+      <div className="flex-1 lg:ml-64 p-4 lg:p-8 overflow-y-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600">Welcome back, {user?.name}</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              {/* Notifications now handled by sidebar */}
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
+            >
+              <Menu className="w-6 h-6 text-gray-600" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Dashboard</h1>
+              <p className="text-gray-600 text-sm lg:text-base">Welcome back, {user?.name}</p>
             </div>
           </div>
         </div>

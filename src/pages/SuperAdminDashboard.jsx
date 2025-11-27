@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGetAnalyticsQuery, useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { DollarSign, Users, Clock, Zap, Star, Plus, ToggleLeft, ToggleRight } from "lucide-react";
+import { DollarSign, Users, Clock, Zap, Star, Plus, ToggleLeft, ToggleRight, Menu } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
 
@@ -9,6 +9,7 @@ const SuperAdminDashboard = () => {
   const [period, setPeriod] = useState("day");
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "SubUser" });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
 
   const { data: analytics } = useGetAnalyticsQuery(period);
@@ -66,13 +67,28 @@ const SuperAdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <RestaurantSidebar user={JSON.parse(sessionStorage.getItem("restaurantUser") || "{}")} onLogout={handleLogout} />
+      <RestaurantSidebar 
+        user={JSON.parse(sessionStorage.getItem("restaurantUser") || "{}")} 
+        onLogout={handleLogout}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
       
-      <div className="flex-1 ml-64 p-6 overflow-y-auto">
+      <div className="flex-1 lg:ml-64 p-4 lg:p-6 overflow-y-auto">
         <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
-          <p className="text-gray-600">Manage users and monitor performance</p>
+        <div className="mb-6 lg:mb-8">
+          <div className="flex items-center gap-4 mb-2">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 hover:bg-gray-200 rounded-lg"
+            >
+              <Menu className="w-6 h-6 text-gray-600" />
+            </button>
+            <div className="flex-1">
+              <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Super Admin Dashboard</h1>
+              <p className="text-gray-600 text-sm lg:text-base">Manage users and monitor performance</p>
+            </div>
+          </div>
         </div>
 
         {/* Analytics Section */}

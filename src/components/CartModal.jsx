@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "../Context/CartContext";
 import Modal from "../components/Modal";
-import { User, Mail, Phone, ShoppingCart, Trash2, Loader2 } from "lucide-react";
+import { User, Mail, Phone, ShoppingCart, Trash2, Loader2, QrCode } from "lucide-react";
 import { useCreateOrderMutation } from "../slices/orderSlice";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/formatCurrency";
+import QRScanner from "./QRScanner";
 
 
 const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
@@ -15,12 +16,27 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   });
 
   const [errors, setErrors] = useState({});
-  const [tableNumber, setTableNumber] = useState("");
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
-
+  const [showQRScanner, setShowQRScanner] = useState(false);
 
   const [createOrder, { isLoading }] = useCreateOrderMutation();
+
+  // Auto-populate customer info from localStorage
+  useEffect(() => {
+    const savedCustomerInfo = localStorage.getItem('customerInfo');
+    if (savedCustomerInfo) {
+      const parsedInfo = JSON.parse(savedCustomerInfo);
+      setCustomerInfo(parsedInfo);
+    }
+  }, []);
+
+  // Save customer info to localStorage when it changes
+  useEffect(() => {
+    if (customerInfo.name || customerInfo.email || customerInfo.phone) {
+      localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+    }
+  }, [customerInfo]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -131,7 +147,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
 };
 
 
-  const { cartItems, removeFromCart, clearCart } = useCart();
+  const { cartItems, removeFromCart, clearCart, tableNumber, setTableNumber } = useCart();
 
   const total = cartItems
     .reduce((sum, item) => sum + item.totalPrice, 0)
@@ -249,26 +265,37 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       >
                         Table Number *
                       </label>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          id="tableNumber"
-                          name="tableNumber"
-                          placeholder="Enter table number"
-                          value={tableNumber}
-                          onChange={(e) => {
-                            setTableNumber(e.target.value);
-                            if (errors.tableNumber) {
-                              setErrors((prev) => ({ ...prev, tableNumber: "" }));
-                            }
-                          }}
-                          required
-                          className={`block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
-                            errors.tableNumber
-                              ? "border-red-300 bg-red-50"
-                              : "border-gray-300 bg-white"
-                          }`}
-                        />
+                      <div className="flex gap-2">
+                        <div className="flex-1 relative">
+                          <input
+                            type="text"
+                            id="tableNumber"
+                            name="tableNumber"
+                            placeholder="Enter table number or scan QR"
+                            value={tableNumber}
+                            onChange={(e) => {
+                              setTableNumber(e.target.value);
+                              if (errors.tableNumber) {
+                                setErrors((prev) => ({ ...prev, tableNumber: "" }));
+                              }
+                            }}
+                            required
+                            className={`block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                              errors.tableNumber
+                                ? "border-red-300 bg-red-50"
+                                : "border-gray-300 bg-white"
+                            }`}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setShowQRScanner(true)}
+                          className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+                          title="Scan QR Code"
+                        >
+                          <QrCode className="w-4 h-4" />
+                          Scan
+                        </button>
                       </div>
                       {errors.tableNumber && (
                         <p className="text-red-600 text-sm">
@@ -398,6 +425,38 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
         </div>
         </div>
       </div>
+
+      {/* QR Scanner Modal */}
+      {showQRScanner && (
+        <QRScanner
+          onScanSuccess={(scannedTableNumber) => {
+            try {
+              // Try to parse as JSON (QR code format)
+              const qrData = JSON.parse(scannedTableNumber);
+              if (qrData.type === 'table' && qrData.tableNumber) {
+                setTableNumber(qrData.tableNumber);
+                toast.success(`Table ${qrData.tableNumber} selected! Customer info loaded.`);
+              } else {
+                throw new Error('Invalid QR format');
+              }
+            } catch {
+              // If not JSON, treat as plain table number
+              setTableNumber(scannedTableNumber);
+              toast.success(`Table ${scannedTableNumber} selected! Customer info loaded.`);
+            }
+            
+            // Auto-populate customer info after QR scan
+            const savedCustomerInfo = localStorage.getItem('customerInfo');
+            if (savedCustomerInfo) {
+              const parsedInfo = JSON.parse(savedCustomerInfo);
+              setCustomerInfo(parsedInfo);
+            }
+            
+            setShowQRScanner(false);
+          }}
+          onClose={() => setShowQRScanner(false)}
+        />
+      )}
 
       {/* Duplicate Order Modal */}
       {showDuplicateModal && (

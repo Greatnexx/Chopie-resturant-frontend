@@ -10,7 +10,7 @@ const NotificationBell = ({ user }) => {
   useEffect(() => {
     if (!user) return;
     
-    const socketUrl = import.meta.env.VITE_BASE_URL.replace('/api/v1', '');
+    const socketUrl = import.meta.env.VITE_API_URL.replace('/api/v1', '');
     console.log('🔔 NotificationBell connecting to Socket.IO:', socketUrl, 'User role:', user.role);
     
     const socket = io(socketUrl, {

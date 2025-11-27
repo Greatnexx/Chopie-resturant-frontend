@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { Lock, Eye, EyeOff, Menu } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
-import QRGenerator from "../components/QRGenerator";
+
 
 const Settings = () => {
   const [formData, setFormData] = useState({
@@ -86,10 +86,7 @@ const Settings = () => {
             </div>
           </div>
 
-          {/* QR Code Generator Section */}
-          <div className="bg-white rounded-lg shadow mb-6">
-            <QRGenerator />
-          </div>
+        
 
           <div className="bg-white rounded-lg shadow">
             <div className="p-6 border-b">

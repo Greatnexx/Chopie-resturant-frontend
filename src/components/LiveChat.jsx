@@ -26,7 +26,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   useEffect(() => {
     if (chatId) {
-      const newSocket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''), {
+      const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''), {
         transports: ['websocket', 'polling'],
         timeout: 20000,
       });
@@ -86,7 +86,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   const createChat = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/create`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerName, customerEmail, orderNumber })
@@ -103,7 +103,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   const loadMessages = async (id) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${id}/messages`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${id}/messages`);
       const data = await response.json();
       if (data.success) {
         setMessages(data.data.messages || []);
@@ -118,7 +118,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
     try {
       console.log('Customer sending message:', { chatId, customerName, content: newMessage });
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -139,7 +139,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   const editMessage = async (messageId, newContent) => {
     try {
-      await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages/${messageId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages/${messageId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: newContent })
@@ -152,7 +152,7 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
 
   const deleteMessage = async (messageId) => {
     try {
-      await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages/${messageId}`, {
+      await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages/${messageId}`, {
         method: 'DELETE'
       });
     } catch (error) {

@@ -265,37 +265,31 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       >
                         Table Number *
                       </label>
-                      <div className="flex gap-2">
-                        <div className="flex-1 relative">
-                          <input
-                            type="text"
-                            id="tableNumber"
-                            name="tableNumber"
-                            placeholder="Enter table number or scan QR"
-                            value={tableNumber}
-                            onChange={(e) => {
-                              setTableNumber(e.target.value);
-                              if (errors.tableNumber) {
-                                setErrors((prev) => ({ ...prev, tableNumber: "" }));
-                              }
-                            }}
-                            required
-                            className={`block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
-                              errors.tableNumber
-                                ? "border-red-300 bg-red-50"
-                                : "border-gray-300 bg-white"
-                            }`}
-                          />
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => setShowQRScanner(true)}
-                          className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
-                          title="Scan QR Code"
-                        >
-                          <QrCode className="w-4 h-4" />
-                          Scan
-                        </button>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          id="tableNumber"
+                          name="tableNumber"
+                          placeholder={tableNumber ? `Table ${tableNumber}` : "Table number will appear after scanning QR code"}
+                          value={tableNumber ? `Table ${tableNumber}` : ''}
+                          readOnly
+                          required
+                          className={`block w-full px-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 bg-gray-50 cursor-not-allowed ${
+                            errors.tableNumber
+                              ? "border-red-300"
+                              : "border-gray-300"
+                          }`}
+                        />
+                        {!tableNumber && (
+                          <button
+                            type="button"
+                            onClick={() => setShowQRScanner(true)}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600 transition-colors flex items-center gap-1"
+                          >
+                            <QrCode className="w-3 h-3" />
+                            Scan QR
+                          </button>
+                        )}
                       </div>
                       {errors.tableNumber && (
                         <p className="text-red-600 text-sm">

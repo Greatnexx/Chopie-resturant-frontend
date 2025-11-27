@@ -18,7 +18,7 @@ const SimpleStaffChat = ({ user }) => {
   useEffect(() => {
     loadChats();
     
-    const newSocket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''));
+    const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''));
     setSocket(newSocket);
     
     // Join all existing chat rooms for instant message reception
@@ -26,7 +26,7 @@ const SimpleStaffChat = ({ user }) => {
       try {
         const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
         const token = restaurantUser.token;
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/staff/chats`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -104,7 +104,7 @@ const SimpleStaffChat = ({ user }) => {
 
   const loadChatMessages = async (chatId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`);
       const data = await response.json();
       if (data.success && data.data.messages) {
         const formattedMessages = data.data.messages.map(msg => ({
@@ -131,7 +131,7 @@ const SimpleStaffChat = ({ user }) => {
     try {
       const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
       const token = restaurantUser.token;
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/staff/chats`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -150,7 +150,7 @@ const SimpleStaffChat = ({ user }) => {
 
     try {
       // Save message to database first
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${activeChat.chatId}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${activeChat.chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -218,7 +218,7 @@ const SimpleStaffChat = ({ user }) => {
       const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
       const token = restaurantUser.token;
       
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatRequest.chatId}/accept`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatRequest.chatId}/accept`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

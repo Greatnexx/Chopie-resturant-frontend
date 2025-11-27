@@ -17,7 +17,7 @@ const StaffChatPanel = ({ user }) => {
   useEffect(() => {
     loadChats();
 
-    const newSocket = io(import.meta.env.VITE_BASE_URL.replace("/api/v1", ""));
+    const newSocket = io(import.meta.env.VITE_API_URL.replace("/api/v1", ""));
     setSocket(newSocket);
 
     newSocket.on("newMessage", (data) => {
@@ -108,7 +108,7 @@ const StaffChatPanel = ({ user }) => {
       );
       const token = restaurantUser.token;
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/chat/staff/chats`,
+        `${import.meta.env.VITE_API_URL}/chat/staff/chats`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -125,7 +125,7 @@ const StaffChatPanel = ({ user }) => {
   const loadMessages = async (chatId) => {
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages`
+        `${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`
       );
       const data = await response.json();
       if (data.success) {
@@ -141,7 +141,7 @@ const StaffChatPanel = ({ user }) => {
 
     try {
       await fetch(
-        `${import.meta.env.VITE_BASE_URL}/chat/${activeChat.chatId}/messages`,
+        `${import.meta.env.VITE_API_URL}/chat/${activeChat.chatId}/messages`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

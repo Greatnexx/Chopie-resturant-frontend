@@ -136,7 +136,7 @@ const TrackOrder = () => {
             >
               Order Number, Email, or Phone
             </label>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Package className="h-5 w-5 text-gray-400" />
@@ -148,24 +148,26 @@ const TrackOrder = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter order number, email, or phone"
-                  className="block w-full pl-12 pr-4 py-4 text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  className="block w-full pl-12 pr-4 py-4 text-base sm:text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                   disabled={isSearching}
                 />
               </div>
               <button
                 onClick={handleSearch}
                 disabled={isSearching || !searchTerm.trim()}
-                className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:ring-red-200 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 text-lg"
+                className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 sm:px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:ring-red-200 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base sm:text-lg"
               >
                 {isSearching ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    Searching...
+                    <span className="hidden sm:inline">Searching...</span>
+                    <span className="sm:hidden">Searching...</span>
                   </>
                 ) : (
                   <>
                     <Search className="w-5 h-5" />
-                    Track Order
+                    <span className="hidden sm:inline">Track Order</span>
+                    <span className="sm:hidden">Track</span>
                   </>
                 )}
               </button>
@@ -343,14 +345,12 @@ const TrackOrder = () => {
               </div>
             </div>
             {/* Action Buttons */}
-
-            {/* Action Buttons */}
             <div className="bg-white rounded-2xl shadow-xl p-6">
-              <div className=" sm:flex-row gap-4 justify-center">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="bg-blue-500 hover:bg-blue-600 px-6 py-3 text-white rounded-lg focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-3 text-lg"
+                  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 px-6 py-3 text-white rounded-lg focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
                 >
                   {isRefreshing ? (
                     <>
@@ -359,18 +359,11 @@ const TrackOrder = () => {
                     </>
                   ) : (
                     <>
-                      <RefreshCcwDot className="w-5 h-5 animate-spin-slow" />
+                      <RefreshCcwDot className="w-5 h-5" />
                       Refresh Status
                     </>
                   )}
                 </button>
-
-                {/* <button
-                  onClick={() => setOrderNumber("")}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                >
-                  Track Another Order
-                </button> */}
               </div>
             </div>
             {/* Support Section */}

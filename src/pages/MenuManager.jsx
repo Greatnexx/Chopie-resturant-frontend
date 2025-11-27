@@ -108,7 +108,7 @@ const MenuManager = () => {
               onClick={async () => {
                 if (confirm('Are you sure you want to clear all chat data?')) {
                   try {
-                    await fetch(`${import.meta.env.VITE_BASE_URL}/chat/clear-all`, {
+                    await fetch(`${import.meta.env.VITE_API_URL}/chat/clear-all`, {
                       method: 'DELETE'
                     });
                     toast.success('All chat data cleared!');

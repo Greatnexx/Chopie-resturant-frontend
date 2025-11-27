@@ -58,7 +58,7 @@ const NotificationBell = ({ user }) => {
         try {
           const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
           const token = restaurantUser.token;
-          const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/staff/chats`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
           const data = await response.json();

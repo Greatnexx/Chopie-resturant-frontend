@@ -18,7 +18,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
 
   useEffect(() => {
     if (chatId && !socket) {
-      const newSocket = io(import.meta.env.VITE_BASE_URL.replace('/api/v1', ''));
+      const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''));
       setSocket(newSocket);
 
       // Join chat room
@@ -74,7 +74,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
   const initializeChat = async () => {
     try {
       console.log('Creating chat for:', { customerName, customerEmail, orderNumber });
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/create`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ customerName, customerEmail, orderNumber })
@@ -88,7 +88,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
         // Send initial greeting message
         setTimeout(async () => {
           try {
-            await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${data.data.chatId}/messages`, {
+            await fetch(`${import.meta.env.VITE_API_URL}/chat/${data.data.chatId}/messages`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -134,7 +134,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
 
     try {
       // Save message to database first
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/chat/${chatId}/messages`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

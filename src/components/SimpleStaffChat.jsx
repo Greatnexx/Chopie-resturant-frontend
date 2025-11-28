@@ -65,15 +65,27 @@ const SimpleStaffChat = ({ user }) => {
 
     newSocket.on('receiveMessage', (data) => {
       console.log('Staff received message:', data);
-      // Update messages if this is the active chat
-      if (activeChat && data.chatId === activeChat.chatId && data.message.senderType !== 'staff') {
-        setMessages(prev => [...prev, {
-          id: Date.now() + Math.random(),
-          content: data.message.content,
-          sender: data.message.sender,
-          senderType: data.message.senderType,
-          timestamp: data.timestamp
-        }]);
+      // Update messages if this is the active chat and message is from customer
+      if (activeChat && data.chatId === activeChat.chatId && data.message.senderType === 'customer') {
+        setMessages(prev => {
+          // Check if message already exists to avoid duplicates
+          const messageExists = prev.some(msg => 
+            msg.content === data.message.content && 
+            msg.sender === data.message.sender &&
+            Math.abs(new Date(msg.timestamp).getTime() - new Date(data.timestamp).getTime()) < 1000
+          );
+          
+          if (!messageExists) {
+            return [...prev, {
+              id: data.message._id || Date.now() + Math.random(),
+              content: data.message.content,
+              sender: data.message.sender,
+              senderType: data.message.senderType,
+              timestamp: data.timestamp || new Date().toISOString()
+            }];
+          }
+          return prev;
+        });
       }
       // Always reload chats to update the chat list
       loadChats();

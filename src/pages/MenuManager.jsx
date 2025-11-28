@@ -160,72 +160,137 @@ const MenuManager = () => {
                   <p className="text-gray-500 text-lg">No menu items found</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left py-3">Name</th>
-                        <th className="text-left py-3">Category</th>
-                        <th className="text-left py-3">Price</th>
-                        <th className="text-left py-3">Status</th>
-                        <th className="text-left py-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {menus.map((menu) => (
-                        <tr key={menu._id} className="border-b">
-                          <td className="py-3">
-                            <div className="flex items-center gap-3">
-                              {menu.image && (
-                                <img 
-                                  src={menu.image} 
-                                  alt={menu.name}
-                                  className="w-12 h-12 rounded-lg object-cover"
-                                />
-                              )}
-                              <div>
-                                <p className="font-medium">{menu.name}</p>
-                                <p className="text-sm text-gray-500">{menu.description}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="py-3">{menu.category?.name || 'N/A'}</td>
-                          <td className="py-3">{formatCurrency(menu.price || 0)}</td>
-                          <td className="py-3">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${
-                              menu.available 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
-                              {menu.available ? 'Available' : 'Unavailable'}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => handleEditMenuItem(menu)}
-                                className="text-gray-600 hover:text-gray-800"
-                                title="Edit menu item"
-                              >
-                                <Edit className="w-5 h-5" />
-                              </button>
-                              <button
-                                onClick={() => handleToggleAvailability(menu._id, menu.available)}
-                                className="text-blue-600 hover:text-blue-800"
-                                title="Toggle availability"
-                              >
-                                {menu.available ? 
-                                  <ToggleRight className="w-6 h-6" /> : 
-                                  <ToggleLeft className="w-6 h-6" />
-                                }
-                              </button>
-                            </div>
-                          </td>
+                <>
+                  {/* Desktop Table View */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-3">Name</th>
+                          <th className="text-left py-3">Category</th>
+                          <th className="text-left py-3">Price</th>
+                          <th className="text-left py-3">Status</th>
+                          <th className="text-left py-3">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      </thead>
+                      <tbody>
+                        {menus.map((menu) => (
+                          <tr key={menu._id} className="border-b">
+                            <td className="py-3">
+                              <div className="flex items-center gap-3">
+                                {menu.image && (
+                                  <img 
+                                    src={menu.image} 
+                                    alt={menu.name}
+                                    className="w-12 h-12 rounded-lg object-cover"
+                                  />
+                                )}
+                                <div>
+                                  <p className="font-medium">{menu.name}</p>
+                                  <p className="text-sm text-gray-500">{menu.description}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="py-3">{menu.category?.name || 'N/A'}</td>
+                            <td className="py-3">{formatCurrency(menu.price || 0)}</td>
+                            <td className="py-3">
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                menu.available 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {menu.available ? 'Available' : 'Unavailable'}
+                              </span>
+                            </td>
+                            <td className="py-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => handleEditMenuItem(menu)}
+                                  className="text-gray-600 hover:text-gray-800"
+                                  title="Edit menu item"
+                                >
+                                  <Edit className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => handleToggleAvailability(menu._id, menu.available)}
+                                  className="text-blue-600 hover:text-blue-800"
+                                  title="Toggle availability"
+                                >
+                                  {menu.available ? 
+                                    <ToggleRight className="w-6 h-6" /> : 
+                                    <ToggleLeft className="w-6 h-6" />
+                                  }
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="lg:hidden space-y-4">
+                    {menus.map((menu) => (
+                      <div key={menu._id} className="bg-gray-50 rounded-lg p-4 border">
+                        <div className="flex items-start gap-3 mb-3">
+                          {menu.image && (
+                            <img 
+                              src={menu.image} 
+                              alt={menu.name}
+                              className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-gray-900 truncate">{menu.name}</h3>
+                            <p className="text-sm text-gray-500 mt-1">{menu.description}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4 mb-3">
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Category</p>
+                            <p className="text-sm font-medium text-gray-900">{menu.category?.name || 'N/A'}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">Price</p>
+                            <p className="text-sm font-medium text-gray-900">{formatCurrency(menu.price || 0)}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            menu.available 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {menu.available ? 'Available' : 'Unavailable'}
+                          </span>
+                          
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleEditMenuItem(menu)}
+                              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+                              title="Edit menu item"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleToggleAvailability(menu._id, menu.available)}
+                              className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-100 rounded-lg transition-colors"
+                              title="Toggle availability"
+                            >
+                              {menu.available ? 
+                                <ToggleRight className="w-5 h-5" /> : 
+                                <ToggleLeft className="w-5 h-5" />
+                              }
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
           </div>
@@ -239,21 +304,21 @@ const MenuManager = () => {
       
       {/* Chat Modal */}
       {showChatModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-4xl h-96 flex flex-col m-4">
-            <div className="bg-red-500 text-white p-4 rounded-t-lg flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <MessageCircle className="w-6 h-6" />
-                <h2 className="text-xl font-semibold">Customer Support Chat</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-lg w-full max-w-4xl h-[90vh] sm:h-96 flex flex-col">
+            <div className="bg-red-500 text-white p-3 sm:p-4 rounded-t-lg flex justify-between items-center flex-shrink-0">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0" />
+                <h2 className="text-lg sm:text-xl font-semibold truncate">Customer Support Chat</h2>
               </div>
               <button
                 onClick={() => setShowChatModal(false)}
-                className="hover:bg-red-600 p-1 rounded"
+                className="hover:bg-red-600 p-1 rounded flex-shrink-0 ml-2"
               >
                 <span className="text-xl">&times;</span>
               </button>
             </div>
-            <div className="flex-1 p-4">
+            <div className="flex-1 p-2 sm:p-4 overflow-hidden">
               <SimpleStaffChat user={user} />
             </div>
           </div>

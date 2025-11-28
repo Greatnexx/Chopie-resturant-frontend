@@ -105,7 +105,7 @@ const OrderManagement = () => {
                     {order.customerName} • Table {order.tableNumber}
                   </p>
                   <p className="text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
+                    {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date not available'}
                   </p>
                 </div>
                 <div className={`px-3 py-1 rounded-full border flex items-center gap-2 ${getStatusColor(order.status)}`}>

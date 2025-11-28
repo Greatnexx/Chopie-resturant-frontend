@@ -102,7 +102,7 @@ const OrderManagement = () => {
                     Order #{order.orderNumber}
                   </h3>
                   <p className="text-gray-600">
-                    {order.customerName} • Table {order.tableNumber}
+                    {order.customerName} • Table {order.tableNumber} • {order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}
                   </p>
                   <p className="text-sm text-gray-500">
                     {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date not available'}

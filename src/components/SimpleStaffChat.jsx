@@ -65,8 +65,8 @@ const SimpleStaffChat = ({ user }) => {
 
     newSocket.on('receiveMessage', (data) => {
       console.log('Staff received message:', data);
-      // Update messages if this is the active chat and message is from customer
-      if (activeChat && data.chatId === activeChat.chatId && data.message.senderType === 'customer') {
+      // Update messages if this is the active chat
+      if (activeChat && data.chatId === activeChat.chatId) {
         setMessages(prev => {
           // Check if message already exists to avoid duplicates
           const messageExists = prev.some(msg => 

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { Bell, Clock, CheckCircle, ChefHat, User, X, Check, Menu } from "lucide-react";
+import { formatCurrency } from "../utils/formatCurrency";
 import { useNavigate } from "react-router-dom";
 import io from "socket.io-client";
 import RestaurantSidebar from "../components/RestaurantSidebar";
@@ -258,7 +259,7 @@ const RestaurantDashboard = () => {
                             </p>
                           )}
                         </div>
-                        <span className="font-medium">${item.totalPrice?.toFixed(2) || '0.00'}</span>
+                        <span className="font-medium">{formatCurrency(item.totalPrice || 0)}</span>
                       </div>
                     ))}
                   </div>
@@ -266,7 +267,7 @@ const RestaurantDashboard = () => {
 
                 <div className="flex justify-between items-center pt-4 border-t">
                   <div className="text-lg font-bold">
-                    Total: ${order.totalAmount?.toFixed(2) || '0.00'}
+                    Total: {formatCurrency(order.totalAmount || 0)}
                   </div>
                   {order.status === "pending" && !order.assignedTo ? (
                     <OrderActionButtons

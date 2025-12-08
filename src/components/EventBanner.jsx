@@ -54,7 +54,7 @@ const EventBanner = () => {
       <div className="flex items-center gap-4">
         {currentEvent.bannerImage && (
           <img
-            src={`${import.meta.env.VITE_API_URL}/uploads/${currentEvent.bannerImage}`}
+            src={`${import.meta.env.VITE_API_URL}/uploads/banners/${currentEvent.bannerImage}`}
             alt={currentEvent.title}
             className="w-16 h-16 rounded-lg object-cover"
           />

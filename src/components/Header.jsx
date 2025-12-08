@@ -45,8 +45,8 @@ const Header = () => {
             to={"/"}
             className="flex items-center space-x-2 cursor-pointer"
           >
-            <span className="text-xl lg:text-2xl">🍽️</span>
-            <h1 className="text-xl lg:text-2xl font-bold">Chopie</h1>
+            <span className="text-xl lg:text-2xl">🥂</span>
+            <h1 className="text- lg:text-2xl font-bold">LaQuinta Club</h1>
           </Link>
           
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
@@ -54,7 +54,7 @@ const Header = () => {
               to="/trackorder"
               className="bg-white/10 hover:bg-white/20 backdrop-blur-sm px-3 lg:px-4 py-2 rounded-full text-xs lg:text-sm font-medium flex items-center justify-center gap-1 lg:gap-2 transition-all duration-200 hover:scale-105 whitespace-nowrap"
             >
-              <Search className="w-3 h-3 lg:w-4 lg:h-4" />
+              <Search className=" w-4 h-4" />
               <span className="hidden sm:inline">Track Order</span>
               <span className="sm:hidden">Track</span>
             </Link>

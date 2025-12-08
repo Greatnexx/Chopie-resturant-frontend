@@ -36,6 +36,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
     { icon: BarChart3, label: "Analytics", path: "/restaurant/super-admin", roles: ["SuperAdmin"] },
     { icon: Users, label: "User Management", path: "/restaurant/users", roles: ["SuperAdmin"] },
     { icon: ChefHat, label: "Menu Management", path: "/restaurant/menu-manager", roles: ["MenuManager"] },
+    { icon: FileText, label: "Event Management", path: "/restaurant/events", roles: ["SuperAdmin", "MenuManager"] },
     { icon: FileText, label: "Audit Trail", path: "/restaurant/audit", roles: ["SuperAdmin", "TransactionAdmin"] },
     { icon: Settings, label: "Settings", path: "/restaurant/settings", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager", "SubUser"] },
   ];
@@ -66,7 +67,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
           <div className="flex items-center gap-3">
             <ChefHat className="w-8 h-8 text-red-500" />
             <div>
-              <h2 className="font-bold text-gray-800">Chopie Admin</h2>
+              <h2 className="font-bold text-gray-800">LaQuinta Club Admin</h2>
               <p className="text-sm text-gray-600">{user?.role}</p>
             </div>
           </div>

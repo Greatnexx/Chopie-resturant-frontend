@@ -1,7 +1,6 @@
 import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import { toast } from "sonner";
 
-
 const getBaseUrl = () => {
   // Check for manual override in localStorage
   const useRemote = localStorage.getItem('USE_REMOTE_SERVER');
@@ -22,7 +21,7 @@ const getBaseUrl = () => {
 const baseQuery = fetchBaseQuery({
   baseUrl: getBaseUrl(),
   timeout: 60000, // 60 second timeout for Render cold starts
-  prepareHeaders: (headers) => {
+  prepareHeaders: (headers, { getState }) => {
     // Check for regular user token
     const userInfo = sessionStorage.getItem("userInfo");
     if (userInfo) {
@@ -57,7 +56,11 @@ const baseQuery = fetchBaseQuery({
       headers.set("Authorization", `Bearer ${restaurantToken}`);
     }
 
-    headers.set("Content-Type", "application/json");
+    // ✅ Don't set Content-Type at all
+    // fetchBaseQuery will automatically:
+    // - Set 'application/json' for plain objects
+    // - Leave it unset for FormData (browser adds multipart/form-data with boundary)
+    
     return headers;
   },
 });
@@ -84,6 +87,8 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
       toast.error("Unauthorized. Redirecting to login.");
       sessionStorage.removeItem("userInfo");
       sessionStorage.removeItem("expirationTime");
+      sessionStorage.removeItem("restaurantUser");
+      sessionStorage.removeItem("restaurantToken");
       // window.location.href = "/";
       return retryResult;
     }
@@ -97,6 +102,6 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "apiService",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["base"],
+  tagTypes: ["base", "RestaurantOrders", "Users", "MenuItems", "Categories", "PaymentSummary"],
   endpoints: () => ({}),
 });

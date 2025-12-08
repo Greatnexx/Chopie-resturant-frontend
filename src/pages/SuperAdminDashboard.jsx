@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useGetAnalyticsQuery, useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation } from "../slices/restaurantSlice";
+import { useGetAnalyticsQuery, useGetAllUsersQuery, useToggleUserStatusMutation, useAwardStarMutation, useCreateUserMutation, useGetPaymentSummaryQuery } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { DollarSign, Users, Clock, Zap, Star, Plus, ToggleLeft, ToggleRight, Menu } from "lucide-react";
+import { DollarSign, Users, Clock, Zap, Star, Plus, ToggleLeft, ToggleRight, Menu, CreditCard, Banknote } from "lucide-react";
 import { formatCurrency } from "../utils/formatCurrency";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
@@ -11,16 +11,19 @@ const SuperAdminDashboard = () => {
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "SubUser" });
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const navigate = useNavigate();
 
   const { data: analytics } = useGetAnalyticsQuery(period);
   const { data: usersData, refetch } = useGetAllUsersQuery();
+  const { data: paymentSummary } = useGetPaymentSummaryQuery(selectedDate);
   const [toggleUserStatus] = useToggleUserStatusMutation();
   const [awardStar] = useAwardStarMutation();
   const [createUser, { isLoading: creating }] = useCreateUserMutation();
 
   const users = usersData?.data || [];
   const stats = analytics?.data || {};
+  const paymentData = paymentSummary?.data || { cash: { count: 0, total: 0 }, transfer: { count: 0, total: 0 }, grandTotal: 0 };
 
   const handleToggleStatus = async (userId, currentStatus) => {
     try {
@@ -145,6 +148,54 @@ const SuperAdminDashboard = () => {
                 <div className="ml-4">
                   <p className="text-sm text-gray-600">Fast Orders</p>
                   <p className="text-2xl font-bold">{stats.fastOrders || 0}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Order Analysis Section */}
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Order Analysis</h2>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="px-4 py-2 border rounded-lg"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <Banknote className="w-8 h-8 text-green-500" />
+                <div className="ml-4">
+                  <p className="text-sm text-gray-600">Cash Orders</p>
+                  <p className="text-2xl font-bold">{paymentData.cash.count}</p>
+                  <p className="text-sm text-green-600">{formatCurrency(paymentData.cash.total)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <CreditCard className="w-8 h-8 text-blue-500" />
+                <div className="ml-4">
+                  <p className="text-sm text-gray-600">Transfer Orders</p>
+                  <p className="text-2xl font-bold">{paymentData.transfer.count}</p>
+                  <p className="text-sm text-blue-600">{formatCurrency(paymentData.transfer.total)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex items-center">
+                <DollarSign className="w-8 h-8 text-purple-500" />
+                <div className="ml-4">
+                  <p className="text-sm text-gray-600">Total Revenue</p>
+                  <p className="text-2xl font-bold">{paymentData.cash.count + paymentData.transfer.count}</p>
+                  <p className="text-sm text-purple-600">{formatCurrency(paymentData.grandTotal)}</p>
                 </div>
               </div>
             </div>

@@ -16,7 +16,10 @@ const NotificationBell = ({ user }) => {
     const socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       timeout: 20000,
-      forceNew: true
+      autoConnect: true,
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5
     });
     
     socket.on('connect', () => {

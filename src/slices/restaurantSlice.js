@@ -93,21 +93,22 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["Users"],
     }),
     createMenuItem: builder.mutation({
-      query: (menuData) => ({
+      query: (formData) => ({
         url: "/menu",
         method: "POST",
-        body: menuData,
+        body: formData,
       }),
       invalidatesTags: ["MenuItems"],
     }),
     updateMenuItem: builder.mutation({
-      query: ({ menuId, ...menuData }) => ({
+      query: ({ menuId, body }) => ({
         url: `/menu/${menuId}`,
         method: "PATCH",
-        body: menuData,
+        body,
       }),
       invalidatesTags: ["MenuItems"],
     }),
+
     getCategories: builder.query({
       query: () => "/categories",
       providesTags: ["Categories"],
@@ -136,6 +137,10 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
         body: data,
       }),
     }),
+    getPaymentSummary: builder.query({
+      query: (date) => `/order/payment-summary${date ? `?date=${date}` : ''}`,
+      providesTags: ["PaymentSummary"],
+    }),
   }),
 });
 
@@ -163,4 +168,5 @@ export const {
   useGetUserCredentialsQuery,
   useResetUserPasswordMutation,
   useFirstTimePasswordChangeMutation,
+  useGetPaymentSummaryQuery,
 } = restaurantApiSlice;

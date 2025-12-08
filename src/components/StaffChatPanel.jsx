@@ -20,28 +20,54 @@ const StaffChatPanel = ({ user }) => {
     const newSocket = io(import.meta.env.VITE_API_URL.replace("/api/v1", ""));
     setSocket(newSocket);
 
-    newSocket.on("newMessage", (data) => {
-      console.log('Staff received new message:', data);
-      if (activeChat && data.chatId === activeChat.chatId) {
-        setMessages((prev) => [...prev, data.message]);
-      }
-      loadChats();
-    });
+    return () => newSocket.disconnect();
+  }, []);
 
-    newSocket.on("chatUpdate", (data) => {
+  // Separate useEffect for socket event handlers that need access to current state
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewMessage = (data) => {
+      console.log('Staff received new message:', data);
+      
+      // Update messages if this is the active chat
+      setMessages((prev) => {
+        // Check if this message is for the currently active chat
+        if (activeChat && (data.chatId === activeChat.chatId || data.chatId === activeChat._id)) {
+          return [...prev, data.message];
+        }
+        return prev;
+      });
+      
+      // Always update the chat list to show new message preview
+      setChats((prevChats) => 
+        prevChats.map((chat) => {
+          if (chat.chatId === data.chatId || chat._id === data.chatId) {
+            return {
+              ...chat,
+              lastActivity: new Date().toISOString(),
+              messages: chat.messages ? [...chat.messages, data.message] : [data.message]
+            };
+          }
+          return chat;
+        })
+      );
+    };
+
+    const handleChatUpdate = (data) => {
       console.log('Staff received chat update:', data);
       loadChats();
-    });
+    };
 
-    newSocket.on("newChatCreated", (data) => {
+    const handleNewChatCreated = (data) => {
       console.log('New chat created:', data);
       loadChats();
-    });
+    };
 
-    newSocket.on("messageEdited", (data) => {
-      if (activeChat && data.chatId === activeChat.chatId) {
-        setMessages((prev) =>
-          prev.map((msg) =>
+    const handleMessageEdited = (data) => {
+      setMessages((prev) => {
+        if (activeChat && (data.chatId === activeChat.chatId || data.chatId === activeChat._id)) {
+          return prev.map((msg) =>
             msg._id === data.messageId
               ? {
                   ...msg,
@@ -50,36 +76,52 @@ const StaffChatPanel = ({ user }) => {
                   editedAt: data.editedAt,
                 }
               : msg
-          )
-        );
-      }
-    });
+          );
+        }
+        return prev;
+      });
+    };
 
-    newSocket.on("messageDeleted", (data) => {
-      if (activeChat && data.chatId === activeChat.chatId) {
-        setMessages((prev) =>
-          prev.map((msg) =>
+    const handleMessageDeleted = (data) => {
+      setMessages((prev) => {
+        if (activeChat && (data.chatId === activeChat.chatId || data.chatId === activeChat._id)) {
+          return prev.map((msg) =>
             msg._id === data.messageId
               ? { ...msg, content: "This message was deleted", isDeleted: true }
               : msg
-          )
-        );
-      }
-    });
+          );
+        }
+        return prev;
+      });
+    };
 
-    newSocket.on("typingStatus", (data) => {
+    const handleTypingStatus = (data) => {
       if (
         activeChat &&
-        data.chatId === activeChat.chatId &&
+        (data.chatId === activeChat.chatId || data.chatId === activeChat._id) &&
         data.sender !== user.name
       ) {
         setTypingUser(data.sender);
         setIsTyping(data.isTyping);
       }
-    });
+    };
 
-    return () => newSocket.disconnect();
-  }, []);
+    socket.on("newMessage", handleNewMessage);
+    socket.on("chatUpdate", handleChatUpdate);
+    socket.on("newChatCreated", handleNewChatCreated);
+    socket.on("messageEdited", handleMessageEdited);
+    socket.on("messageDeleted", handleMessageDeleted);
+    socket.on("typingStatus", handleTypingStatus);
+
+    return () => {
+      socket.off("newMessage", handleNewMessage);
+      socket.off("chatUpdate", handleChatUpdate);
+      socket.off("newChatCreated", handleNewChatCreated);
+      socket.off("messageEdited", handleMessageEdited);
+      socket.off("messageDeleted", handleMessageDeleted);
+      socket.off("typingStatus", handleTypingStatus);
+    };
+  }, [socket, activeChat, user.name]);
 
   useEffect(() => {
     if (activeChat && socket) {
@@ -89,11 +131,11 @@ const StaffChatPanel = ({ user }) => {
     }
   }, [activeChat, socket]);
 
-  // Auto-refresh chats every 10 seconds
+  // Auto-refresh chats every 30 seconds (reduced frequency since we have real-time updates)
   useEffect(() => {
     const interval = setInterval(() => {
       loadChats();
-    }, 10000);
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 

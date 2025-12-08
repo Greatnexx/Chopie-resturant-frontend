@@ -27,7 +27,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
   const handleDownloadReceipt = () => {
     const receiptContent = `
 ===========================================
-           CHOPIE RESTAURANT
+           LaQuinta Club 
            ORDER CONFIRMATION
 ===========================================
 
@@ -52,9 +52,9 @@ ${orderData.items?.map(item =>
 TOTAL AMOUNT: ${formatCurrency(orderData.totalAmount)}
 -------------------------------------------
 
-Estimated Preparation Time: 5-10 minutes
+Estimated Time: 5-10 minutes
 
-Thank you for choosing Chopie Restaurant!
+Thank you for choosing LaQuinta Club!
 We appreciate your business.
 
 ===========================================
@@ -80,7 +80,7 @@ We appreciate your business.
             <CheckCircle className="w-8 h-8 text-white" />
           </div>
           <h2 className="text-2xl font-bold text-green-800 mb-2">Order Placed Successfully!</h2>
-          <p className="text-green-600">Your order has been sent to the kitchen</p>
+          <p className="text-green-600">Your order has been sent</p>
         </div>
 
         {/* Order Details */}
@@ -110,7 +110,7 @@ We appreciate your business.
           <div className="flex items-center gap-3 mb-6 p-3 bg-blue-50 rounded-lg">
             <Clock className="w-5 h-5 text-blue-500" />
             <div>
-              <p className="font-medium text-blue-800">Estimated Preparation Time</p>
+              <p className="font-medium text-blue-800">Estimated Time</p>
               <p className="text-sm text-blue-600">5-10 minutes</p>
             </div>
           </div>

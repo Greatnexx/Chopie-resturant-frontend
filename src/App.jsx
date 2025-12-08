@@ -19,6 +19,7 @@ import AuditTrail from "./pages/AuditTrail";
 import MenuManager from "./pages/MenuManager";
 import Settings from "./pages/Settings";
 import UserManagement from "./pages/UserManagement";
+import EventManagement from "./pages/EventManagement";
   
 
 const App = () => {
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/restaurant/super-admin" element={<SuperAdminDashboard />} />
         <Route path="/restaurant/audit" element={<AuditTrail />} />
         <Route path="/restaurant/menu-manager" element={<MenuManager />} />
+        <Route path="/restaurant/events" element={<EventManagement />} />
         <Route path="/restaurant/settings" element={<Settings />} />
         <Route path="/restaurant/users" element={<UserManagement />} />
         <Route path="*" element={<NotFound />} />

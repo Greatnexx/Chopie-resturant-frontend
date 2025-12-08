@@ -15,6 +15,31 @@ body {
   font-size: 14px;
 }
 
+/* VIP and Regular Menu Indicators */
+.bg-gold-100 {
+  background-color: #fef3c7;
+}
+
+.text-gold-800 {
+  color: #92400e;
+}
+
+.border-gold-300 {
+  border-color: #fcd34d;
+}
+
+.bg-blue-100 {
+  background-color: #dbeafe;
+}
+
+.text-blue-800 {
+  color: #1e40af;
+}
+
+.border-blue-300 {
+  border-color: #93c5fd;
+}
+
 
 
 

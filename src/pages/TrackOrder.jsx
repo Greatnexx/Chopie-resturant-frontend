@@ -58,7 +58,7 @@ const TrackOrder = () => {
       case "pending":
         return <CheckCircle className="w-6 h-6 text-green-500" />;
       case "Preparing":
-        return <ChefHat className="w-6 h-6 text-orange-500" />;
+        return <Package className="w-6 h-6 text-orange-500" />;
       case "completed":
         return <Truck className="w-6 h-6 text-green-600" />;
       case "cancelled":
@@ -306,11 +306,11 @@ const TrackOrder = () => {
                           }`}
                         >
                           {step.status === "pending"
-                            ? "Order Confirmed"
+                            ? "Order Received"
                             : step.status === "Preparing"
                             ? "Being Prepared"
                             : step.status === "completed"
-                            ? "Order Completed"
+                            ? "Ready for Pickup"
                             : step.status}
                         </h4>
                         <span

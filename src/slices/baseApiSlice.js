@@ -142,6 +142,17 @@ export const baseApiSlice = apiSlice.injectEndpoints({
     trackOrder: builder.query({
       query: (orderNumber) => `/order/${orderNumber}/track`,
     }),
+
+    getMenusByTable: builder.query({
+      query: (tableNumber) => `/menus/table/${tableNumber}`,
+    }),
+
+    getMenuItemsByTable: builder.query({
+      query: ({ categoryId, tableNumber }) => {
+        const id = typeof categoryId === 'object' ? categoryId._id : categoryId;
+        return `/menus/${id}/table/${tableNumber}`;
+      },
+    }),
   }),
 });
 
@@ -152,5 +163,7 @@ export const {
   useVerifyOtpMutation,
   useGetCategoriesQuery,
   useGetMenuItemsQuery,
+  useGetMenusByTableQuery,
+  useGetMenuItemsByTableQuery,
   useLazyTrackOrderQuery,
 } = baseApiSlice;

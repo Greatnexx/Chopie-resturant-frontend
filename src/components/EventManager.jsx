@@ -193,7 +193,7 @@ const EventManager = () => {
             <div className="flex items-center gap-4">
               {event.bannerImage && (
                 <img
-                  src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${event.bannerImage}`}
+                  src={`http://localhost:8000/uploads/banners/${event.bannerImage}`}
                   alt={event.title}
                   className="w-20 h-20 object-cover rounded-lg"
                 />

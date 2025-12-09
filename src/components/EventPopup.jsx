@@ -63,7 +63,7 @@ const EventPopup = () => {
         
         {currentEvent.bannerImage ? (
           <img
-            src={`http://localhost:8000/uploads/banners/${currentEvent.bannerImage}`}
+            src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
             alt={currentEvent.title || 'Event Banner'}
             className="w-full h-full object-cover cursor-pointer"
             onClick={handleClose}

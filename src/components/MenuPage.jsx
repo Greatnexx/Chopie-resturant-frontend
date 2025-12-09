@@ -61,6 +61,13 @@ const MenuPage = () => {
   const currentMenuLoading = tableNumber ? menuLoading : fallbackMenuLoading;
   const currentMenuError = tableNumber ? menuError : fallbackMenuError;
 
+  // Debug logging
+  console.log('Active Category:', activeCategory);
+  console.log('Table Number:', tableNumber);
+  console.log('Menu Data:', tableNumber ? menuData : fallbackMenuData);
+  console.log('Menu Items:', menuItems);
+  console.log('Menu Items Count:', menuItems?.length || 0);
+
 
 
   // Set first category as active by default when categories are loaded

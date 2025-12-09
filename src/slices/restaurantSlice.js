@@ -108,6 +108,13 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["MenuItems"],
     }),
+    deleteMenuItem: builder.mutation({
+      query: (menuId) => ({
+        url: `/menu/${menuId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["MenuItems"],
+    }),
 
     getCategories: builder.query({
       query: () => "/categories",
@@ -163,6 +170,7 @@ export const {
   useToggleMenuAvailabilityMutation,
   useCreateMenuItemMutation,
   useUpdateMenuItemMutation,
+  useDeleteMenuItemMutation,
   useGetCategoriesQuery,
   useDeleteUserMutation,
   useGetUserCredentialsQuery,

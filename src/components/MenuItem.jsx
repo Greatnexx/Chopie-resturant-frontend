@@ -14,7 +14,7 @@ const MenuItem = ({ item }) => {
    const [specialInstructions, setSpecialInstructions] = useState("");
    const { addToCart } = useCart();
    
-  console.log("my item is showing please:", item);
+  
   
   // Environment-aware image URL construction
   const getImageUrl = () => {

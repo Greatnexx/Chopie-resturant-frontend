@@ -1,6 +1,6 @@
-import { useGetAllMenuItemsQuery, useToggleMenuAvailabilityMutation } from "../slices/restaurantSlice";
+import { useGetAllMenuItemsQuery, useToggleMenuAvailabilityMutation, useDeleteMenuItemMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { ChefHat, ToggleLeft, ToggleRight, MessageCircle, Plus, Edit, Menu } from "lucide-react";
+import { ChefHat, ToggleLeft, ToggleRight, MessageCircle, Plus, Edit, Menu, Trash2 } from "lucide-react";
 import MenuItemModal from "../components/MenuItemModal";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
@@ -12,6 +12,7 @@ import { formatCurrency } from "../utils/formatCurrency";
 const MenuManager = () => {
   const { data: menuData, refetch, isLoading } = useGetAllMenuItemsQuery();
   const [toggleAvailability] = useToggleMenuAvailabilityMutation();
+  const [deleteMenuItem] = useDeleteMenuItemMutation();
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showChatModal, setShowChatModal] = useState(false);
   const [showMenuModal, setShowMenuModal] = useState(false);
@@ -51,6 +52,18 @@ const MenuManager = () => {
 
   const handleMenuSuccess = () => {
     refetch();
+  };
+
+  const handleDeleteMenuItem = async (menuId, menuName) => {
+    if (window.confirm(`Are you sure you want to delete "${menuName}"? This action cannot be undone.`)) {
+      try {
+        await deleteMenuItem(menuId).unwrap();
+        toast.success("Menu item deleted successfully!");
+        refetch();
+      } catch (error) {
+        toast.error("Failed to delete menu item");
+      }
+    }
   };
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
@@ -221,6 +234,13 @@ const MenuManager = () => {
                                     <ToggleLeft className="w-6 h-6" />
                                   }
                                 </button>
+                                <button
+                                  onClick={() => handleDeleteMenuItem(menu._id, menu.name)}
+                                  className="text-red-600 hover:text-red-800"
+                                  title="Delete menu item"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -284,6 +304,13 @@ const MenuManager = () => {
                                 <ToggleRight className="w-5 h-5" /> : 
                                 <ToggleLeft className="w-5 h-5" />
                               }
+                            </button>
+                            <button
+                              onClick={() => handleDeleteMenuItem(menu._id, menu.name)}
+                              className="p-2 text-red-600 hover:text-red-800 hover:bg-red-100 rounded-lg transition-colors"
+                              title="Delete menu item"
+                            >
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>

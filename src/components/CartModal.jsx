@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../Context/CartContext";
 import Modal from "../components/Modal";
-import { User, Mail, Phone, ShoppingCart, Trash2, Loader2, QrCode } from "lucide-react";
+import { User, Phone, ShoppingCart, Trash2, Loader2, QrCode } from "lucide-react";
 import { useCreateOrderMutation } from "../slices/orderSlice";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -11,7 +11,6 @@ import { formatCurrency } from "../utils/formatCurrency";
 const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
-    email: "",
     phone: "",
   });
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -34,7 +33,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
 
   // Save customer info to localStorage when it changes
   useEffect(() => {
-    if (customerInfo.name || customerInfo.email || customerInfo.phone) {
+    if (customerInfo.name || customerInfo.phone) {
       localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
     }
   }, [customerInfo]);
@@ -62,12 +61,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       newErrors.name = "Name is required";
     }
 
-    if (!customerInfo.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(customerInfo.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-
     if (!tableNumber.trim()) {
       newErrors.tableNumber = "Table number is required";
     }
@@ -83,7 +76,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   const createOrderData = () => ({
     tableNumber,
     customerName: customerInfo.name,
-    customerEmail: customerInfo.email,
     customerPhone: customerInfo.phone || null,
     paymentMethod,
     items: cartItems.map(item => ({
@@ -112,7 +104,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       const orderConfirmationData = {
         orderNumber: result.data?.orderNumber || 'N/A',
         customerName: result.data?.customerName || customerInfo.name,
-        customerEmail: result.data?.customerEmail || customerInfo.email,
         customerPhone: result.data?.customerPhone || customerInfo.phone,
         tableNumber: result.data?.tableNumber || tableNumber,
         items: result.data?.items || cartItems,
@@ -131,7 +122,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
 
       // ✅ Then clear the form data
       clearCart();
-      setCustomerInfo({ name: "", email: "", phone: "" });
+      setCustomerInfo({ name: "", phone: "" });
       setTableNumber("");
       setPaymentMethod("");
       setErrors({});
@@ -302,7 +293,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                         htmlFor="name"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Full Name *
+                        Name *
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -312,7 +303,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           type="text"
                           id="name"
                           name="name"
-                          placeholder="Enter your full name"
+                          placeholder="Enter your name"
                           value={customerInfo.name}
                           onChange={handleInputChange}
                           required
@@ -330,39 +321,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       )}
                     </div>
 
-                    {/* ⚠️ EMAIL FIELD - THIS WAS MISSING! */}
-                    <div className="space-y-2">
-                      <label
-                        htmlFor="email"
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Email Address *
-                      </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-                          <Mail className="h-4 w-4 text-gray-400" />
-                        </div>
-                        <input
-                          type="email"
-                          id="email"
-                          name="email"
-                          placeholder="Enter your email"
-                          value={customerInfo.email}
-                          onChange={handleInputChange}
-                          required
-                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
-                            errors.email
-                              ? "border-red-300 bg-red-50"
-                              : "border-gray-300 bg-white"
-                          }`}
-                        />
-                      </div>
-                      {errors.email && (
-                        <p className="text-red-600 text-sm">
-                          {errors.email}
-                        </p>
-                      )}
-                    </div>
+
 
                     {/* Phone Field */}
                     <div className="space-y-2">

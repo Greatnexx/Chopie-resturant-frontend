@@ -8,7 +8,6 @@ import {
   ChefHat,
   MapPin,
   Phone,
-  Mail,
   RefreshCcwDot,
   MessageCircle,
 } from "lucide-react";
@@ -34,13 +33,13 @@ const TrackOrder = () => {
   // Handle different types of errors
   const getErrorMessage = () => {
     if (!searchTerm.trim() && isSearching) {
-      return "Please enter an order number, email, or phone number";
+      return "Please enter an order number or phone number";
     }
     if (trackingError) {
       if (trackingError.status === 404) {
         return (
           trackingError?.data?.message ||
-          "Order not found. Please check your order number, email, or phone number and try again."
+          "Order not found. Please check your order number or phone number and try again."
         );
       }
       return (
@@ -123,7 +122,7 @@ const TrackOrder = () => {
             Track Your Order
           </h1>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Enter your order number, email address, or phone number to track your order status.
+            Enter your order number or phone number to track your order status.
           </p>
         </div>
 
@@ -134,7 +133,7 @@ const TrackOrder = () => {
               htmlFor="searchTerm"
               className="block text-sm font-medium text-gray-700 mb-3"
             >
-              Order Number, Email, or Phone
+              Order Number or Phone
             </label>
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
@@ -147,7 +146,7 @@ const TrackOrder = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter order number, email, or phone"
+                  placeholder="Enter order number or phone"
                   className="block w-full pl-12 pr-4 py-4 text-base sm:text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                   disabled={isSearching}
                 />
@@ -245,12 +244,7 @@ const TrackOrder = () => {
                           {searchResult.customerInfo.phone}
                         </p>
                       )}
-                      {searchResult.customerInfo.email && (
-                        <p className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          {searchResult.customerInfo.email}
-                        </p>
-                      )}
+
                     </div>
                   </div>
 
@@ -403,7 +397,7 @@ const TrackOrder = () => {
         isOpen={showChat}
         onClose={() => setShowChat(false)}
         customerName={searchResult?.customerInfo?.name || `Customer-${searchTerm}`}
-        customerEmail={searchResult?.customerInfo?.email || ''}
+        customerEmail={''}
         orderNumber={searchResult?.orderNumber || searchTerm}
       />
     </div>

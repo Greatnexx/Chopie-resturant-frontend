@@ -37,7 +37,6 @@ Time: ${new Date().toLocaleTimeString()}
 
 Customer Details:
 Name: ${orderData.customerName}
-Email: ${orderData.customerEmail}
 Phone: ${orderData.customerPhone || 'N/A'}
 Table: ${orderData.tableNumber}
 

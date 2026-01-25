@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2, Calendar, Image } from "lucide-react";
 import { toast } from "sonner";
 import { useBranding } from "../Context/BrandingContext";
+import { getBaseUrl } from "../utils/apiUtils";
 
 const EventManager = () => {
   const [events, setEvents] = useState([]);
@@ -15,6 +16,13 @@ const EventManager = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const { branding } = useBranding();
+
+  const getEventImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) return imagePath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}/uploads/banners/${imagePath}`;
+  };
 
   useEffect(() => {
     fetchEvents();
@@ -37,7 +45,7 @@ const EventManager = () => {
         return;
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/active`, {
+      const response = await fetch(`${getBaseUrl()}/events/active`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -91,7 +99,7 @@ const EventManager = () => {
         formDataToSend.append('bannerImage', selectedImage);
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/events`, {
+      const response = await fetch(`${getBaseUrl()}/events`, {
         method: "POST",
         headers: {
           'Authorization': `Bearer ${token}`
@@ -134,7 +142,7 @@ const EventManager = () => {
           return;
         }
 
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${eventId}`, {
+        const response = await fetch(`${getBaseUrl()}/events/${eventId}`, {
           method: "DELETE",
           headers: {
             'Authorization': `Bearer ${token}`
@@ -273,7 +281,7 @@ const EventManager = () => {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                 {event.bannerImage && (
                   <img
-                    src={`http://localhost:8000/uploads/banners/${event.bannerImage}`}
+                    src={getEventImageUrl(event.bannerImage)}
                     alt={event.title}
                     className="w-full sm:w-20 h-32 sm:h-20 object-cover rounded-lg flex-shrink-0"
                   />

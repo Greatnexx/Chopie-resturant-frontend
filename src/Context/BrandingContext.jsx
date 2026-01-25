@@ -41,7 +41,8 @@ export const BrandingProvider = ({ children }) => {
         return;
       }
 
-      const response = await fetch('/api/v1/restaurant/branding', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-chopie-project.onrender.com/api/v1';
+      const response = await fetch(`${apiUrl}/restaurant/branding`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();

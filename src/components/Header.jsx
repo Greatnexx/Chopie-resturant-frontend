@@ -11,6 +11,7 @@ import { Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { applyTheme, createThemeFromBranding } from "../utils/colorTheme";
 import { useEffect } from "react";
+import { getBaseUrl } from "../utils/apiUtils";
 
 const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
@@ -22,6 +23,13 @@ const Header = () => {
   const location = useLocation();
   const count = cartItems.reduce((total, item) => total + item.quantity, 0);
   
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http')) return logoPath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${logoPath}`;
+  };
+
   // Use tenant branding if available, otherwise use branding context
   const activeBranding = currentTenant ? {
     name: currentTenant.name,
@@ -78,7 +86,7 @@ const Header = () => {
           >
             {activeBranding?.logo ? (
               <img 
-                src={activeBranding.logo} 
+                src={getLogoUrl(activeBranding.logo)} 
                 alt={activeBranding.name} 
                 className="w-8 h-8 lg:w-10 lg:h-10 object-cover rounded-full"
               />

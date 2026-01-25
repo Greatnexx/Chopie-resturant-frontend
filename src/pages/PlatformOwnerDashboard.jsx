@@ -120,6 +120,17 @@ const PlatformOwnerDashboard = () => {
     return 'text-red-600';
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Unknown time';
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return date.toLocaleString();
+    } catch (error) {
+      return 'Invalid date';
+    }
+  };
+
   const revenueChartData = {
     labels: revenueData.chartData?.map(item => item._id) || [],
     datasets: [
@@ -444,7 +455,7 @@ const PlatformOwnerDashboard = () => {
                       <p className="text-sm font-medium">{activity.action}</p>
                       <p className="text-xs text-gray-500">
                         {activity.userId?.name} • {activity.restaurantId?.name} • 
-                        {new Date(activity.timestamp).toLocaleString()}
+                        {formatDate(activity.timestamp)}
                       </p>
                     </div>
                   </div>

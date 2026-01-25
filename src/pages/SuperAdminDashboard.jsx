@@ -6,6 +6,8 @@ const SuperAdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [stats, setStats] = useState({
     totalRestaurants: 0,
     activeRestaurants: 0,
@@ -55,6 +57,11 @@ const SuperAdminDashboard = () => {
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
+  };
+
+  const handleViewDetails = (restaurant) => {
+    setSelectedRestaurant(restaurant);
+    setShowDetailsModal(true);
   };
 
   const handleRestaurantStatusChange = async (restaurantId, isActive) => {
@@ -250,7 +257,10 @@ const SuperAdminDashboard = () => {
                       >
                         {restaurant.isActive ? 'Suspend' : 'Approve'}
                       </button>
-                      <button className="text-blue-600 hover:text-blue-900">
+                      <button
+                        onClick={() => handleViewDetails(restaurant)}
+                        className="text-blue-600 hover:text-blue-900"
+                      >
                         View Details
                       </button>
                     </td>
@@ -260,6 +270,98 @@ const SuperAdminDashboard = () => {
             </table>
           </div>
         </div>
+
+        {/* Restaurant Details Modal */}
+        {showDetailsModal && selectedRestaurant && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-bold text-gray-900">Restaurant Details</h3>
+                  <button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-4">
+                    {selectedRestaurant.branding?.logo && (
+                      <img 
+                        className="h-16 w-16 rounded-full" 
+                        src={getLogoUrl(selectedRestaurant.branding.logo)} 
+                        alt={selectedRestaurant.name}
+                      />
+                    )}
+                    <div>
+                      <h4 className="text-lg font-semibold">{selectedRestaurant.name}</h4>
+                      <p className="text-gray-600">{selectedRestaurant.subdomain}.chopie.com</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">Contact Information</h5>
+                      <p className="text-sm text-gray-600">Email: {selectedRestaurant.email}</p>
+                      <p className="text-sm text-gray-600">Phone: {selectedRestaurant.phone}</p>
+                      <p className="text-sm text-gray-600">Address: {selectedRestaurant.address}</p>
+                    </div>
+                    
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">Status & Subscription</h5>
+                      <p className="text-sm text-gray-600">
+                        Status: <span className={`font-medium ${
+                          selectedRestaurant.isActive ? 'text-green-600' : 'text-red-600'
+                        }`}>
+                          {selectedRestaurant.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </p>
+                      <p className="text-sm text-gray-600">Plan: {selectedRestaurant.subscription?.plan || 'Basic'}</p>
+                      <p className="text-sm text-gray-600">Subscription Status: {selectedRestaurant.subscription?.status || 'Active'}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedRestaurant.branding && (
+                    <div>
+                      <h5 className="font-medium text-gray-900 mb-2">Branding</h5>
+                      <div className="grid grid-cols-2 gap-4">
+                        <p className="text-sm text-gray-600">Primary Color: 
+                          <span className="ml-2 inline-block w-4 h-4 rounded" 
+                                style={{ backgroundColor: selectedRestaurant.branding.primaryColor }}></span>
+                          {selectedRestaurant.branding.primaryColor}
+                        </p>
+                        <p className="text-sm text-gray-600">Secondary Color: 
+                          <span className="ml-2 inline-block w-4 h-4 rounded" 
+                                style={{ backgroundColor: selectedRestaurant.branding.secondaryColor }}></span>
+                          {selectedRestaurant.branding.secondaryColor}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <h5 className="font-medium text-gray-900 mb-2">Registration Details</h5>
+                    <p className="text-sm text-gray-600">Created: {new Date(selectedRestaurant.createdAt).toLocaleDateString()}</p>
+                    <p className="text-sm text-gray-600">Last Updated: {new Date(selectedRestaurant.updatedAt).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                
+                <div className="mt-6 flex justify-end">
+                  <button
+                    onClick={() => setShowDetailsModal(false)}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

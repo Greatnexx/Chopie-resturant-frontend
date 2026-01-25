@@ -7,7 +7,8 @@ import { getBaseUrl } from "../utils/apiUtils";
 const EventManager = () => {
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData, setFormData] = useState({
     title: "",
     description: "",
     startDate: "",
@@ -73,6 +74,8 @@ const EventManager = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
+    
     try {
       // Get user token for authentication
       const userData = sessionStorage.getItem("restaurantUser");
@@ -110,7 +113,7 @@ const EventManager = () => {
       const result = await response.json();
       if (response.ok && result.status) {
         toast.success("Event banner created successfully!");
-        fetchEvents();
+        await fetchEvents(); // Wait for events to refresh
         setShowForm(false);
         setFormData({ title: "", description: "", startDate: "", endDate: "" });
         setSelectedImage(null);
@@ -121,6 +124,8 @@ const EventManager = () => {
     } catch (error) {
       console.error("Error creating event:", error);
       toast.error("Failed to create event banner");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -240,12 +245,13 @@ const EventManager = () => {
             <div className="flex flex-col sm:flex-row gap-2">
               <button 
                 type="submit" 
-                className="text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
+                disabled={isSubmitting}
+                className="text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
                 style={{ backgroundColor: branding.primaryColor }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = branding.primaryColor + 'dd'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = branding.primaryColor}
+                onMouseEnter={(e) => !isSubmitting && (e.target.style.backgroundColor = branding.primaryColor + 'dd')}
+                onMouseLeave={(e) => !isSubmitting && (e.target.style.backgroundColor = branding.primaryColor)}
               >
-                Create Event
+                {isSubmitting ? 'Creating...' : 'Create Event'}
               </button>
               <button
                 type="button"

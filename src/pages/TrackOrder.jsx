@@ -18,6 +18,7 @@ import {
 import { useSearchOrderQuery } from "../slices/orderSlice";
 import LoadingBtn from "../components/LoadingBtn";
 import SimpleLiveChat from "../components/SimpleLiveChat";
+import { getBaseUrl } from "../utils/apiUtils";
 
 const TrackOrder = () => {
   const { restaurantId } = useParams(); // Get restaurant ID from URL
@@ -28,6 +29,13 @@ const TrackOrder = () => {
   const [searchTriggered, setSearchTriggered] = useState(false);
   const [showChat, setShowChat] = useState(false);
   
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http')) return logoPath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${logoPath}`;
+  };
+
   // Get restaurant branding from tenant data or use defaults
   const restaurantBranding = {
     name: currentTenant?.name || restaurantId || 'Restaurant',
@@ -169,7 +177,7 @@ const TrackOrder = () => {
           >
             {restaurantBranding.logo ? (
               <img 
-                src={restaurantBranding.logo} 
+                src={getLogoUrl(restaurantBranding.logo)} 
                 alt={restaurantBranding.name} 
                 className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-full"
               />

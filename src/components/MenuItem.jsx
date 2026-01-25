@@ -3,6 +3,7 @@ import Modal from "./Modal";
 import { toast } from "sonner";
 import { useCart } from "../Context/CartContext";
 import { formatCurrency } from "../utils/formatCurrency";
+import { getBaseUrl } from "../utils/apiUtils";
 
 const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInterface = false, menuType = 'REGULAR' }) => {
   if (!item) {
@@ -35,18 +36,13 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
 
   // Environment-aware image URL construction
   const getImageUrl = () => {
-    if (item.image?.startsWith('http')) {
+    if (!item.image) return null;
+    if (item.image.startsWith('http')) {
       return item.image; // Already a full URL
     }
     
-    // In development, use proxy (Vite redirects /uploads to backend)
-    if (import.meta.env.DEV) {
-      return item.image; // Use proxy
-    }
-    
-    // In production, use the deployed backend URL
-    const backendUrl = import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:8000';
-    return `${backendUrl}${item.image}`;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${item.image}`;
   };
   
   const imageUrl = getImageUrl();
@@ -103,13 +99,25 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
         {/* Image Section */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <img
-            src={imageUrl}
+            src={imageUrl || '/placeholder-food.jpg'}
             alt={item.name}
             className="w-full h-48 object-contain object-center transition-transform duration-300 hover:scale-105"
             onError={(e) => {
-              e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
+              // Use a simple colored div as fallback instead of external placeholder
+              e.target.style.display = 'none';
+              e.target.nextElementSibling.style.display = 'flex';
             }}
           />
+          {/* Fallback div when image fails */}
+          <div 
+            className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-gray-500 font-medium" 
+            style={{ display: 'none' }}
+          >
+            <div className="text-center">
+              <div className="text-4xl mb-2">🍽️</div>
+              <div>No Image</div>
+            </div>
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
           {item.nutritionalInfo && (
             <div className="absolute top-3 left-3 bg-green-500/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs text-white font-medium shadow-lg">

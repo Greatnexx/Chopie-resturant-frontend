@@ -78,9 +78,8 @@ const StaffCartModal = ({
         
         // Auto-redirect to dashboard after 3 seconds
         setTimeout(() => {
-          // Use full URL for production compatibility
-          const dashboardUrl = window.location.origin + '/restaurant/dashboard';
-          window.open(dashboardUrl, '_blank');
+          // Use same-tab navigation to avoid popup blockers
+          window.location.href = '/restaurant/dashboard';
         }, 3000);
         
         onClearCart && onClearCart();

@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateMenuItemMutation, useUpdateMenuItemMutation, useGetCategoriesQuery } from "../slices/restaurantSlice";
 import { useBranding } from "../Context/BrandingContext";
+import { getBaseUrl } from "../utils/apiUtils";
 import "./MenuItemModal.css";
 
 const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
@@ -24,6 +25,13 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
   const { data: categoriesData, refetch: refetchCategories, isLoading: categoriesLoading } = useGetCategoriesQuery();
   const [createMenuItem, { isLoading: isCreating }] = useCreateMenuItemMutation();
   const [updateMenuItem, { isLoading: isUpdating }] = useUpdateMenuItemMutation();
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http') || imagePath.startsWith('data:')) return imagePath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${imagePath}`;
+  };
 
   const categories = categoriesData?.data || [];
   const isEditing = !!menuItem;
@@ -419,7 +427,7 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
                   {formData.image && (
                     <div className="relative">
                       <img 
-                        src={formData.image} 
+                        src={getImageUrl(formData.image)} 
                         alt="Preview" 
                         className="w-full h-32 object-cover rounded-xl border-2 border-gray-200"
                       />

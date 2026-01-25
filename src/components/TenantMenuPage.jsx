@@ -29,6 +29,13 @@ const TenantMenuPage = () => {
   
   const { cartItems } = useCart();
 
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http')) return logoPath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${logoPath}`;
+  };
+
   const isRestaurantClosed = restaurantInfo?.data?.isOpen === false;
 
   useEffect(() => {
@@ -142,7 +149,7 @@ const TenantMenuPage = () => {
           <div className="mb-6">
             {branding?.logo && (
               <img 
-                src={branding.logo} 
+                src={getLogoUrl(branding.logo)} 
                 alt={currentTenant.name} 
                 className="h-16 w-16 mx-auto object-cover rounded-lg mb-4"
               />
@@ -184,7 +191,7 @@ const TenantMenuPage = () => {
             <div className="flex items-center space-x-2 sm:space-x-4 min-w-0 flex-1">
               {branding?.logo && (
                 <img 
-                  src={branding.logo} 
+                  src={getLogoUrl(branding.logo)} 
                   alt={currentTenant.name} 
                   className="h-6 w-6 sm:h-10 sm:w-10 object-cover rounded-lg flex-shrink-0"
                 />

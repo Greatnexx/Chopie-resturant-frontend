@@ -21,7 +21,7 @@ const EventManager = () => {
     if (!imagePath) return null;
     if (imagePath.startsWith('http')) return imagePath;
     const baseUrl = getBaseUrl().replace('/api/v1', '');
-    return `${baseUrl}/uploads/banners/${imagePath}`;
+    return `${baseUrl}${imagePath}`;
   };
 
   useEffect(() => {

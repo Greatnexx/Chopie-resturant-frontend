@@ -2,6 +2,13 @@ import { apiSlice } from "./apiSlice";
 
 export const restaurantApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+    registerRestaurant: builder.mutation({
+      query: (restaurantData) => ({
+        url: "/restaurant/register",
+        method: "POST",
+        body: restaurantData,
+      }),
+    }),
     loginRestaurant: builder.mutation({
       query: (credentials) => ({
         url: "/restaurant/login",
@@ -120,6 +127,14 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       query: () => "/categories",
       providesTags: ["Categories"],
     }),
+    createCategory: builder.mutation({
+      query: (categoryData) => ({
+        url: "/category",
+        method: "POST",
+        body: categoryData,
+      }),
+      invalidatesTags: ["Categories"],
+    }),
     deleteUser: builder.mutation({
       query: (userId) => ({
         url: `/restaurant/users/${userId}`,
@@ -148,10 +163,23 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       query: (date) => `/order/payment-summary${date ? `?date=${date}` : ''}`,
       providesTags: ["PaymentSummary"],
     }),
+    getRestaurantSettings: builder.query({
+      query: () => "/restaurant/settings",
+      providesTags: ["RestaurantSettings"],
+    }),
+    updateRestaurantSettings: builder.mutation({
+      query: (settingsData) => ({
+        url: "/restaurant/settings",
+        method: "PUT",
+        body: settingsData,
+      }),
+      invalidatesTags: ["RestaurantSettings"],
+    }),
   }),
 });
 
 export const {
+  useRegisterRestaurantMutation,
   useLoginRestaurantMutation,
   useGetRestaurantOrdersQuery,
   useAcceptOrderMutation,
@@ -172,9 +200,12 @@ export const {
   useUpdateMenuItemMutation,
   useDeleteMenuItemMutation,
   useGetCategoriesQuery,
+  useCreateCategoryMutation,
   useDeleteUserMutation,
   useGetUserCredentialsQuery,
   useResetUserPasswordMutation,
   useFirstTimePasswordChangeMutation,
   useGetPaymentSummaryQuery,
+  useGetRestaurantSettingsQuery,
+  useUpdateRestaurantSettingsMutation,
 } = restaurantApiSlice;

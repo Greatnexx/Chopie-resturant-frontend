@@ -33,7 +33,6 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
       setSocket(newSocket);
       
       newSocket.on('connect_error', (error) => {
-        console.log('Socket connection error:', error);
       });
 
       newSocket.emit('joinChat', chatId);
@@ -117,7 +116,6 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
     if (!newMessage.trim() || !chatId) return;
 
     try {
-      console.log('Customer sending message:', { chatId, customerName, content: newMessage });
       const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,7 +127,6 @@ const LiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber })
         })
       });
       const result = await response.json();
-      console.log('Message send result:', result);
       setNewMessage('');
       stopTyping();
     } catch (error) {

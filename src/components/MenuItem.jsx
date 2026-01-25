@@ -4,18 +4,35 @@ import { toast } from "sonner";
 import { useCart } from "../Context/CartContext";
 import { formatCurrency } from "../utils/formatCurrency";
 
-const MenuItem = ({ item }) => {
+const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInterface = false, menuType = 'REGULAR' }) => {
   if (!item) {
     console.warn('MenuItem rendered without an item prop');
     return null;
   }
+  
    const [showModal, setShowModal] = useState(false);
    const [quantity, setQuantity] = useState(1);
    const [specialInstructions, setSpecialInstructions] = useState("");
    const { addToCart } = useCart();
    
-  
-  
+   // Update CSS variables if tenant branding is provided
+   if (tenantBranding?.primaryColor) {
+     document.documentElement.style.setProperty('--primary-color', tenantBranding.primaryColor);
+   }
+   if (tenantBranding?.secondaryColor) {
+     document.documentElement.style.setProperty('--secondary-color', tenantBranding.secondaryColor);
+   }
+
+  // Get correct price based on menu type for staff interface
+  const getDisplayPrice = () => {
+    if (isStaffInterface && item.menuTypes && item.menuTypes[menuType]) {
+      return item.menuTypes[menuType].price;
+    }
+    return item.price;
+  };
+
+  const displayPrice = getDisplayPrice();
+
   // Environment-aware image URL construction
   const getImageUrl = () => {
     if (item.image?.startsWith('http')) {
@@ -33,13 +50,8 @@ const MenuItem = ({ item }) => {
   };
   
   const imageUrl = getImageUrl();
-  
-  
-  // Test if backend is reachable
-  fetch('http://localhost:8000/test')
-    .then(res => res.text())
-    .then(data => console.log('Backend test:', data))
-    .catch(err => console.log('Backend not reachable:', err));
+
+  // Test if backend is reachable (removed for production)
   const handleShowModal = () => {
     setShowModal(true);
   };
@@ -57,35 +69,37 @@ const MenuItem = ({ item }) => {
   };
 
   const handleAddToCart = () => {
-    // This is where you would typically dispatch to your cart context/state
-    const cartItem = {
-      ...item,
-      quantity,
-      specialInstructions: specialInstructions.trim(),
-      totalPrice: item.price * quantity,
-    };
+    if (isStaffInterface && onAddToCart) {
+      // Staff interface - use callback
+      onAddToCart(item, quantity);
+      toast.success("Added to cart", {
+        description: `${quantity} x ${item.name} added successfully.`,
+      });
+    } else {
+      // Customer interface - use cart context
+      const cartItem = {
+        ...item,
+        quantity,
+        specialInstructions: specialInstructions.trim(),
+        totalPrice: item.price * quantity,
+      };
 
-    addToCart(cartItem);
- 
-toast.success("Added to cart", {
-  description: `${quantity} x ${item.name} added successfully.`,
-});
- 
-
-
+      addToCart(cartItem);
+      toast.success("Added to cart", {
+        description: `${quantity} x ${item.name} added successfully.`,
+      });
+    }
 
     // Reset modal state and close
     setShowModal(false);
     setSpecialInstructions("");
-    // Optionally reset quantity to 1 after adding to cart 
-    // setQuantity(1);
   };
 
   const totalPrice = (item.price * quantity).toFixed(2);
 
   return (
     <>
-      <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 max-w-sm border border-gray-100 hover:border-red-200">
+      <div className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 max-w-sm border border-gray-100 hover:border-primary/30 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20">
         {/* Image Section */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <img
@@ -93,10 +107,8 @@ toast.success("Added to cart", {
             alt={item.name}
             className="w-full h-48 object-contain object-center transition-transform duration-300 hover:scale-105"
             onError={(e) => {
-              console.log('Image failed to load:', imageUrl);
               e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
             }}
-            onLoad={() => console.log('Image loaded successfully:', imageUrl)}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
           {item.nutritionalInfo && (
@@ -113,7 +125,7 @@ toast.success("Added to cart", {
             <h3 className="text-xl font-bold text-gray-800 leading-tight">{item.name}</h3>
             <div className="bg-black text-white px-3 py-1 rounded-lg shadow-md">
               <span className="text-lg font-bold">
-                {formatCurrency(item.price)}
+                {formatCurrency(displayPrice)}
               </span>
             </div>
           </div>
@@ -134,7 +146,7 @@ toast.success("Added to cart", {
               <button
                 onClick={decrementQuantity}
                 disabled={quantity <= 1}
-                className="w-9 h-9 rounded-full bg-white border-2 border-red-400 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-bold"
+                className="w-9 h-9 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white focus:bg-primary focus:text-white transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 −
               </button>
@@ -143,7 +155,7 @@ toast.success("Added to cart", {
               </span>
               <button
                 onClick={incrementQuantity}
-                className="w-9 h-9 rounded-full bg-white border-2 border-red-400 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm font-bold"
+                className="w-9 h-9 rounded-full bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white focus:bg-primary focus:text-white transition-all flex items-center justify-center shadow-sm font-bold focus:outline-none focus:ring-2 focus:ring-primary/30"
               >
                 +
               </button>
@@ -151,7 +163,8 @@ toast.success("Added to cart", {
 
             <button
               onClick={handleShowModal}
-              className="px-6 py-3 rounded-full font-bold transition-all transform bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 hover:scale-105 text-white flex items-center space-x-2 shadow-lg hover:shadow-xl"
+              className="px-6 py-3 rounded-full font-bold transition-all transform hover:scale-105 focus:scale-105 text-white flex items-center space-x-2 shadow-lg hover:shadow-xl focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary/30"
+              style={{ backgroundColor: 'var(--primary-color)' }}
             >
               <span className="text-lg">🛒</span>
               <span>Add</span>
@@ -172,7 +185,7 @@ toast.success("Added to cart", {
             <p className="font-bold text-lg mb-2">{item.name}</p>
             <p className="text-gray-600 mb-2">Quantity: {quantity}</p>
             <p className="text-gray-600">
-              Unit Price: {formatCurrency(item.price)}
+              Unit Price: {formatCurrency(displayPrice)}
             </p>
           </div>
 
@@ -183,7 +196,7 @@ toast.success("Added to cart", {
               value={specialInstructions}
               onChange={(e) => setSpecialInstructions(e.target.value)}
               placeholder="Any special instructions?"
-              className="w-full outline-none focus:ring-2 focus:ring-red-300 p-3 border rounded-md resize-none"
+              className="w-full outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary p-3 border border-gray-300 rounded-md resize-none transition-colors"
               rows={3}
             />
           </div>
@@ -191,19 +204,19 @@ toast.success("Added to cart", {
           {/* Total and Actions */}
           <div className="border-t pt-4">
             <div className="flex justify-between items-center mb-4">
-              <span className="text-2xl font-bold">Total:  {formatCurrency(totalPrice)}</span>
+              <span className="text-2xl font-bold">Total:  {formatCurrency(displayPrice * quantity)}</span>
             </div>
 
             <div className="flex space-x-3">
               <button
                 onClick={handleCloseModal}
-                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300/30 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddToCart}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 focus:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
               >
                 Add to Cart
               </button>

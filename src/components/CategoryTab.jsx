@@ -1,4 +1,8 @@
+import { useBranding } from '../Context/BrandingContext';
+
 const CategoryTab = ({ activeCategory, setActiveCategory, categories }) => {
+  const { branding } = useBranding();
+  
   const handleCategoryChange = (categoryId) => {
     setActiveCategory(categoryId);
   };
@@ -13,9 +17,13 @@ const CategoryTab = ({ activeCategory, setActiveCategory, categories }) => {
               onClick={() => handleCategoryChange(category._id)}
               className={`px-6 py-4 whitespace-nowrap transition-all cursor-pointer ${
                 activeCategory === category._id
-                  ? "text-red-500 border-b-4 border-red-500 font-semibold"
+                  ? "font-semibold border-b-4"
                   : "text-gray-500 border-transparent hover:text-gray-700"
               }`}
+              style={{
+                color: activeCategory === category._id ? branding.primaryColor : undefined,
+                borderBottomColor: activeCategory === category._id ? branding.primaryColor : 'transparent'
+              }}
             >
               <div className="flex items-center">
                 <span className="mr-1">{category.image}</span>

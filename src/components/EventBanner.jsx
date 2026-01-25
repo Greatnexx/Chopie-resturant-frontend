@@ -1,89 +1,124 @@
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
 
-const EventBanner = () => {
+const EventBanner = ({ restaurantId }) => {
   const [events, setEvents] = useState([]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [isVisible, setIsVisible] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
-    fetchActiveEvents();
-  }, []);
-
-  const fetchActiveEvents = async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/banners`);
-      const data = await response.json();
-      
-      if (data.status && data.data.length > 0) {
-        setEvents(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching events:", error);
-    } finally {
-      setLoading(false);
+    if (restaurantId) {
+      fetchEventBanners();
     }
-  };
+  }, [restaurantId]);
 
-  // Auto-rotate events every 5 seconds if multiple events
   useEffect(() => {
     if (events.length > 1) {
       const interval = setInterval(() => {
         setCurrentEventIndex((prev) => (prev + 1) % events.length);
-      }, 5000);
+      }, 5000); // Change banner every 5 seconds
       return () => clearInterval(interval);
     }
   }, [events.length]);
 
-  if (loading || !isVisible || events.length === 0) {
+  const fetchEventBanners = async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/banners`, {
+        headers: {
+          'X-Tenant-Subdomain': window.location.pathname.split('/')[2] || 'default'
+        }
+      });
+      const data = await response.json();
+      
+      if (data.status && data.data.length > 0) {
+        // Filter events that should be shown (upcoming or current)
+        const now = new Date();
+        const activeEvents = data.data.filter(event => {
+          const endDate = new Date(event.endDate);
+          return endDate >= now && event.bannerImage;
+        });
+        
+        setEvents(activeEvents);
+        setShowBanner(activeEvents.length > 0);
+      }
+    } catch (error) {
+      console.error('Error fetching event banners:', error);
+    }
+  };
+
+  if (!showBanner || events.length === 0) {
     return null;
   }
 
   const currentEvent = events[currentEventIndex];
 
   return (
-    <div className="relative bg-gradient-to-r from-red-500 to-orange-500 text-white p-4 mb-4 rounded-lg shadow-lg">
-      <button
-        onClick={() => setIsVisible(false)}
-        className="absolute top-2 right-2 p-1 hover:bg-white/20 rounded-full transition-colors"
-      >
-        <X size={20} />
-      </button>
+    <div className="relative bg-gradient-to-r from-purple-600 to-blue-600 text-white overflow-hidden">
+      <div className="absolute inset-0 bg-black bg-opacity-20"></div>
       
-      <div className="flex items-center gap-4">
-        {currentEvent.bannerImage && (
-          <img
-            src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
-            alt={currentEvent.title}
-            className="w-16 h-16 rounded-lg object-cover"
-          />
-        )}
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex-1 flex items-center space-x-4">
+            {currentEvent.bannerImage && (
+              <img
+                src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
+                alt={currentEvent.title}
+                className="w-16 h-16 object-cover rounded-lg border-2 border-white shadow-lg"
+              />
+            )}
+            
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-1">
+                <span className="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                  🎉 EVENT
+                </span>
+                {events.length > 1 && (
+                  <span className="text-xs opacity-75">
+                    {currentEventIndex + 1} of {events.length}
+                  </span>
+                )}
+              </div>
+              
+              <h3 className="font-bold text-lg leading-tight">
+                {currentEvent.title || 'Special Event'}
+              </h3>
+              
+              {currentEvent.description && (
+                <p className="text-sm opacity-90 mt-1 line-clamp-2">
+                  {currentEvent.description}
+                </p>
+              )}
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowBanner(false)}
+            className="ml-4 p-2 hover:bg-white hover:bg-opacity-20 rounded-full transition-colors"
+            title="Close banner"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
         
-        <div className="flex-1">
-          <h3 className="font-bold text-lg mb-1">{currentEvent.title}</h3>
-          <p className="text-sm opacity-90">{currentEvent.description}</p>
-          <p className="text-xs opacity-75 mt-1">
-            Until {new Date(currentEvent.endDate).toLocaleDateString()}
-          </p>
-        </div>
+        {/* Progress indicators for multiple events */}
+        {events.length > 1 && (
+          <div className="flex justify-center space-x-2 mt-3">
+            {events.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentEventIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all ${
+                  index === currentEventIndex 
+                    ? 'bg-white' 
+                    : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </div>
-      
-      {events.length > 1 && (
-        <div className="flex justify-center mt-3 gap-1">
-          {events.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentEventIndex(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                index === currentEventIndex ? "bg-white" : "bg-white/50"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
 
-export default EventBanner; 
+export default EventBanner;

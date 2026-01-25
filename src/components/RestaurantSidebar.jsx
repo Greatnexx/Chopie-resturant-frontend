@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useBranding } from "../Context/BrandingContext";
 import { 
   Home, 
   Users, 
@@ -10,15 +11,18 @@ import {
   ChefHat,
   BarChart3,
   Shield,
-  X
+  X,
+  MessageCircle,
+  ShoppingCart
 } from "lucide-react";
 import OrderSearchModal from "./OrderSearchModal";
 import NotificationBell from "./NotificationBell";
 
-const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
+const RestaurantSidebar = ({ user, onLogout, isOpen, onClose, onChatToggle, showChatPanel, onNewChat }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [showSearchModal, setShowSearchModal] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { branding } = useBranding();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -33,18 +37,26 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
 
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/restaurant/dashboard", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager", "SubUser"] },
-    { icon: BarChart3, label: "Analytics", path: "/restaurant/super-admin", roles: ["SuperAdmin"] },
+    { icon: BarChart3, label: "Analytics", path: "/restaurant/analytics", roles: ["SuperAdmin"] },
     { icon: Users, label: "User Management", path: "/restaurant/users", roles: ["SuperAdmin"] },
-    { icon: ChefHat, label: "Menu Management", path: "/restaurant/menu-manager", roles: ["MenuManager"] },
+    { icon: ChefHat, label: "Menu Management", path: "/restaurant/menu-manager", roles: ["SuperAdmin", "MenuManager"] },
+    { icon: ShoppingCart, label: "Staff Orders", path: "/restaurant/staff-orders", roles: ["SuperAdmin", "MenuManager", "SubUser"] },
     { icon: FileText, label: "Event Management", path: "/restaurant/events", roles: ["SuperAdmin", "MenuManager"] },
     { icon: FileText, label: "Audit Trail", path: "/restaurant/audit", roles: ["SuperAdmin", "TransactionAdmin"] },
     { icon: Settings, label: "Settings", path: "/restaurant/settings", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager", "SubUser"] },
   ];
 
+  // Add chat toggle for SuperAdmin and MenuManager
+  const chatToggleItem = {
+    icon: MessageCircle,
+    label: showChatPanel ? "Hide Chat" : "Show Chat",
+    action: onChatToggle,
+    roles: ["SuperAdmin", "MenuManager"]
+  };
+
   const filteredItems = menuItems.filter(item => 
     item.roles.includes(user?.role)
   );
-
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -65,14 +77,22 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ChefHat className="w-8 h-8 text-red-500" />
+            {branding.logo ? (
+              <img 
+                src={`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'http://localhost:8000'}${branding.logo}`}
+                alt="Restaurant Logo" 
+                className="w-8 h-8 object-cover rounded"
+              />
+            ) : (
+              <ChefHat className="w-8 h-8 text-primary" />
+            )}
             <div>
-              <h2 className="font-bold text-gray-800">LaQuinta Club Admin</h2>
+              <h2 className="font-bold text-gray-800">{branding.name || 'My Restaurant'}</h2>
               <p className="text-sm text-gray-600">{user?.role}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <NotificationBell user={user} />
+            <NotificationBell user={user} onNewChat={onNewChat} />
             {/* Mobile Close Button */}
             <button
               onClick={onClose}
@@ -94,7 +114,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onClick={() => setShowSearchModal(true)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-red-500 cursor-pointer"
+            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary cursor-pointer"
             readOnly
           />
         </div>
@@ -108,13 +128,15 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
               <button
                 onClick={() => {
                   navigate(item.path);
-                  onClose(); // Close sidebar on mobile after navigation
-                  // Force a small delay to ensure smooth transition
+                  // Only close sidebar on mobile
+                  if (window.innerWidth < 1024) {
+                    onClose();
+                  }
                   setTimeout(() => window.scrollTo(0, 0), 100);
                 }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
                   isActive(item.path)
-                    ? "bg-red-50 text-red-600 border-r-2 border-red-600"
+                    ? `bg-primary text-white shadow-sm`
                     : "text-gray-600 hover:bg-gray-50"
                 }`}
               >
@@ -123,13 +145,33 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
               </button>
             </li>
           ))}
+          
+          {/* Chat Toggle Button */}
+          {chatToggleItem.roles.includes(user?.role) && (
+            <li>
+              <button
+                onClick={() => {
+                  // Navigate to dashboard and show chat
+                  navigate('/restaurant/dashboard?showChat=true');
+                  // Only close sidebar on mobile
+                  if (window.innerWidth < 1024) {
+                    onClose();
+                  }
+                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-gray-600 hover:bg-gray-50"
+              >
+                <chatToggleItem.icon className="w-5 h-5" />
+                <span className="font-medium">Open Chat</span>
+              </button>
+            </li>
+          )}
         </ul>
       </nav>
 
       {/* User Info & Logout */}
       <div className="p-4 border-t">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
             <Shield className="w-4 h-4 text-white" />
           </div>
           <div className="flex-1">
@@ -139,7 +181,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
         </div>
         <button
           onClick={handleLogoutClick}
-          className="w-full flex items-center gap-3 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          className="w-full flex items-center gap-3 px-4 py-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
         >
           <LogOut className="w-4 h-4" />
           <span className="font-medium">Logout</span>
@@ -166,7 +208,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose }) => {
               </button>
               <button
                 onClick={confirmLogout}
-                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                className="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90"
               >
                 Logout
               </button>

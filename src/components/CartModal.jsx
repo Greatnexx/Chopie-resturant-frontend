@@ -1,14 +1,17 @@
 import { useState, useEffect } from "react";
 import { useCart } from "../Context/CartContext";
 import Modal from "../components/Modal";
-import { User, Phone, ShoppingCart, Trash2, Loader2, QrCode } from "lucide-react";
+import { User, Phone, ShoppingCart, Trash2, Loader2, QrCode, Clock } from "lucide-react";
 import { useCreateOrderMutation } from "../slices/orderSlice";
+import { useGetRestaurantPublicInfoQuery } from "../slices/apiSlice";
 import { toast } from "sonner";
 import { formatCurrency } from "../utils/formatCurrency";
+import { useBranding } from "../Context/BrandingContext";
 
 
 
 const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
+  const { branding } = useBranding();
   const [customerInfo, setCustomerInfo] = useState({
     name: "",
     phone: "",
@@ -19,22 +22,33 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
 
+  // Get restaurant info to check if closed
+  const currentPath = window.location.pathname;
+  const restaurantSubdomain = currentPath.startsWith('/r/') ? currentPath.split('/')[2] : null;
+  const { data: restaurantInfo } = useGetRestaurantPublicInfoQuery(restaurantSubdomain, {
+    skip: !restaurantSubdomain
+  });
+  const isRestaurantClosed = restaurantInfo?.data?.isOpen === false;
 
   const [createOrder, { isLoading }] = useCreateOrderMutation();
 
-  // Auto-populate customer info from localStorage
+  // Auto-populate customer info from localStorage (restaurant-specific)
   useEffect(() => {
-    const savedCustomerInfo = localStorage.getItem('customerInfo');
+    const currentPath = window.location.pathname;
+    const restaurantSubdomain = currentPath.startsWith('/r/') ? currentPath.split('/')[2] : 'default';
+    const savedCustomerInfo = localStorage.getItem(`customerInfo_${restaurantSubdomain}`);
     if (savedCustomerInfo) {
       const parsedInfo = JSON.parse(savedCustomerInfo);
       setCustomerInfo(parsedInfo);
     }
   }, []);
 
-  // Save customer info to localStorage when it changes
+  // Save customer info to localStorage when it changes (restaurant-specific)
   useEffect(() => {
     if (customerInfo.name || customerInfo.phone) {
-      localStorage.setItem('customerInfo', JSON.stringify(customerInfo));
+      const currentPath = window.location.pathname;
+      const restaurantSubdomain = currentPath.startsWith('/r/') ? currentPath.split('/')[2] : 'default';
+      localStorage.setItem(`customerInfo_${restaurantSubdomain}`, JSON.stringify(customerInfo));
     }
   }, [customerInfo]);
 
@@ -81,7 +95,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
     items: cartItems.map(item => ({
       productId: item._id,
       name: item.name,
-      description: item.description,
+      description: item.description || 'No description',
       price: item.price,
       image: item.image,
       quantity: item.quantity,
@@ -92,6 +106,12 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
   });
 
  const handlePlaceOrder = async (confirmDuplicate = false) => {
+  // Check if restaurant is closed
+  if (isRestaurantClosed) {
+    toast.error("Sorry, we're currently closed and not accepting orders.");
+    return;
+  }
+  
   if (validateForm() && cartItems.length > 0) {
     try {
       const orderData = {
@@ -159,7 +179,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
         <div className="fixed inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
         <div className="bg-white w-full max-w-2xl max-h-[75vh] rounded-xl shadow-2xl flex flex-col relative border border-gray-200 z-10">
         {/* Header - Fixed at top */}
-        <div className="sticky top-0 bg-gradient-to-r from-red-500 to-red-600 border-b border-red-300 p-6 rounded-t-xl z-20 flex-shrink-0">
+        <div className="sticky top-0 border-b p-6 rounded-t-xl z-20 flex-shrink-0 text-white" style={{ backgroundColor: 'var(--primary-color)', borderBottomColor: branding.accentColor }}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
@@ -307,7 +327,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           value={customerInfo.name}
                           onChange={handleInputChange}
                           required
-                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors ${
+                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors ${
                             errors.name
                               ? "border-red-300 bg-red-50"
                               : "border-gray-300 bg-white"
@@ -342,7 +362,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           placeholder="Enter phone number"
                           value={customerInfo.phone}
                           onChange={handleInputChange}
-                          className="relative z-0 block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 bg-white transition-colors"
+                          className="relative z-0 block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white transition-colors"
                         />
                       </div>
                     </div>
@@ -355,7 +375,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       <div className="grid grid-cols-2 gap-4">
                         <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                           paymentMethod === 'cash' 
-                            ? 'border-red-500 bg-red-50' 
+                            ? 'border-primary bg-primary/10' 
                             : 'border-gray-300 hover:border-gray-400'
                         }`}>
                           <input
@@ -373,10 +393,10 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           />
                           <div className="flex items-center gap-3">
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                              paymentMethod === 'cash' ? 'border-red-500' : 'border-gray-300'
+                              paymentMethod === 'cash' ? 'border-primary' : 'border-gray-300'
                             }`}>
                               {paymentMethod === 'cash' && (
-                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
                               )}
                             </div>
                             <div>
@@ -388,7 +408,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                         
                         <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
                           paymentMethod === 'transfer' 
-                            ? 'border-red-500 bg-red-50' 
+                            ? 'border-primary bg-primary/10' 
                             : 'border-gray-300 hover:border-gray-400'
                         }`}>
                           <input
@@ -406,10 +426,10 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           />
                           <div className="flex items-center gap-3">
                             <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                              paymentMethod === 'transfer' ? 'border-red-500' : 'border-gray-300'
+                              paymentMethod === 'transfer' ? 'border-primary' : 'border-gray-300'
                             }`}>
                               {paymentMethod === 'transfer' && (
-                                <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
                               )}
                             </div>
                             <div>
@@ -429,14 +449,28 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
 
                   {/* Place Order Button */}
                   <div className="mt-8">
+                    {isRestaurantClosed && (
+                      <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <div className="flex items-center gap-2 text-red-700">
+                          <Clock className="w-5 h-5" />
+                          <span className="font-medium">Restaurant is currently closed</span>
+                        </div>
+                        <p className="text-sm text-red-600 mt-1">
+                          We're not accepting orders right now. Please check back during operating hours.
+                        </p>
+                      </div>
+                    )}
                     <button
                       onClick={() => handlePlaceOrder(false)}
-                      disabled={cartItems.length === 0 || isLoading}
-                      className="w-full bg-gradient-to-r from-red-500 to-red-600 text-[15px] text-white py-4 px-8 rounded-lg hover:from-red-600 hover:to-red-700 focus:ring-2 focus:ring-red-200 focus:outline-none transition-all duration-200 font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      disabled={cartItems.length === 0 || isLoading || isRestaurantClosed}
+                      className="w-full text-[15px] text-white py-4 px-8 rounded-lg hover:opacity-90 focus:ring-2 focus:ring-primary/30 focus:outline-none transition-all duration-200 font-bold text-lg shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      style={{ backgroundColor: 'var(--primary-color)' }}
                     >
                       {isLoading && <Loader2 className="w-5 h-5 animate-spin" />}
                       {isLoading
                         ? "Placing Order..."
+                        : isRestaurantClosed
+                        ? "Restaurant Closed"
                         : cartItems.length === 0
                         ? "Cart is Empty"
                         : `Place Order - ${formatCurrency(total)}`}

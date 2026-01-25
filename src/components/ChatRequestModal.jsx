@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MessageCircle, Check, X } from 'lucide-react';
+import { useBranding } from '../Context/BrandingContext';
 
 const ChatRequestModal = ({ isOpen, chatRequest, onAccept, onDecline }) => {
   const [isAccepting, setIsAccepting] = useState(false);

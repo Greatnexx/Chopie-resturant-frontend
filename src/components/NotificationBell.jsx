@@ -3,7 +3,7 @@ import { Bell, MessageCircle, Clock, X } from "lucide-react";
 import io from "socket.io-client";
 import { toast } from "sonner";
 
-const NotificationBell = ({ user }) => {
+const NotificationBell = ({ user, onNewChat }) => {
   const [notifications, setNotifications] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
 
@@ -11,8 +11,6 @@ const NotificationBell = ({ user }) => {
     if (!user) return;
     
     const socketUrl = import.meta.env.VITE_API_URL.replace('/api/v1', '');
-    console.log('🔔 NotificationBell connecting to Socket.IO:', socketUrl, 'User role:', user.role);
-    
     const socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       timeout: 20000,
@@ -23,11 +21,9 @@ const NotificationBell = ({ user }) => {
     });
     
     socket.on('connect', () => {
-      console.log('✅ NotificationBell Socket.IO connected:', socket.id, 'User:', user.name, 'Role:', user.role);
     });
     
     socket.on('disconnect', (reason) => {
-      console.log('❌ NotificationBell Socket.IO disconnected:', reason);
     });
     
     socket.on('connect_error', (error) => {
@@ -37,7 +33,6 @@ const NotificationBell = ({ user }) => {
     // Listen for new orders (for SuperAdmin and MenuManager roles)
     if (user.role === 'SuperAdmin' || user.role === 'MenuManager') {
       socket.on('newOrder', (orderData) => {
-        console.log('🔔 NotificationBell received new order for', user.role, ':', orderData);
         setNotifications(prev => [...prev, {
           id: `order-${orderData.orderId}-${Date.now()}`,
           type: 'order',
@@ -54,13 +49,21 @@ const NotificationBell = ({ user }) => {
       });
     }
 
-    // Listen for new chat requests (only for MenuManager)
-    if (user?.role === 'MenuManager') {
+    // Listen for new chat requests (for SuperAdmin and MenuManager)
+    // DISABLED: Let RestaurantDashboard handle chat notifications to avoid conflicts
+    /*
+    if (user?.role === 'SuperAdmin' || user?.role === 'MenuManager') {
       // Load existing chats and join their rooms
       const loadChatsAndJoin = async () => {
         try {
           const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
-          const token = restaurantUser.token;
+          const token = restaurantUser.data?.token || restaurantUser.token;
+          
+          if (!token) {
+            console.error('No token found for chat API call');
+            return;
+          }
+          
           const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -96,6 +99,11 @@ const NotificationBell = ({ user }) => {
           duration: 5000
         });
         
+        // Notify parent component about new chat
+        if (onNewChat) {
+          onNewChat(chatData);
+        }
+        
         // Join the new chat room for future message notifications
         socket.emit('joinChat', {
           chatId: chatData.chatId,
@@ -124,9 +132,9 @@ const NotificationBell = ({ user }) => {
         }
       });
     }
+    */
 
     return () => {
-      console.log('🔌 NotificationBell disconnecting Socket.IO for user:', user.name);
       socket.disconnect();
     };
   }, [user]);

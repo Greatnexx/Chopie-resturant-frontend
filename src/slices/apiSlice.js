@@ -41,19 +41,38 @@ const baseQuery = fetchBaseQuery({
     if (restaurantUser) {
       try {
         const parsedRestaurantUser = JSON.parse(restaurantUser);
-        const token = parsedRestaurantUser?.token;
+        // Token is at data.token in the response
+        const token = parsedRestaurantUser?.data?.token;
         if (token) {
           headers.set("Authorization", `Bearer ${token}`);
+          
+        } else {
+        }
+        
+        // Also set restaurant ID header if available
+        const restaurantId = parsedRestaurantUser?.data?.user?.restaurantId || parsedRestaurantUser?.data?.restaurantId;
+        if (restaurantId) {
+          headers.set("X-Restaurant-ID", restaurantId);
         }
       } catch (error) {
         console.error("Error parsing sessionStorage restaurantUser:", error);
       }
+    } else {
     }
 
     // Also check for separate restaurant token
     const restaurantToken = sessionStorage.getItem("restaurantToken");
     if (restaurantToken && !headers.get("Authorization")) {
       headers.set("Authorization", `Bearer ${restaurantToken}`);
+    }
+
+    // For tenant routes, extract restaurant subdomain from URL and set header
+    const currentPath = window.location.pathname;
+    if (currentPath.startsWith('/r/')) {
+      const subdomain = currentPath.split('/')[2];
+      if (subdomain) {
+        headers.set("X-Tenant-Subdomain", subdomain);
+      }
     }
 
     // ✅ Don't set Content-Type at all
@@ -70,12 +89,6 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 
   // Log errors for debugging
   if (result.error) {
-    console.log('API Error:', {
-      status: result.error.status,
-      data: result.error.data,
-      url: args.url || args,
-      method: args.method || 'GET'
-    });
   }
 
   if (result.error && result.error.status === 401) {
@@ -102,6 +115,14 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 export const apiSlice = createApi({
   reducerPath: "apiService",
   baseQuery: baseQueryWithReauth,
-  tagTypes: ["base", "RestaurantOrders", "Users", "MenuItems", "Categories", "PaymentSummary"],
-  endpoints: () => ({}),
+  tagTypes: ["base", "RestaurantOrders", "Users", "MenuItems", "Categories", "PaymentSummary", "RestaurantPublicInfo"],
+  endpoints: (builder) => ({
+    getRestaurantPublicInfo: builder.query({
+      query: (subdomain) => `/restaurant/public/${subdomain}`,
+      providesTags: ["RestaurantPublicInfo"],
+    }),
+  }),
 });
+export const {
+  useGetRestaurantPublicInfoQuery,
+} = apiSlice;

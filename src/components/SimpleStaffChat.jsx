@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, Users } from 'lucide-react';
 import io from 'socket.io-client';
 import ChatRequestModal from './ChatRequestModal';
+import EmojiPicker from './EmojiPicker';
 import { toast } from 'sonner';
 
 const SimpleStaffChat = ({ user }) => {
@@ -25,7 +26,7 @@ const SimpleStaffChat = ({ user }) => {
     const joinAllChats = async () => {
       try {
         const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
-        const token = restaurantUser.token;
+        const token = restaurantUser.data?.token || restaurantUser.token;
         const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -47,7 +48,6 @@ const SimpleStaffChat = ({ user }) => {
     joinAllChats();
 
     newSocket.on('newChatAvailable', (data) => {
-      console.log('Staff received new chat notification:', data);
       setChatRequest({
         ...data,
         initialMessage: `Hi! I need help with my order ${data.orderNumber || ''}. Can someone assist me?`
@@ -64,7 +64,6 @@ const SimpleStaffChat = ({ user }) => {
     });
 
     newSocket.on('receiveMessage', (data) => {
-      console.log('Staff received message:', data);
       // Update messages if this is the active chat
       if (activeChat && data.chatId === activeChat.chatId) {
         setMessages(prev => {
@@ -91,8 +90,6 @@ const SimpleStaffChat = ({ user }) => {
       loadChats();
     });
 
-
-
     newSocket.on('userTyping', (data) => {
       if (activeChat && data.chatId === activeChat.chatId && data.userName !== user.name) {
         setIsTyping(data.isTyping);
@@ -104,7 +101,6 @@ const SimpleStaffChat = ({ user }) => {
 
   useEffect(() => {
     if (activeChat && socket) {
-      console.log('Staff joining chat:', activeChat.chatId);
       socket.emit('joinChat', {
         chatId: activeChat.chatId,
         userType: 'staff',
@@ -127,7 +123,6 @@ const SimpleStaffChat = ({ user }) => {
           timestamp: msg.createdAt
         }));
         setMessages(formattedMessages);
-        console.log('Loaded chat messages:', formattedMessages.length);
       }
     } catch (error) {
       console.error('Failed to load chat messages:', error);
@@ -142,15 +137,13 @@ const SimpleStaffChat = ({ user }) => {
   const loadChats = async () => {
     try {
       const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
-      const token = restaurantUser.token;
+      const token = restaurantUser.data?.token || restaurantUser.token;
       const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      console.log('Staff chats loaded:', data);
       if (data.success) {
         setChats(data.data);
-        console.log('Active chats count:', data.data.length);
       }
     } catch (error) {
       console.error('Failed to load chats:', error);
@@ -174,8 +167,6 @@ const SimpleStaffChat = ({ user }) => {
       });
       
       const result = await response.json();
-      console.log('Staff message saved to DB:', result);
-      
       if (result.success && socket) {
         // Then emit via socket for real-time
         const messageData = {
@@ -187,8 +178,6 @@ const SimpleStaffChat = ({ user }) => {
             _id: Date.now().toString()
           }
         };
-        
-        console.log('Staff emitting message:', messageData);
         socket.emit('sendMessage', messageData);
         
         // Add to local messages immediately
@@ -228,7 +217,11 @@ const SimpleStaffChat = ({ user }) => {
   const handleAcceptChat = async (chatRequest) => {
     try {
       const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
-      const token = restaurantUser.token;
+      const token = restaurantUser.data?.token || restaurantUser.token;
+      if (!token) {
+        toast.error('Authentication required. Please log in again.');
+        return;
+      }
       
       const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatRequest.chatId}/accept`, {
         method: 'POST',
@@ -245,6 +238,8 @@ const SimpleStaffChat = ({ user }) => {
         setShowChatRequest(false);
         setChatRequest(null);
         loadChats();
+      } else {
+        toast.error(result.message || 'Failed to accept chat');
       }
     } catch (error) {
       console.error('Failed to accept chat:', error);
@@ -278,7 +273,7 @@ const SimpleStaffChat = ({ user }) => {
                 key={chat._id}
                 onClick={() => setActiveChat(chat)}
                 className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${
-                  activeChat?._id === chat._id ? 'bg-red-50 border-l-4 border-l-red-500' : ''
+                  activeChat?._id === chat._id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
                 }`}
               >
                 <p className="font-medium text-sm">{chat.customerName}</p>
@@ -310,7 +305,7 @@ const SimpleStaffChat = ({ user }) => {
                   <div
                     className={`max-w-xs px-3 py-2 rounded-lg ${
                       message.senderType === 'staff'
-                        ? 'bg-red-500 text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-gray-200 text-gray-800'
                     }`}
                   >
@@ -340,12 +335,13 @@ const SimpleStaffChat = ({ user }) => {
                   }}
                   onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                   placeholder="Type your message..."
-                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                  className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
+                <EmojiPicker onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} />
                 <button
                   onClick={sendMessage}
                   disabled={!newMessage.trim()}
-                  className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 disabled:opacity-50"
+                  className="bg-primary text-white p-2 rounded-lg hover:opacity-90 disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
                 </button>

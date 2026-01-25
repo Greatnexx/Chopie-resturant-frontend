@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentTenant } from "../slices/tenantSlice";
 import {
   Search,
   Package,
@@ -10,25 +13,56 @@ import {
   Phone,
   RefreshCcwDot,
   MessageCircle,
+  ArrowLeft,
 } from "lucide-react";
 import { useSearchOrderQuery } from "../slices/orderSlice";
 import LoadingBtn from "../components/LoadingBtn";
 import SimpleLiveChat from "../components/SimpleLiveChat";
 
 const TrackOrder = () => {
+  const { restaurantId } = useParams(); // Get restaurant ID from URL
+  const currentTenant = useSelector(selectCurrentTenant); // Get tenant data from Redux
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [searchTriggered, setSearchTriggered] = useState(false);
   const [showChat, setShowChat] = useState(false);
   
-  // RTK Query hook - skip until search is triggered
+  // Get restaurant branding from tenant data or use defaults
+  const restaurantBranding = {
+    name: currentTenant?.name || restaurantId || 'Restaurant',
+    primaryColor: currentTenant?.branding?.primaryColor || '#ef4444',
+    secondaryColor: currentTenant?.branding?.secondaryColor || '#f97316',
+    logo: currentTenant?.branding?.logo
+  };
+  
+  // Update CSS variables when branding changes
+  useEffect(() => {
+    document.documentElement.style.setProperty('--primary-color', restaurantBranding.primaryColor);
+    document.documentElement.style.setProperty('--secondary-color', restaurantBranding.secondaryColor);
+  }, [restaurantBranding]);
+  
+  // RTK Query hook - skip until search is triggered and include restaurant ID
   const { data: trackingData, isLoading: isSearching, error: trackingError, refetch } = useSearchOrderQuery(
-    searchTerm.trim(),
+    restaurantId && searchTerm.trim() ? `${restaurantId}/${searchTerm.trim()}` : searchTerm.trim(),
     { skip: !searchTriggered || !searchTerm.trim() }
   );
 
   // Extract search result and error from RTK Query response
   const searchResult = trackingData?.status ? trackingData.data : null;
+  
+  // Update branding when order is found (fallback if tenant data not available)
+  useEffect(() => {
+    if (searchResult?.restaurantInfo && !currentTenant) {
+      const newBranding = {
+        name: searchResult.restaurantInfo.name || restaurantId || 'Restaurant',
+        primaryColor: searchResult.restaurantInfo.primaryColor || '#ef4444',
+        secondaryColor: searchResult.restaurantInfo.secondaryColor || '#f97316'
+      };
+      document.documentElement.style.setProperty('--primary-color', newBranding.primaryColor);
+      document.documentElement.style.setProperty('--secondary-color', newBranding.secondaryColor);
+    }
+  }, [searchResult, currentTenant, restaurantId]);
 
   // Handle different types of errors
   const getErrorMessage = () => {
@@ -113,16 +147,50 @@ const TrackOrder = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
       <div className="max-w-4xl mx-auto">
+        {/* Back to Menu Button */}
+        <div className="mb-4 sm:mb-6">
+          <button
+            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
+            className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white border-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm sm:text-base"
+            style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span className="font-medium">Back to Menu</span>
+          </button>
+        </div>
+
         {/* Header Section */}
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Search className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold text-gray-800 mb-4">
-            Track Your Order
-          </h1>
-          <p className="text-gray-600 text-lg max-w-2xl mx-auto">
+        <div className="text-center mb-8 sm:mb-12">
+          <button 
+            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 hover:opacity-80 transition-all duration-200 hover:scale-105 cursor-pointer border-2 border-white shadow-lg" 
+            style={{ backgroundColor: 'var(--primary-color)' }}
+            title="Click to go back to menu"
+          >
+            {restaurantBranding.logo ? (
+              <img 
+                src={restaurantBranding.logo} 
+                alt={restaurantBranding.name} 
+                className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-full"
+              />
+            ) : (
+              <Search className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+            )}
+          </button>
+          <button 
+            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
+            className="hover:opacity-80 transition-opacity group"
+            title="Click to go back to menu"
+          >
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800 mb-2 group-hover:underline px-4">
+              {restaurantBranding.name}
+            </h1>
+          </button>
+          <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-2 px-4">
             Enter your order number or phone number to track your order status.
+          </p>
+          <p className="text-xs sm:text-sm text-gray-500 px-4">
+            💡 Click the logo or restaurant name above to return to the menu
           </p>
         </div>
 
@@ -147,14 +215,15 @@ const TrackOrder = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Enter order number or phone"
-                  className="block w-full pl-12 pr-4 py-4 text-base sm:text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
+                  className="block w-full pl-12 pr-4 py-4 text-base sm:text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
                   disabled={isSearching}
                 />
               </div>
               <button
                 onClick={handleSearch}
                 disabled={isSearching || !searchTerm.trim()}
-                className="w-full sm:w-auto bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 sm:px-8 py-4 rounded-xl hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:ring-red-200 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base sm:text-lg"
+                className="w-full sm:w-auto text-white px-6 sm:px-8 py-4 rounded-xl hover:opacity-90 focus:ring-4 focus:ring-primary/20 focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-base sm:text-lg"
+                style={{ backgroundColor: 'var(--primary-color)' }}
               >
                 {isSearching ? (
                   <>
@@ -199,7 +268,7 @@ const TrackOrder = () => {
           <div className="space-y-8">
             {/* Order Summary */}
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 p-6 text-white">
+              <div className="p-6 text-white" style={{ backgroundColor: 'var(--primary-color)' }}>
                 <div className="flex justify-between items-start">
                   <div>
                     <h2 className="text-2xl font-bold">
@@ -344,7 +413,7 @@ const TrackOrder = () => {
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}
-                  className="w-full sm:w-auto bg-blue-500 hover:bg-blue-600 px-6 py-3 text-white rounded-lg focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
+                  className="w-full sm:w-auto bg-primary hover:opacity-90 px-6 py-3 text-white rounded-lg focus:outline-none transition-all duration-200 font-medium shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg"
                 >
                   {isRefreshing ? (
                     <>
@@ -370,17 +439,10 @@ const TrackOrder = () => {
                   If you have any questions about your order, our support team
                   is here to help.
                 </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <a
-                    href="tel:+2348012345678"
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-white border border-blue-300 rounded-lg text-blue-700 hover:bg-blue-50 transition-colors"
-                  >
-                    <Phone className="w-4 h-4" />
-                    Call Support
-                  </a>
+                <div className="flex justify-center">
                   <button
                     onClick={() => setShowChat(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-all"
                   >
                     <MessageCircle className="w-4 h-4" />
                     Live Chat
@@ -399,6 +461,7 @@ const TrackOrder = () => {
         customerName={searchResult?.customerInfo?.name || `Customer-${searchTerm}`}
         customerEmail={''}
         orderNumber={searchResult?.orderNumber || searchTerm}
+        restaurantId={restaurantId || currentTenant?.subdomain}
       />
     </div>
   );

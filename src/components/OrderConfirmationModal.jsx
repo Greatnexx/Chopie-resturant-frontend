@@ -1,16 +1,29 @@
 import { CheckCircle, Clock, ShoppingBag, Eye, Copy, Download, Check } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useState } from "react";
 
 const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [copied, setCopied] = useState(false);
 
   if (!isOpen || !orderData) return null;
 
+  // Extract restaurant ID from current URL
+  const getRestaurantId = () => {
+    const pathParts = location.pathname.split('/');
+    const rIndex = pathParts.indexOf('r');
+    return rIndex !== -1 && pathParts[rIndex + 1] ? pathParts[rIndex + 1] : null;
+  };
+
   const handleTrackOrder = () => {
-    navigate(`/trackorder`);
+    const restaurantId = getRestaurantId();
+    if (restaurantId) {
+      navigate(`/r/${restaurantId}/trackorder`);
+    } else {
+      navigate(`/trackorder`);
+    }
     onClose();
   };
 

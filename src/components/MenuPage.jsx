@@ -13,16 +13,23 @@ const MenuPage = () => {
   const [activeCategory, setActiveCategory] = useState("");
   const [tableNumber, setTableNumber] = useState("");
   const [menuType, setMenuType] = useState("");
+  const [restaurantId, setRestaurantId] = useState("");
 
-  // Get table number from URL params
+  // Get table number and restaurant info from URL params
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const table = urlParams.get('table');
+    const restaurant = urlParams.get('restaurantId');
+    
     if (table) {
       setTableNumber(table);
       // Determine menu type from table number
       const type = table.toUpperCase().startsWith('VIP') ? 'VIP' : 'REGULAR';
       setMenuType(type);
+    }
+    
+    if (restaurant) {
+      setRestaurantId(restaurant);
     }
   }, []);
 
@@ -52,7 +59,6 @@ const MenuPage = () => {
     skip: !activeCategory || activeCategory === 'undefined' || !!tableNumber,
   });
 
-
   const categories = categoriesData?.data || [];
   const menuItems = tableNumber 
     ? (menuData?.data || menuData || []) 
@@ -62,21 +68,10 @@ const MenuPage = () => {
   const currentMenuError = tableNumber ? menuError : fallbackMenuError;
 
   // Debug logging
-  console.log('Active Category:', activeCategory);
-  console.log('Table Number:', tableNumber);
-  console.log('Menu Data:', tableNumber ? menuData : fallbackMenuData);
-  console.log('Menu Items:', menuItems);
-  console.log('Menu Items Count:', menuItems?.length || 0);
-
-
-
   // Set first category as active by default when categories are loaded
   useEffect(() => {
     if (categories.length > 0 && !activeCategory) {
-      console.log('Categories:', categories);
-      console.log('First category:', categories[0]);
       const firstCategoryId = categories[0]._id || categories[0].id;
-      console.log('Setting active category to:', firstCategoryId);
       setActiveCategory(firstCategoryId);
     }
   }, [categories, activeCategory]);
@@ -97,8 +92,6 @@ const MenuPage = () => {
         setActiveCategory={setActiveCategory}
         categories={categories} 
       />
-      
-
 
       {/* Menu Type Indicator */}
       {tableNumber && menuType && (

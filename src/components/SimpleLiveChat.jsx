@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
 import io from 'socket.io-client';
+import EmojiPicker from './EmojiPicker';
 
-const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber }) => {
+const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber, restaurantId }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const [chatId, setChatId] = useState(null);
@@ -21,24 +22,27 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
       const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''));
       setSocket(newSocket);
 
-      // Join chat room
+      // Join chat room with restaurant isolation
       newSocket.emit('joinChat', {
         chatId,
         userType: 'customer',
-        userName: customerName
+        userName: customerName,
+        restaurantId: restaurantId || null
       });
 
       // Listen for messages
       newSocket.on('receiveMessage', (data) => {
-        console.log('Customer received message:', data);
-        if (data.chatId === chatId && data.message.senderType !== 'customer') {
-          setMessages(prev => [...prev, {
-            id: Date.now() + Math.random(),
-            content: data.message.content,
-            sender: data.message.sender,
-            senderType: data.message.senderType,
-            timestamp: data.timestamp
-          }]);
+        if (data.chatId === chatId) {
+          // Show all messages except our own (avoid duplicates)
+          if (data.message.sender !== customerName) {
+            setMessages(prev => [...prev, {
+              id: Date.now() + Math.random(),
+              content: data.message.content,
+              sender: data.message.sender,
+              senderType: data.message.senderType,
+              timestamp: data.timestamp
+            }]);
+          }
         }
       });
 
@@ -51,7 +55,6 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
       });
 
       newSocket.on('chatAccepted', (data) => {
-        console.log('Chat accepted by staff:', data.staffName);
         setMessages(prev => [...prev, {
           id: Date.now(),
           content: `${data.staffName} has joined the chat and will assist you.`,
@@ -73,14 +76,17 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
 
   const initializeChat = async () => {
     try {
-      console.log('Creating chat for:', { customerName, customerEmail, orderNumber });
       const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerName, customerEmail, orderNumber })
+        body: JSON.stringify({ 
+          customerName, 
+          customerEmail, 
+          orderNumber,
+          restaurantId: restaurantId || null
+        })
       });
       const data = await response.json();
-      console.log('Chat creation response:', data);
       
       if (data.success) {
         setChatId(data.data.chatId);
@@ -146,7 +152,6 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
       });
       
       const result = await response.json();
-      console.log('Message saved to DB:', result);
       
       if (result.success && socket) {
         // Then emit via socket for real-time
@@ -160,7 +165,6 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
           }
         };
         
-        console.log('Customer emitting message:', messageData);
         socket.emit('sendMessage', messageData);
         
         // Add to local messages immediately
@@ -202,12 +206,12 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-md h-96 flex flex-col">
-        <div className="bg-red-500 text-white p-4 rounded-t-lg flex justify-between items-center">
+        <div className="bg-primary text-white p-4 rounded-t-lg flex justify-between items-center">
           <div className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5" />
             <span className="font-medium">Live Support</span>
           </div>
-          <button onClick={onClose} className="hover:bg-red-600 p-1 rounded">
+          <button onClick={onClose} className="hover:bg-primary/80 p-1 rounded">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -221,7 +225,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
               <div
                 className={`max-w-xs px-3 py-2 rounded-lg ${
                   message.senderType === 'customer'
-                    ? 'bg-red-500 text-white'
+                    ? 'bg-primary text-white'
                     : message.senderType === 'system'
                     ? 'bg-blue-100 text-blue-800'
                     : 'bg-gray-200 text-gray-800'
@@ -253,12 +257,13 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
               }}
               onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
               placeholder="Type your message..."
-              className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
+            <EmojiPicker onEmojiSelect={(emoji) => setNewMessage(prev => prev + emoji)} />
             <button
               onClick={sendMessage}
               disabled={!newMessage.trim()}
-              className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 disabled:opacity-50"
+              className="bg-primary text-white p-2 rounded-lg hover:opacity-90 disabled:opacity-50"
             >
               <Send className="w-4 h-4" />
             </button>

@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 import { useCreateMenuItemMutation, useUpdateMenuItemMutation, useGetCategoriesQuery } from "../slices/restaurantSlice";
+import { useBranding } from "../Context/BrandingContext";
+import "./MenuItemModal.css";
 
 const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
+  const { branding } = useBranding();
   const [imageFile, setImageFile] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -13,25 +16,25 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
     image: "",
     available: true,
     menuTypes: {
-      REGULAR: {
-        price: "",
-        available: true
-      },
-      VIP: {
-        price: "",
-        available: true
-      }
+      REGULAR: { available: true, price: "" },
+      VIP: { available: true, price: "" }
     }
   });
 
-
-  const { data: categoriesData } = useGetCategoriesQuery();
+  const { data: categoriesData, refetch: refetchCategories, isLoading: categoriesLoading } = useGetCategoriesQuery();
   const [createMenuItem, { isLoading: isCreating }] = useCreateMenuItemMutation();
   const [updateMenuItem, { isLoading: isUpdating }] = useUpdateMenuItemMutation();
 
   const categories = categoriesData?.data || [];
   const isEditing = !!menuItem;
   const isLoading = isCreating || isUpdating;
+
+  // Refetch categories when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      refetchCategories();
+    }
+  }, [isOpen, refetchCategories]);
 
   useEffect(() => {
     if (menuItem) {
@@ -44,12 +47,12 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
         available: menuItem.available ?? true,
         menuTypes: {
           REGULAR: {
-            price: menuItem.menuTypes?.REGULAR?.price?.toString() || menuItem.price?.toString() || "",
-            available: menuItem.menuTypes?.REGULAR?.available ?? true
+            available: menuItem.menuTypes?.REGULAR?.available ?? true,
+            price: menuItem.menuTypes?.REGULAR?.price?.toString() || menuItem.price?.toString() || ""
           },
           VIP: {
-            price: menuItem.menuTypes?.VIP?.price?.toString() || menuItem.price?.toString() || "",
-            available: menuItem.menuTypes?.VIP?.available ?? true
+            available: menuItem.menuTypes?.VIP?.available ?? true,
+            price: menuItem.menuTypes?.VIP?.price?.toString() || menuItem.price?.toString() || ""
           }
         }
       });
@@ -62,14 +65,8 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
         image: "",
         available: true,
         menuTypes: {
-          REGULAR: {
-            price: "",
-            available: true
-          },
-          VIP: {
-            price: "",
-            available: true
-          }
+          REGULAR: { available: true, price: "" },
+          VIP: { available: true, price: "" }
         }
       });
     }
@@ -78,49 +75,46 @@ const MenuItemModal = ({ isOpen, onClose, menuItem = null, onSuccess }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.description || !formData.category || 
-        !formData.menuTypes.REGULAR.price || !formData.menuTypes.VIP.price) {
-      toast.error("Please fill in all required fields including Regular and VIP prices");
+    if (!formData.name || !formData.description || !formData.category || !formData.price) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
     try {
       const formDataToSend = new FormData();
       
-      // Add text fields
       formDataToSend.append('name', formData.name);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('price', parseFloat(formData.menuTypes.REGULAR.price));
+      formDataToSend.append('price', parseInt(formData.price));
       formDataToSend.append('category', formData.category);
       formDataToSend.append('available', formData.available);
       
-      // Add menuTypes as JSON string
+      // Add menuTypes data
       formDataToSend.append('menuTypes', JSON.stringify({
         REGULAR: {
-          price: parseFloat(formData.menuTypes.REGULAR.price),
-          available: formData.menuTypes.REGULAR.available
+          available: formData.menuTypes.REGULAR.available,
+          price: parseInt(formData.menuTypes.REGULAR.price) || parseInt(formData.price)
         },
         VIP: {
-          price: parseFloat(formData.menuTypes.VIP.price),
-          available: formData.menuTypes.VIP.available
+          available: formData.menuTypes.VIP.available,
+          price: parseInt(formData.menuTypes.VIP.price) || parseInt(formData.price)
         }
       }));
       
-      // Add image file if selected
       if (imageFile) {
         formDataToSend.append('image', imageFile);
       }
-if (isEditing) {
-  await updateMenuItem({ menuId: menuItem._id, body: formDataToSend }).unwrap();
 
-} else {
-  await createMenuItem(formDataToSend).unwrap();
-}
-
+      if (isEditing) {
+        await updateMenuItem({ menuId: menuItem._id, body: formDataToSend }).unwrap();
+        toast.success("Menu item updated successfully!");
+      } else {
+        await createMenuItem(formDataToSend).unwrap();
+        toast.success("Menu item created successfully!");
+      }
       
       onSuccess();
       onClose();
-      // clear form
       setFormData({
         name: "",
         description: "",
@@ -129,14 +123,8 @@ if (isEditing) {
         image: "",
         available: true,
         menuTypes: {
-          REGULAR: {
-            price: "",
-            available: true
-          },
-          VIP: {
-            price: "",
-            available: true
-          }
+          REGULAR: { available: true, price: "" },
+          VIP: { available: true, price: "" }
         }
       });
       setImageFile(null);
@@ -149,8 +137,8 @@ if (isEditing) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] shadow-2xl border border-gray-100 overflow-hidden flex flex-col">
-        <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-4 flex justify-between items-center">
+      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] shadow-2xl border border-gray-100 overflow-hidden flex flex-col">
+        <div className="text-white p-4 flex justify-between items-center" style={{ backgroundColor: branding.primaryColor }}>
           <h2 className="text-2xl font-bold">
             {isEditing ? "✏️ Edit Menu Item" : "➕ Add New Menu Item"}
           </h2>
@@ -164,7 +152,6 @@ if (isEditing) {
 
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
           <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -174,83 +161,24 @@ if (isEditing) {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-all duration-200 bg-gray-50 focus:bg-white"
-                  placeholder="Enter drink name"
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl transition-all duration-200 bg-gray-50 focus:bg-white"
+                  style={{ 
+                    '--tw-ring-color': branding.primaryColor,
+                    '--tw-border-opacity': '1'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = branding.primaryColor;
+                    e.target.style.boxShadow = `0 0 0 2px ${branding.primaryColor}40`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  placeholder="Enter menu item name"
                   required
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  💰 Regular Price *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.menuTypes.REGULAR.price}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    menuTypes: {
-                      ...formData.menuTypes,
-                      REGULAR: {
-                        ...formData.menuTypes.REGULAR,
-                        price: e.target.value
-                      }
-                    }
-                  })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-all duration-200 bg-gray-50 focus:bg-white"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  👑 VIP Price *
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.menuTypes.VIP.price}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    menuTypes: {
-                      ...formData.menuTypes,
-                      VIP: {
-                        ...formData.menuTypes.VIP,
-                        price: e.target.value
-                      }
-                    }
-                  })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-all duration-200 bg-gray-50 focus:bg-white"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  📂 Category *
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-all duration-200 bg-gray-50 focus:bg-white"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category._id} value={category._id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-gray-800 mb-2">
                   📝 Description *
@@ -258,11 +186,207 @@ if (isEditing) {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full p-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-400 focus:border-red-400 transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
-                  rows={2}
+                  className="w-full p-3 border-2 border-gray-200 rounded-xl transition-all duration-200 bg-gray-50 focus:bg-white resize-none"
+                  onFocus={(e) => {
+                    e.target.style.borderColor = branding.primaryColor;
+                    e.target.style.boxShadow = `0 0 0 2px ${branding.primaryColor}40`;
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e5e7eb';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  rows={3}
                   placeholder="Describe the menu item"
                   required
                 />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    💰 Base Price *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.price ? Number(formData.price).toLocaleString() : ''}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/,/g, '');
+                      if (value === '' || /^\d+$/.test(value)) {
+                        setFormData({ ...formData, price: value });
+                      }
+                    }}
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl transition-all duration-200 bg-gray-50 focus:bg-white"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = branding.primaryColor;
+                      e.target.style.boxShadow = `0 0 0 2px ${branding.primaryColor}40`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e5e7eb';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                    placeholder="0"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter amount without decimals (e.g., 60000 for ₦60,000)</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-800 mb-2">
+                    📂 Category *
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                    className="w-full p-3 border-2 border-gray-200 rounded-xl transition-all duration-200 bg-gray-50 focus:bg-white"
+                    onFocus={(e) => {
+                      e.target.style.borderColor = branding.primaryColor;
+                      e.target.style.boxShadow = `0 0 0 2px ${branding.primaryColor}40`;
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.borderColor = '#e5e7eb';
+                      e.target.style.boxShadow = 'none';
+                    }}
+                    required
+                  >
+                    <option value="">Select a category</option>
+                    {categoriesLoading ? (
+                      <option disabled>Loading categories...</option>
+                    ) : categories.length === 0 ? (
+                      <option disabled>No categories found - Please create a category first</option>
+                    ) : (
+                      categories.map((category) => (
+                        <option key={category._id} value={category._id}>
+                          {category.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                </div>
+              </div>
+
+              {/* VIP/Regular Pricing Section */}
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-xl border border-purple-200">
+                <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  👑 VIP & Regular Pricing
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Regular Pricing */}
+                  <div className="bg-white p-4 rounded-lg border border-gray-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">🍽️</span>
+                      <h4 className="font-semibold text-gray-800">Regular Menu</h4>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Price
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.menuTypes.REGULAR.price ? Number(formData.menuTypes.REGULAR.price).toLocaleString() : ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/,/g, '');
+                            if (value === '' || /^\d+$/.test(value)) {
+                              setFormData({
+                                ...formData,
+                                menuTypes: {
+                                  ...formData.menuTypes,
+                                  REGULAR: {
+                                    ...formData.menuTypes.REGULAR,
+                                    price: value
+                                  }
+                                }
+                              });
+                            }
+                          }}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                          placeholder="Regular price"
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="regular-available"
+                          checked={formData.menuTypes.REGULAR.available}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            menuTypes: {
+                              ...formData.menuTypes,
+                              REGULAR: {
+                                ...formData.menuTypes.REGULAR,
+                                available: e.target.checked
+                              }
+                            }
+                          })}
+                          className="w-4 h-4 text-blue-500 border-gray-300 rounded focus:ring-blue-400 mr-2"
+                        />
+                        <label htmlFor="regular-available" className="text-sm text-gray-700">
+                          Available for regular customers
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* VIP Pricing */}
+                  <div className="bg-gradient-to-br from-yellow-50 to-orange-50 p-4 rounded-lg border border-yellow-200">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="text-lg">👑</span>
+                      <h4 className="font-semibold text-gray-800">VIP Menu</h4>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          VIP Price
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.menuTypes.VIP.price ? Number(formData.menuTypes.VIP.price).toLocaleString() : ''}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/,/g, '');
+                            if (value === '' || /^\d+$/.test(value)) {
+                              setFormData({
+                                ...formData,
+                                menuTypes: {
+                                  ...formData.menuTypes,
+                                  VIP: {
+                                    ...formData.menuTypes.VIP,
+                                    price: value
+                                  }
+                                }
+                              });
+                            }
+                          }}
+                          className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400"
+                          placeholder="VIP price"
+                        />
+                      </div>
+                      <div className="flex items-center">
+                        <input
+                          type="checkbox"
+                          id="vip-available"
+                          checked={formData.menuTypes.VIP.available}
+                          onChange={(e) => setFormData({
+                            ...formData,
+                            menuTypes: {
+                              ...formData.menuTypes,
+                              VIP: {
+                                ...formData.menuTypes.VIP,
+                                available: e.target.checked
+                              }
+                            }
+                          })}
+                          className="w-4 h-4 text-yellow-500 border-gray-300 rounded focus:ring-yellow-400 mr-2"
+                        />
+                        <label htmlFor="vip-available" className="text-sm text-gray-700">
+                          Available for VIP customers
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-3 text-xs text-gray-600">
+                  💡 Tip: VIP tables are identified by table numbers starting with "VIP" (e.g., VIP1, VIP2)
+                </div>
               </div>
 
               <div>
@@ -284,7 +408,13 @@ if (isEditing) {
                         reader.readAsDataURL(file);
                       }
                     }}
-                    className="w-full p-3 border-2 border-dashed border-gray-300 rounded-xl hover:border-red-400 transition-all duration-200 bg-gray-50 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-red-500 file:text-white file:cursor-pointer hover:file:bg-red-600"
+                    className="dynamic-file-input w-full p-3 border-2 border-dashed border-gray-300 rounded-xl transition-all duration-200 bg-gray-50"
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = branding.primaryColor;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = '#d1d5db';
+                    }}
                   />
                   {formData.image && (
                     <div className="relative">
@@ -299,7 +429,16 @@ if (isEditing) {
                           setFormData({ ...formData, image: "" });
                           setImageFile(null);
                         }}
-                        className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors"
+                        className="absolute top-2 right-2 text-white rounded-full w-6 h-6 flex items-center justify-center transition-colors"
+                        style={{
+                          backgroundColor: branding.primaryColor
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.backgroundColor = branding.secondaryColor;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.backgroundColor = branding.primaryColor;
+                        }}
                       >
                         ×
                       </button>
@@ -308,66 +447,22 @@ if (isEditing) {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex items-center bg-blue-50 p-3 rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="regularAvailable"
-                    checked={formData.menuTypes.REGULAR.available}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      menuTypes: {
-                        ...formData.menuTypes,
-                        REGULAR: {
-                          ...formData.menuTypes.REGULAR,
-                          available: e.target.checked
-                        }
-                      }
-                    })}
-                    className="w-5 h-5 text-blue-500 border-2 border-gray-300 rounded focus:ring-blue-400 mr-3"
-                  />
-                  <label htmlFor="regularAvailable" className="text-sm font-semibold text-gray-800">
-                    🍽️ Available for Regular customers
-                  </label>
-                </div>
-                
-                <div className="flex items-center bg-yellow-50 p-3 rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="vipAvailable"
-                    checked={formData.menuTypes.VIP.available}
-                    onChange={(e) => setFormData({ 
-                      ...formData, 
-                      menuTypes: {
-                        ...formData.menuTypes,
-                        VIP: {
-                          ...formData.menuTypes.VIP,
-                          available: e.target.checked
-                        }
-                      }
-                    })}
-                    className="w-5 h-5 text-yellow-500 border-2 border-gray-300 rounded focus:ring-yellow-400 mr-3"
-                  />
-                  <label htmlFor="vipAvailable" className="text-sm font-semibold text-gray-800">
-                    👑 Available for VIP customers
-                  </label>
-                </div>
-                
-                <div className="flex items-center bg-gray-50 p-3 rounded-xl">
-                  <input
-                    type="checkbox"
-                    id="available"
-                    checked={formData.available}
-                    onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
-                    className="w-5 h-5 text-red-500 border-2 border-gray-300 rounded focus:ring-red-400 mr-3"
-                  />
-                  <label htmlFor="available" className="text-sm font-semibold text-gray-800">
-                    ✅ Overall availability
-                  </label>
-                </div>
+              <div className="flex items-center bg-gray-50 p-3 rounded-xl">
+                <input
+                  type="checkbox"
+                  id="available"
+                  checked={formData.available}
+                  onChange={(e) => setFormData({ ...formData, available: e.target.checked })}
+                  className="w-5 h-5 border-2 border-gray-300 rounded mr-3"
+                  style={{
+                    accentColor: branding.primaryColor
+                  }}
+                />
+                <label htmlFor="available" className="text-sm font-semibold text-gray-800">
+                  ✅ Available for customers
+                </label>
               </div>
             </div>
-          </div>
 
             <div className="flex gap-4 pt-6 border-t border-gray-100 mt-6">
               <button
@@ -380,7 +475,18 @@ if (isEditing) {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl hover:from-red-600 hover:to-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                className="flex-1 px-6 py-3 text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                style={{ backgroundColor: branding.primaryColor }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.target.style.backgroundColor = branding.primaryColor + 'dd';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isLoading) {
+                    e.target.style.backgroundColor = branding.primaryColor;
+                  }
+                }}
               >
                 {isLoading ? "⏳ Saving..." : isEditing ? "✏️ Update Item" : "➕ Create Item"}
               </button>

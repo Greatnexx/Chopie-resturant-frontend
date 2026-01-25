@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 
 const EventPopup = () => {
   const [events, setEvents] = useState([]);
   const [currentEventIndex, setCurrentEventIndex] = useState(0);
-  const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,14 +14,10 @@ const EventPopup = () => {
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/events/active`);
       const data = await response.json();
-      
-      console.log('Events data:', data);
-      
+
       if (data.status && data.data.length > 0) {
-        console.log('First event:', data.data[0]);
-        console.log('Banner image:', data.data[0].bannerImage);
+
         setEvents(data.data);
-        setShowPopup(true);
       }
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -31,62 +26,105 @@ const EventPopup = () => {
     }
   };
 
-  // Auto-rotate events every 4 seconds if multiple events
+  // Auto-rotate events every 5 seconds if multiple events
   useEffect(() => {
-    if (events.length > 1 && showPopup) {
+    if (events.length > 1) {
       const interval = setInterval(() => {
         setCurrentEventIndex((prev) => (prev + 1) % events.length);
-      }, 4000);
+      }, 5000);
       return () => clearInterval(interval);
     }
-  }, [events.length, showPopup]);
+  }, [events.length]);
 
-  const handleClose = () => {
-    setShowPopup(false);
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'short',
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
-  if (loading || !showPopup || events.length === 0) {
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  if (loading || events.length === 0) {
     return null;
   }
 
   const currentEvent = events[currentEventIndex];
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <div className="relative w-full max-w-2xl max-h-[80vh] overflow-hidden rounded-lg">
-        <button
-          onClick={handleClose}
-          className="absolute top-3 right-3 z-10 p-2 bg-black bg-opacity-70 text-white rounded-full hover:bg-opacity-90 transition-all"
-        >
-          <X size={20} />
-        </button>
-        
+    <div className="max-w-6xl mx-auto px-4 mb-6">
+      <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-xl shadow-lg">
         {currentEvent.bannerImage ? (
           <img
             src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
             alt={currentEvent.title || 'Event Banner'}
-            className="w-full h-full object-cover cursor-pointer"
-            onClick={handleClose}
+            className="w-full h-full object-cover"
             onError={(e) => {
               console.error('Image failed to load:', e.target.src);
-              console.log('Current event:', currentEvent);
             }}
-            onLoad={() => console.log('Image loaded successfully:', currentEvent.bannerImage)}
           />
         ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-            <p className="text-gray-500">No banner image</p>
+          <div className="w-full h-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center">
+            <div className="text-center text-white">
+              <h3 className="text-2xl font-bold mb-2">{currentEvent.title}</h3>
+              <p className="text-lg opacity-90">{currentEvent.description}</p>
+            </div>
           </div>
         )}
         
+        {/* Date and Time Overlay */}
+        <div className="absolute top-4 left-4 bg-black bg-opacity-70 text-white px-4 py-2 rounded-lg">
+          <div className="flex items-center gap-2 mb-1">
+            <Calendar size={16} />
+            <span className="text-sm font-semibold">
+              {formatDate(currentEvent.startDate)}
+            </span>
+          </div>
+          {currentEvent.startTime && (
+            <div className="flex items-center gap-2">
+              <Clock size={16} />
+              <span className="text-sm">
+                {formatTime(currentEvent.startDate)}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Event Info Overlay */}
+        {currentEvent.bannerImage && (
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/70 to-transparent p-6">
+            <h3 className="text-white text-xl md:text-2xl font-bold mb-2">
+              {currentEvent.title}
+            </h3>
+            {currentEvent.description && (
+              <p className="text-white/90 text-sm md:text-base line-clamp-2">
+                {currentEvent.description}
+              </p>
+            )}
+          </div>
+        )}
+        
+        {/* Navigation dots for multiple events */}
         {events.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-2">
+          <div className="absolute bottom-4 right-4 flex gap-2">
             {events.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentEventIndex(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentEventIndex ? "bg-white" : "bg-white bg-opacity-50"
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentEventIndex 
+                    ? "bg-white scale-110" 
+                    : "bg-white/50 hover:bg-white/70"
                 }`}
               />
             ))}

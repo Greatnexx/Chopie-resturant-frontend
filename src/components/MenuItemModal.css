@@ -1,0 +1,30 @@
+/* Dynamic file input styling */
+.dynamic-file-input::file-selector-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-right: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dynamic-file-input::file-selector-button:hover {
+  background-color: var(--secondary-color);
+}
+
+.dynamic-file-input::-webkit-file-upload-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  margin-right: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dynamic-file-input::-webkit-file-upload-button:hover {
+  background-color: var(--secondary-color);
+}

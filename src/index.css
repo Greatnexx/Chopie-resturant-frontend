@@ -4,6 +4,52 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  /* Default theme colors */
+  --primary-color: #ef4444;
+  --secondary-color: #f97316;
+  --accent-color: #10b981;
+  --background-color: #ffffff;
+  --surface-color: #f9fafb;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --border-color: #e5e7eb;
+  --border-light: #f3f4f6;
+  --success-color: #10b981;
+  --warning-color: #f59e0b;
+  --error-color: #ef4444;
+  --info-color: #3b82f6;
+  
+  /* Status colors */
+  --status-pending: #f59e0b;
+  --status-accepted: #3b82f6;
+  --status-preparing: #f97316;
+  --status-completed: #10b981;
+  --status-cancelled: #ef4444;
+  
+  /* VIP colors */
+  --vip-primary: #fbbf24;
+  --vip-secondary: #92400e;
+  --vip-background: #fef3c7;
+  --vip-border: #fcd34d;
+  
+  /* Regular customer colors */
+  --regular-primary: #3b82f6;
+  --regular-secondary: #1e40af;
+  --regular-background: #dbeafe;
+  --regular-border: #93c5fd;
+  
+  /* Gradient colors */
+  --gradient-start: var(--primary-color);
+  --gradient-end: var(--secondary-color);
+  
+  /* Shadow colors */
+  --shadow-light: rgba(0, 0, 0, 0.1);
+  --shadow-medium: rgba(0, 0, 0, 0.15);
+  --shadow-heavy: rgba(0, 0, 0, 0.25);
+}
+
 *{
   margin: 0;
   padding: 0;
@@ -13,33 +59,116 @@
 
 body {
   font-size: 14px;
+  background-color: var(--surface-color);
+  color: var(--text-primary);
 }
 
-/* VIP and Regular Menu Indicators */
+/* Enhanced Cart Button Animations */
+@keyframes fadeInOut {
+  0%, 100% { opacity: 0; transform: translateY(10px); }
+  20%, 80% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes cartPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes cartGlow {
+  0%, 100% { box-shadow: 0 8px 32px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.1); }
+  50% { box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 6px rgba(255,255,255,0.2), 0 0 20px var(--accent-color); }
+}
+
+@keyframes badgeBounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.2) rotate(-5deg); }
+  75% { transform: scale(1.2) rotate(5deg); }
+}
+
+/* Cart button enhanced styling */
+.cart-button-enhanced {
+  animation: cartPulse 2s ease-in-out infinite, cartGlow 3s ease-in-out infinite;
+}
+
+.cart-button-enhanced:hover {
+  animation: none;
+}
+
+.cart-badge-enhanced {
+  animation: badgeBounce 1s ease-in-out infinite;
+}
+
+/* Dynamic VIP and Regular Menu Indicators */
 .bg-gold-100 {
-  background-color: #fef3c7;
+  background-color: var(--vip-background);
 }
 
 .text-gold-800 {
-  color: #92400e;
+  color: var(--vip-secondary);
 }
 
 .border-gold-300 {
-  border-color: #fcd34d;
+  border-color: var(--vip-border);
 }
 
 .bg-blue-100 {
-  background-color: #dbeafe;
+  background-color: var(--regular-background);
 }
 
 .text-blue-800 {
-  color: #1e40af;
+  color: var(--regular-secondary);
 }
 
 .border-blue-300 {
-  border-color: #93c5fd;
+  border-color: var(--regular-border);
 }
 
+/* Dynamic utility classes */
+.bg-primary {
+  background-color: var(--primary-color);
+}
 
+.bg-secondary {
+  background-color: var(--secondary-color);
+}
 
+.bg-accent {
+  background-color: var(--accent-color);
+}
 
+.text-primary {
+  color: var(--primary-color);
+}
+
+.text-secondary {
+  color: var(--secondary-color);
+}
+
+.border-primary {
+  border-color: var(--primary-color);
+}
+
+.gradient-primary {
+  background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+}
+
+/* Status indicator classes */
+.status-pending {
+  color: var(--status-pending);
+}
+
+.status-accepted {
+  color: var(--status-accepted);
+}
+
+.status-preparing {
+  color: var(--status-preparing);
+}
+
+.status-completed {
+  color: var(--status-completed);
+}
+
+.status-cancelled {
+  color: var(--status-cancelled);
+}

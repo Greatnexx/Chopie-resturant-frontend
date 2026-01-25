@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { MessageCircle, Send, Edit2, Trash2, Users, Clock } from "lucide-react";
 import io from "socket.io-client";
+import { toast } from "sonner";
 import EmojiPicker from "./EmojiPicker";
 
 const StaffChatPanel = ({ user }) => {
@@ -12,6 +13,7 @@ const StaffChatPanel = ({ user }) => {
   const [typingUser, setTypingUser] = useState("");
   const [socket, setSocket] = useState(null);
   const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
   useEffect(() => {
@@ -27,41 +29,65 @@ const StaffChatPanel = ({ user }) => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewMessage = (data) => {
-      console.log('Staff received new message:', data);
+    const handleMessageNotification = (data) => {
+      // Show notification for customer messages
+      if (data.message.senderType === 'customer') {
+        toast.success(`New message from ${data.customerName}`);
+      }
       
+      // Refresh chats to show updated message
+      loadChats();
+    };
+
+    const handleNewMessage = (data) => {
       // Update messages if this is the active chat
       setMessages((prev) => {
         // Check if this message is for the currently active chat
         if (activeChat && (data.chatId === activeChat.chatId || data.chatId === activeChat._id)) {
-          return [...prev, data.message];
+          // Avoid duplicates - check by content, sender and timestamp
+          const messageExists = prev.some(msg => {
+            const isSameContent = msg.content === data.message.content;
+            const isSameSender = msg.sender === data.message.sender;
+            const isRecentDuplicate = Math.abs(new Date(msg.createdAt || msg.timestamp) - new Date(data.message.createdAt || data.timestamp)) < 2000;
+            
+            return isSameContent && isSameSender && isRecentDuplicate;
+          });
+          
+          if (!messageExists) {
+            return [...prev, data.message];
+          }
         }
         return prev;
       });
-      
-      // Always update the chat list to show new message preview
-      setChats((prevChats) => 
-        prevChats.map((chat) => {
-          if (chat.chatId === data.chatId || chat._id === data.chatId) {
-            return {
-              ...chat,
-              lastActivity: new Date().toISOString(),
-              messages: chat.messages ? [...chat.messages, data.message] : [data.message]
-            };
-          }
-          return chat;
-        })
-      );
     };
 
     const handleChatUpdate = (data) => {
-      console.log('Staff received chat update:', data);
       loadChats();
     };
 
     const handleNewChatCreated = (data) => {
-      console.log('New chat created:', data);
       loadChats();
+    };
+
+    const handleNewChatAvailable = (data) => {
+      loadChats();
+    };
+
+    const handleChatAccepted = (data) => {
+      loadChats();
+      
+      // If this is the chat we just accepted, select it automatically
+      if (data.chatId && !activeChat) {
+        setTimeout(() => {
+          setChats(prevChats => {
+            const acceptedChat = prevChats.find(chat => chat.chatId === data.chatId);
+            if (acceptedChat) {
+              setActiveChat(acceptedChat);
+            }
+            return prevChats;
+          });
+        }, 1000); // Small delay to ensure chat list is updated
+      }
     };
 
     const handleMessageEdited = (data) => {
@@ -106,27 +132,38 @@ const StaffChatPanel = ({ user }) => {
       }
     };
 
+    socket.on("messageNotification", handleMessageNotification);
     socket.on("newMessage", handleNewMessage);
+    socket.on("receiveMessage", handleNewMessage); // Also listen to receiveMessage event
     socket.on("chatUpdate", handleChatUpdate);
     socket.on("newChatCreated", handleNewChatCreated);
+    socket.on("newChatAvailable", handleNewChatAvailable);
+    socket.on("chatAccepted", handleChatAccepted);
     socket.on("messageEdited", handleMessageEdited);
     socket.on("messageDeleted", handleMessageDeleted);
     socket.on("typingStatus", handleTypingStatus);
 
     return () => {
+      socket.off("messageNotification", handleMessageNotification);
       socket.off("newMessage", handleNewMessage);
+      socket.off("receiveMessage", handleNewMessage);
       socket.off("chatUpdate", handleChatUpdate);
       socket.off("newChatCreated", handleNewChatCreated);
+      socket.off("newChatAvailable", handleNewChatAvailable);
+      socket.off("chatAccepted", handleChatAccepted);
       socket.off("messageEdited", handleMessageEdited);
       socket.off("messageDeleted", handleMessageDeleted);
       socket.off("typingStatus", handleTypingStatus);
     };
-  }, [socket, activeChat, user.name]);
+  }, [socket, activeChat, user?.name]);
 
   useEffect(() => {
     if (activeChat && socket) {
-      console.log('Joining chat room:', activeChat.chatId);
-      socket.emit("joinChat", activeChat.chatId);
+      socket.emit("joinChat", {
+        chatId: activeChat.chatId,
+        userType: 'staff',
+        userName: user.name
+      });
       loadMessages(activeChat.chatId);
     }
   }, [activeChat, socket]);
@@ -140,7 +177,10 @@ const StaffChatPanel = ({ user }) => {
   }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      container.scrollTop = container.scrollHeight;
+    }
   }, [messages]);
 
   const loadChats = async () => {
@@ -148,14 +188,24 @@ const StaffChatPanel = ({ user }) => {
       const restaurantUser = JSON.parse(
         sessionStorage.getItem("restaurantUser") || "{}"
       );
-      const token = restaurantUser.token;
+      const token = restaurantUser.data?.token || restaurantUser.token;
+      
+      if (!token) {
+        return;
+      }
+      
       const response = await fetch(
         `${import.meta.env.VITE_API_URL}/chat/staff/chats`,
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { 
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
         }
       );
+      
       const data = await response.json();
+      
       if (data.success) {
         setChats(data.data);
       }
@@ -166,8 +216,16 @@ const StaffChatPanel = ({ user }) => {
 
   const loadMessages = async (chatId) => {
     try {
+      const restaurantUser = JSON.parse(
+        sessionStorage.getItem("restaurantUser") || "{}"
+      );
+      const token = restaurantUser.data?.token || restaurantUser.token;
+      
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`
+        `${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
       const data = await response.json();
       if (data.success) {
@@ -181,24 +239,63 @@ const StaffChatPanel = ({ user }) => {
   const sendMessage = async () => {
     if (!newMessage.trim() || !activeChat) return;
 
+    const messageContent = newMessage;
+    setNewMessage(""); // Clear input immediately
+    
     try {
-      await fetch(
+      const restaurantUser = JSON.parse(
+        sessionStorage.getItem("restaurantUser") || "{}"
+      );
+      const token = restaurantUser.data?.token || restaurantUser.token;
+      
+      // Add message to local state immediately with temporary ID
+      const tempMessage = {
+        _id: `temp_${Date.now()}`,
+        content: messageContent,
+        sender: user.name,
+        senderType: "staff",
+        createdAt: new Date().toISOString(),
+        isTemp: true
+      };
+      
+      setMessages(prev => [...prev, tempMessage]);
+      
+      const response = await fetch(
         `${import.meta.env.VITE_API_URL}/chat/${activeChat.chatId}/messages`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
           body: JSON.stringify({
             sender: user.name,
             senderType: "staff",
-            content: newMessage,
+            content: messageContent,
             messageType: "text",
           }),
         }
       );
-      setNewMessage("");
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // Replace temp message with real message
+        setMessages(prev => prev.map(msg => 
+          msg._id === tempMessage._id 
+            ? { ...result.data, _id: result.data._id || Date.now().toString() }
+            : msg
+        ));
+      } else {
+        // Remove temp message on error
+        setMessages(prev => prev.filter(msg => msg._id !== tempMessage._id));
+      }
+      
       stopTyping();
     } catch (error) {
       console.error("Failed to send message:", error);
+      // Remove temp message on error
+      setMessages(prev => prev.filter(msg => msg._id === `temp_${Date.now()}`));
     }
   };
 
@@ -259,7 +356,7 @@ const StaffChatPanel = ({ user }) => {
                 onClick={() => setActiveChat(chat)}
                 className={`p-3 border-b cursor-pointer hover:bg-gray-50 ${
                   activeChat?._id === chat._id
-                    ? "bg-blue-50 border-l-4 border-l-blue-500"
+                    ? "bg-primary/10 border-l-4 border-l-primary"
                     : ""
                 }`}
               >
@@ -306,7 +403,11 @@ const StaffChatPanel = ({ user }) => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-3">
+            <div 
+              ref={messagesContainerRef}
+              className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth" 
+              style={{ scrollBehavior: 'smooth' }}
+            >
               {messages.map((message) => (
                 <div
                   key={message._id}
@@ -319,7 +420,7 @@ const StaffChatPanel = ({ user }) => {
                   <div
                     className={`max-w-xs px-3 py-2 rounded-lg ${
                       message.senderType === "staff"
-                        ? "bg-blue-500 text-white"
+                        ? "bg-primary text-white"
                         : "bg-gray-200 text-gray-800"
                     }`}
                   >
@@ -353,7 +454,7 @@ const StaffChatPanel = ({ user }) => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
-                    className="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                     <EmojiPicker
@@ -366,7 +467,7 @@ const StaffChatPanel = ({ user }) => {
                 <button
                   onClick={sendMessage}
                   disabled={!newMessage.trim()}
-                  className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-primary text-white p-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-4 h-4" />
                 </button>

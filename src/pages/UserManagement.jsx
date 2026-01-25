@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Users, Plus, Star, ToggleLeft, ToggleRight, Trash2, Eye, RefreshCw, Copy, Menu } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
+import { useBranding } from "../Context/BrandingContext";
 
 const UserManagement = () => {
   const [showCreateUser, setShowCreateUser] = useState(false);
@@ -14,6 +15,7 @@ const UserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { branding } = useBranding();
 
   const { data: usersData, refetch } = useGetAllUsersQuery();
   const [toggleUserStatus] = useToggleUserStatusMutation();
@@ -90,10 +92,13 @@ const UserManagement = () => {
     navigate("/restaurant/login");
   };
 
+  const userData = sessionStorage.getItem("restaurantUser");
+  const currentUser = userData ? JSON.parse(userData).data || JSON.parse(userData) : {};
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <RestaurantSidebar 
-        user={JSON.parse(sessionStorage.getItem("restaurantUser") || "{}")} 
+        user={currentUser} 
         onLogout={handleLogout}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -123,7 +128,13 @@ const UserManagement = () => {
                 <h2 className="text-lg lg:text-xl font-semibold">Staff Members</h2>
                 <button
                   onClick={() => setShowCreateUser(true)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center justify-center gap-2 text-sm lg:text-base"
+                  className="text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 text-sm lg:text-base transition-colors"
+                  style={{ 
+                    backgroundColor: branding.primaryColor,
+                    '--hover-color': branding.primaryColor + 'dd'
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = branding.primaryColor + 'dd'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = branding.primaryColor}
                 >
                   <Plus className="w-4 h-4" />
                   Add User
@@ -194,7 +205,7 @@ const UserManagement = () => {
                         </td>
                         <td className="py-3">
                           <div className="flex gap-2">
-                            {user._id !== JSON.parse(sessionStorage.getItem("restaurantUser") || "{}")._id && (
+                            {user._id !== currentUser._id && (
                               <button
                                 onClick={() => handleToggleStatus(user._id, user.isActive)}
                                 className="text-blue-600 hover:text-blue-800"
@@ -297,7 +308,7 @@ const UserManagement = () => {
                     </div>
 
                     <div className="flex flex-wrap gap-2">
-                      {user._id !== JSON.parse(sessionStorage.getItem("restaurantUser") || "{}")._id && (
+                      {user._id !== currentUser._id && (
                         <button
                           onClick={() => handleToggleStatus(user._id, user.isActive)}
                           className="flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 rounded text-sm hover:bg-blue-200"
@@ -390,7 +401,12 @@ const UserManagement = () => {
                     <button
                       type="submit"
                       disabled={creating}
-                      className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 text-sm lg:text-base"
+                      className="flex-1 px-4 py-2 text-white rounded-lg disabled:opacity-50 text-sm lg:text-base transition-colors"
+                      style={{ 
+                        backgroundColor: creating ? branding.primaryColor + '80' : branding.primaryColor
+                      }}
+                      onMouseEnter={(e) => !creating && (e.target.style.backgroundColor = branding.primaryColor + 'dd')}
+                      onMouseLeave={(e) => !creating && (e.target.style.backgroundColor = branding.primaryColor)}
                     >
                       {creating ? "Creating..." : "Create"}
                     </button>
@@ -421,7 +437,12 @@ const UserManagement = () => {
                   <button
                     onClick={handleDeleteUser}
                     disabled={deleting}
-                    className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50 text-sm lg:text-base"
+                    className="flex-1 px-4 py-2 text-white rounded-lg disabled:opacity-50 text-sm lg:text-base transition-colors"
+                    style={{ 
+                      backgroundColor: deleting ? '#ef4444' + '80' : '#ef4444'
+                    }}
+                    onMouseEnter={(e) => !deleting && (e.target.style.backgroundColor = '#dc2626')}
+                    onMouseLeave={(e) => !deleting && (e.target.style.backgroundColor = '#ef4444')}
                   >
                     {deleting ? "Deleting..." : "Delete"}
                   </button>

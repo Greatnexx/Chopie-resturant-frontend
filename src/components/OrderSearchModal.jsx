@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useSearchOrdersQuery } from "../slices/restaurantSlice";
-import { Search, X, User, Clock, DollarSign } from "lucide-react";
+import { Search, X, User, Clock, Banknote } from "lucide-react";
+import { useBranding } from "../Context/BrandingContext";
 
 const OrderSearchModal = ({ isOpen, onClose }) => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { branding } = useBranding();
   const { data: searchResults, isLoading } = useSearchOrdersQuery(searchTerm, {
     skip: !searchTerm || searchTerm.length < 2,
   });
@@ -29,7 +31,8 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
               placeholder="Search by order number, customer name, or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+              className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:border-gray-400 transition-all"
+              style={{ '--focus-ring-color': branding.primaryColor + '33' }}
               autoFocus
             />
           </div>
@@ -38,7 +41,7 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
         <div className="p-6 overflow-y-auto max-h-96">
           {isLoading ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 mx-auto" style={{ borderBottomColor: branding.primaryColor }}></div>
               <p className="text-gray-500 mt-2">Searching...</p>
             </div>
           ) : orders.length === 0 && searchTerm.length >= 2 ? (
@@ -66,8 +69,8 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
                           <span>{new Date(order.createdAt).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
-                          <span>${order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
+                          <Banknote className="w-4 h-4" />
+                          <span>₦{order.totalAmount ? order.totalAmount.toFixed(2) : '0.00'}</span>
                         </div>
                       </div>
                     </div>
@@ -95,7 +98,7 @@ const OrderSearchModal = ({ isOpen, onClose }) => {
                       {order.items.map((item, index) => (
                         <div key={index} className="flex justify-between text-sm">
                           <span>{item.name} × {item.quantity}</span>
-                          <span>${item.totalPrice ? item.totalPrice.toFixed(2) : '0.00'}</span>
+                          <span>₦{item.totalPrice ? item.totalPrice.toFixed(2) : '0.00'}</span>
                         </div>
                       ))}
                     </div>

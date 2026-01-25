@@ -8,6 +8,8 @@ export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
+  const [showToast, setShowToast] = useState(false);
+  const [toastData, setToastData] = useState({ itemName: '', itemCount: 0 });
   const [tableNumber, setTableNumber] = useState(() => {
     // Check URL parameter first, then sessionStorage
     const urlParams = new URLSearchParams(window.location.search);
@@ -57,16 +59,29 @@ export const CartProvider = ({ children }) => {
        updated[existingIndex].quantity += item.quantity;
        updated[existingIndex].totalPrice += item.totalPrice;
        sessionStorage.setItem("cart", JSON.stringify(updated));
+       
+       // Show toast notification
+       setToastData({ itemName: item.name, itemCount: item.quantity });
+       setShowToast(true);
+       
        return updated;
      }
 
      // otherwise, create a unique entry
      const newCart = [...prev, { ...item, cartId: uuidv4() }];
      sessionStorage.setItem("cart", JSON.stringify(newCart));
+     
+     // Show toast notification
+     setToastData({ itemName: item.name, itemCount: item.quantity });
+     setShowToast(true);
+     
      return newCart;
    });
  };
 
+  const hideToast = () => {
+    setShowToast(false);
+  };
 
   const removeFromCart = (itemIndex) => {
     setCartItems((prev) => prev.filter((_, i) => i !== itemIndex));
@@ -86,7 +101,17 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, clearCart, tableNumber, setTableNumber: setTableNumberWithSession }}
+      value={{ 
+        cartItems, 
+        addToCart, 
+        removeFromCart, 
+        clearCart, 
+        tableNumber, 
+        setTableNumber: setTableNumberWithSession,
+        showToast,
+        toastData,
+        hideToast
+      }}
     >
       {children}
     </CartContext.Provider>

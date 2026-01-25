@@ -17,10 +17,12 @@ const EventManagement = () => {
       return;
     }
     const parsedUser = JSON.parse(userData);
-    setUser(parsedUser);
+    // Handle nested user data structure
+    const user = parsedUser.data || parsedUser;
+    setUser(user);
 
     // Check if user has permission to manage events
-    if (!["SuperAdmin", "MenuManager"].includes(parsedUser.role)) {
+    if (!["SuperAdmin", "MenuManager"].includes(user.role)) {
       navigate("/restaurant/dashboard");
     }
   }, [navigate]);

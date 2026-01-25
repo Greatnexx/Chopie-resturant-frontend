@@ -3,6 +3,7 @@ import { useLoginRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, ChefHat, Eye, EyeOff } from "lucide-react";
+import { triggerBrandingRefresh } from "../Context/BrandingContext";
 
 const RestaurantLogin = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -14,7 +15,10 @@ const RestaurantLogin = () => {
     e.preventDefault();
     try {
       const result = await loginRestaurant(formData).unwrap();
-      sessionStorage.setItem("restaurantUser", JSON.stringify(result.data));
+      // Store the entire result which includes the token
+      sessionStorage.setItem("restaurantUser", JSON.stringify(result));
+      // Trigger branding refresh to load restaurant's custom branding
+      triggerBrandingRefresh();
       toast.success("Login successful!");
       navigate("/restaurant/dashboard");
     } catch (error) {

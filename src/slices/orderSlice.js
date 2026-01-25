@@ -10,10 +10,24 @@ export const orderApiSlice = apiSlice.injectEndpoints({
       }),
     }),
     trackOrder: builder.query({
-      query: (orderNumber) => `/order/${orderNumber}/track`,
+      query: (orderParam) => {
+        // Support both old format (orderNumber) and new format (restaurantId/orderNumber)
+        if (orderParam.includes('/')) {
+          const [restaurantId, orderNumber] = orderParam.split('/');
+          return `/order/${orderNumber}/track?restaurantId=${restaurantId}`;
+        }
+        return `/order/${orderParam}/track`;
+      },
     }),
     searchOrder: builder.query({
-      query: (searchTerm) => `/order/search/${searchTerm}`,
+      query: (searchParam) => {
+        // Support both old format (searchTerm) and new format (restaurantId/searchTerm)
+        if (searchParam.includes('/')) {
+          const [restaurantId, searchTerm] = searchParam.split('/');
+          return `/order/search/${searchTerm}?restaurantId=${restaurantId}`;
+        }
+        return `/order/search/${searchParam}`;
+      },
     }),
     getAllOrders: builder.query({
       query: () => "/order",

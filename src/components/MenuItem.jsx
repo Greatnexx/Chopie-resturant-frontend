@@ -42,7 +42,9 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
     }
     
     const baseUrl = getBaseUrl().replace('/api/v1', '');
-    return `${baseUrl}${item.image}`;
+    const fullUrl = `${baseUrl}${item.image}`;
+    console.log('MenuItem Image URL:', fullUrl, 'Original path:', item.image);
+    return fullUrl;
   };
   
   const imageUrl = getImageUrl();

@@ -27,7 +27,9 @@ const Header = () => {
     if (!logoPath) return null;
     if (logoPath.startsWith('http')) return logoPath;
     const baseUrl = getBaseUrl().replace('/api/v1', '');
-    return `${baseUrl}${logoPath}`;
+    const fullUrl = `${baseUrl}${logoPath}`;
+    console.log('Logo URL:', fullUrl, 'Original path:', logoPath);
+    return fullUrl;
   };
 
   // Use tenant branding if available, otherwise use branding context

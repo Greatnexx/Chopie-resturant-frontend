@@ -13,6 +13,13 @@ const SuperAdminDashboard = () => {
     totalUsers: 0
   });
 
+  const getLogoUrl = (logoPath) => {
+    if (!logoPath) return null;
+    if (logoPath.startsWith('http')) return logoPath;
+    const baseUrl = getBaseUrl().replace('/api/v1', '');
+    return `${baseUrl}${logoPath}`;
+  };
+
   useEffect(() => {
     if (user?.role === 'SuperAdmin') {
       fetchRestaurants();
@@ -202,7 +209,7 @@ const SuperAdminDashboard = () => {
                         {restaurant.branding?.logo && (
                           <img 
                             className="h-10 w-10 rounded-full mr-3" 
-                            src={restaurant.branding.logo} 
+                            src={getLogoUrl(restaurant.branding.logo)} 
                             alt={restaurant.name}
                           />
                         )}

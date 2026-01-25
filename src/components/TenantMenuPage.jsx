@@ -9,6 +9,7 @@ import SimpleLiveChat from './SimpleLiveChat';
 import EventImagePopup from './EventImagePopup';
 import { useCart } from '../Context/CartContext';
 import { MessageCircle, Search, Clock } from 'lucide-react';
+import { getBaseUrl } from '../utils/apiUtils';
 
 const TenantMenuPage = () => {
   const currentTenant = useSelector(selectCurrentTenant);
@@ -43,7 +44,7 @@ const TenantMenuPage = () => {
       setLoading(true);
 
       // Fetch categories
-      const categoriesResponse = await fetch(`/api/v1/tenant/${currentTenant.subdomain}/categories`);
+      const categoriesResponse = await fetch(`${getBaseUrl()}/tenant/${currentTenant.subdomain}/categories`);
       const categoriesData = await categoriesResponse.json();
 
       if (categoriesData.status) {
@@ -59,7 +60,7 @@ const TenantMenuPage = () => {
           
           for (const category of categoriesData.data) {
             try {
-              const menuResponse = await fetch(`/api/v1/menus/${category._id}/table/${tableNumber}`, {
+              const menuResponse = await fetch(`${getBaseUrl()}/menus/${category._id}/table/${tableNumber}`, {
                 headers: {
                   'X-Tenant-Subdomain': currentTenant.subdomain
                 }
@@ -79,7 +80,7 @@ const TenantMenuPage = () => {
 
         } else {
           // Fallback to regular menu fetch
-          const menuResponse = await fetch(`/api/v1/tenant/${currentTenant.subdomain}/menu`);
+          const menuResponse = await fetch(`${getBaseUrl()}/tenant/${currentTenant.subdomain}/menu`);
           const menuData = await menuResponse.json();
 
           if (menuData.status) {

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import BrandingCustomization from './BrandingCustomization';
+import { getBaseUrl } from '../utils/apiUtils';
 
 const RestaurantCustomizationDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -52,7 +53,7 @@ const RestaurantCustomizationDashboard = () => {
 
   const fetchSettings = async () => {
     try {
-      const response = await fetch('/api/v1/restaurant/settings', {
+      const response = await fetch(`${getBaseUrl()}/restaurant/settings`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -92,7 +93,7 @@ const RestaurantCustomizationDashboard = () => {
     setMessage('');
 
     try {
-      const response = await fetch('/api/v1/restaurant/settings', {
+      const response = await fetch(`${getBaseUrl()}/restaurant/settings`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

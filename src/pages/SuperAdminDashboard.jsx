@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
+import { getBaseUrl } from '../utils/apiUtils';
 
 const SuperAdminDashboard = () => {
   const { user } = useSelector((state) => state.auth);
@@ -21,7 +22,7 @@ const SuperAdminDashboard = () => {
 
   const fetchRestaurants = async () => {
     try {
-      const response = await fetch('/api/v1/tenant/admin/restaurants', {
+      const response = await fetch(`${getBaseUrl()}/tenant/admin/restaurants`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -37,7 +38,7 @@ const SuperAdminDashboard = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/v1/admin/stats', {
+      const response = await fetch(`${getBaseUrl()}/admin/stats`, {
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
       });
       const data = await response.json();
@@ -51,7 +52,7 @@ const SuperAdminDashboard = () => {
 
   const handleRestaurantStatusChange = async (restaurantId, isActive) => {
     try {
-      const response = await fetch(`/api/v1/tenant/admin/restaurants/${restaurantId}/status`, {
+      const response = await fetch(`${getBaseUrl()}/tenant/admin/restaurants/${restaurantId}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

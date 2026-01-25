@@ -42,9 +42,7 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
     }
     
     const baseUrl = getBaseUrl().replace('/api/v1', '');
-    const fullUrl = `${baseUrl}${item.image}`;
-    console.log('MenuItem Image URL:', fullUrl, 'Original path:', item.image);
-    return fullUrl;
+    return `${baseUrl}${item.image}`;
   };
   
   const imageUrl = getImageUrl();
@@ -101,11 +99,10 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
         {/* Image Section */}
         <div className="relative overflow-hidden bg-gradient-to-br from-gray-50 to-gray-100">
           <img
-            src={imageUrl || '/placeholder-food.jpg'}
+            src={imageUrl}
             alt={item.name}
             className="w-full h-48 object-contain object-center transition-transform duration-300 hover:scale-105"
             onError={(e) => {
-              // Use a simple colored div as fallback instead of external placeholder
               e.target.style.display = 'none';
               e.target.nextElementSibling.style.display = 'flex';
             }}

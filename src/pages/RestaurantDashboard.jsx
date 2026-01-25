@@ -443,7 +443,7 @@ const RestaurantDashboard = () => {
         )}
 
         {/* Regular Dashboard Content for other roles */}
-        {user?.role !== 'TransactionAdmin' && (
+        {user?.role !== 'TransactionAdmin' && user?.role !== 'MenuManager' && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Quick Setup</h2>
           <p className="text-gray-600 mb-6">Get your restaurant ready to receive orders</p>

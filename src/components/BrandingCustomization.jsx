@@ -26,9 +26,20 @@ const BrandingCustomization = () => {
     if (contextBranding) {
       setBranding(contextBranding);
       if (contextBranding.logo) {
-        setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'http://localhost:8000'}${contextBranding.logo}`);
+        setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${contextBranding.logo}`);
       }
     }
+    
+    // Get restaurant name from session storage
+    const userData = sessionStorage.getItem('restaurantUser');
+    if (userData) {
+      const user = JSON.parse(userData);
+      const restaurantName = user?.data?.restaurantName || user?.restaurantName;
+      if (restaurantName && !branding.name) {
+        setBranding(prev => ({ ...prev, name: restaurantName }));
+      }
+    }
+    
     fetchBrandingData();
   }, [contextBranding]);
 
@@ -38,13 +49,14 @@ const BrandingCustomization = () => {
       const user = userData ? JSON.parse(userData) : null;
       const token = user?.data?.token || user?.token;
       
-      const response = await fetch('/api/v1/restaurant/branding', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-chopie-project.onrender.com/api/v1';
+      const response = await fetch(`${apiUrl}/restaurant/branding`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       if (data.status) {
         setBranding({
-          name: data.data.branding?.name || '',
+          name: data.data.branding?.name || data.data.name || '',
           logo: data.data.branding?.logo || null,
           primaryColor: data.data.branding?.primaryColor || '#ef4444',
           secondaryColor: data.data.branding?.secondaryColor || '#f97316',
@@ -52,7 +64,7 @@ const BrandingCustomization = () => {
           fontFamily: data.data.branding?.fontFamily || 'Inter'
         });
         if (data.data.branding?.logo) {
-          setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'http://localhost:8000'}${data.data.branding.logo}`);
+          setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${data.data.branding.logo}`);
         }
       }
     } catch (error) {
@@ -94,7 +106,8 @@ const BrandingCustomization = () => {
       const user = userData ? JSON.parse(userData) : null;
       const token = user?.data?.token || user?.token;
 
-      const response = await fetch('/api/v1/restaurant/branding', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-chopie-project.onrender.com/api/v1';
+      const response = await fetch(`${apiUrl}/restaurant/branding`, {
         method: 'PUT',
         headers: { 'Authorization': `Bearer ${token}` },
         body: formData

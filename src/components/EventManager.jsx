@@ -8,7 +8,7 @@ const EventManager = () => {
   const [events, setEvents] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     title: "",
     description: "",
     startDate: "",
@@ -113,7 +113,7 @@ const EventManager = () => {
       const result = await response.json();
       if (response.ok && result.status) {
         toast.success("Event banner created successfully!");
-        await fetchEvents(); // Wait for events to refresh
+        await fetchEvents();
         setShowForm(false);
         setFormData({ title: "", description: "", startDate: "", endDate: "" });
         setSelectedImage(null);

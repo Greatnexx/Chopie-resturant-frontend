@@ -79,7 +79,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose, onChatToggle, show
           <div className="flex items-center gap-3">
             {branding.logo ? (
               <img 
-                src={branding.logo.startsWith('http') ? branding.logo : `${import.meta.env.VITE_API_URL?.split('/api')[0] || 'http://localhost:8000'}${branding.logo}`}
+                src={branding.logo.startsWith('http') ? branding.logo : `${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${branding.logo}`}
                 alt="Restaurant Logo" 
                 className="w-8 h-8 object-cover rounded"
               />

@@ -458,7 +458,7 @@ const RestaurantDashboard = () => {
               <p className="text-sm text-gray-600 mb-3">Add your restaurant logo and brand colors</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Go to Settings
               </button>
@@ -474,7 +474,7 @@ const RestaurantDashboard = () => {
               <p className="text-sm text-gray-600 mb-3">Add categories and menu items</p>
               <button 
                 onClick={() => navigate('/restaurant/menu-manager')}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Manage Menu
               </button>
@@ -490,7 +490,7 @@ const RestaurantDashboard = () => {
               <p className="text-sm text-gray-600 mb-3">Create accounts for your team</p>
               <button 
                 onClick={() => navigate('/restaurant/users')}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Manage Users
               </button>
@@ -503,10 +503,10 @@ const RestaurantDashboard = () => {
                 </div>
                 <h3 className="font-semibold text-gray-900">Set Hours</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Configure operating hours</p>
+              <p className="text-sm text-gray-600 mb-3">Configure your operating hours</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
-                className="w-full bg-gray-50 hover:bg-gray-100 text-gray-700 px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Set Hours
               </button>

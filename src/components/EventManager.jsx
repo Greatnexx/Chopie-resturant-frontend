@@ -226,20 +226,30 @@ const EventManager = () => {
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <input
-                  type="datetime-local"
-                  placeholder="Start Date (Optional)"
-                  value={formData.startDate}
-                  onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  className="p-2 sm:p-3 border rounded-lg text-sm sm:text-base"
-                />
-                <input
-                  type="datetime-local"
-                  placeholder="End Date (Optional)"
-                  value={formData.endDate}
-                  onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  className="p-2 sm:p-3 border rounded-lg text-sm sm:text-base"
-                />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Start Date *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.startDate}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                    className="p-2 sm:p-3 border rounded-lg text-sm sm:text-base w-full"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    End Date *
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.endDate}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                    className="p-2 sm:p-3 border rounded-lg text-sm sm:text-base w-full"
+                    required
+                  />
+                </div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-2">
@@ -271,21 +281,13 @@ const EventManager = () => {
             <Calendar className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No events created yet</h3>
             <p className="text-gray-500 mb-4 text-sm sm:text-base px-4">Create your first event to engage with customers</p>
-            <button
-              onClick={() => setShowForm(true)}
-              className="text-white px-4 py-2 rounded-lg transition-colors text-sm sm:text-base"
-              style={{ backgroundColor: branding.primaryColor }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = branding.primaryColor + 'dd'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = branding.primaryColor}
-            >
-              Create Your First Event
-            </button>
+           
           </div>
         ) : (
           events.map((event) => (
             <div key={event._id} className="bg-white p-4 rounded-lg shadow border">
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                {event.bannerImage && (
+             {event.bannerImage && (
                   <img
                     src={getEventImageUrl(event.bannerImage)}
                     alt={event.title}

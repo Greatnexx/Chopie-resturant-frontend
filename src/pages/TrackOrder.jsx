@@ -158,7 +158,10 @@ const TrackOrder = () => {
         {/* Back to Menu Button */}
         <div className="mb-4 sm:mb-6">
           <button
-            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
+            onClick={() => {
+              const subdomain = currentTenant?.subdomain || restaurantId;
+              navigate(`/r/${subdomain}`);
+            }}
             className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white border-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm sm:text-base"
             style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
           >
@@ -169,11 +172,9 @@ const TrackOrder = () => {
 
         {/* Header Section */}
         <div className="text-center mb-8 sm:mb-12">
-          <button 
-            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
-            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 hover:opacity-80 transition-all duration-200 hover:scale-105 cursor-pointer border-2 border-white shadow-lg" 
+          <div 
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6 border-2 border-white shadow-lg" 
             style={{ backgroundColor: 'var(--primary-color)' }}
-            title="Click to go back to menu"
           >
             {restaurantBranding.logo ? (
               <img 
@@ -184,9 +185,12 @@ const TrackOrder = () => {
             ) : (
               <Search className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
             )}
-          </button>
+          </div>
           <button 
-            onClick={() => navigate(`/r/${restaurantId || currentTenant?.subdomain}`)}
+            onClick={() => {
+              const subdomain = currentTenant?.subdomain || restaurantId;
+              navigate(`/r/${subdomain}`);
+            }}
             className="hover:opacity-80 transition-opacity group"
             title="Click to go back to menu"
           >
@@ -379,9 +383,9 @@ const TrackOrder = () => {
                           {step.status === "pending"
                             ? "Order Received"
                             : step.status === "Preparing"
-                            ? "Being Prepared"
+                            ? "Preparing"
                             : step.status === "completed"
-                            ? "Ready for Pickup"
+                            ? "Completed"
                             : step.status}
                         </h4>
                         <span

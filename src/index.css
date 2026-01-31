@@ -1,3 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -9,6 +14,7 @@
   --primary-color: #ef4444;
   --secondary-color: #f97316;
   --accent-color: #10b981;
+  --font-family: 'Inter';
   --background-color: #ffffff;
   --surface-color: #f9fafb;
   --text-primary: #111827;
@@ -54,13 +60,14 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
+  font-family: var(--font-family), sans-serif;
 }
 
 body {
   font-size: 14px;
   background-color: var(--surface-color);
   color: var(--text-primary);
+  font-family: var(--font-family), sans-serif;
 }
 
 /* Enhanced Cart Button Animations */

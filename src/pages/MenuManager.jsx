@@ -219,7 +219,7 @@ const MenuManager = () => {
                               <div className="flex items-center gap-3">
                                 {menu.image && (
                                   <img 
-                                    src={`${import.meta.env.VITE_API_URL.split('/api')[0]}${menu.image}`}
+                                    src={menu.image.startsWith('http') ? menu.image : `${import.meta.env.VITE_API_URL.split('/api')[0]}${menu.image}`}
                                     alt={menu.name}
                                     className="w-12 h-12 rounded-lg object-cover"
                                   />
@@ -282,7 +282,7 @@ const MenuManager = () => {
                         <div className="flex items-start gap-3 mb-3">
                           {menu.image && (
                             <img 
-                              src={`${import.meta.env.VITE_API_URL.split('/api')[0]}${menu.image}`}
+                              src={menu.image.startsWith('http') ? menu.image : `${import.meta.env.VITE_API_URL.split('/api')[0]}${menu.image}`}
                               alt={menu.name}
                               className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                             />

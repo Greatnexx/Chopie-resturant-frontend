@@ -26,7 +26,12 @@ const BrandingCustomization = () => {
     if (contextBranding) {
       setBranding(contextBranding);
       if (contextBranding.logo) {
-        setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${contextBranding.logo}`);
+        // Check if logo is already a full URL (Cloudinary) or needs backend URL prefix
+        if (contextBranding.logo.startsWith('http')) {
+          setLogoPreview(contextBranding.logo);
+        } else {
+          setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${contextBranding.logo}`);
+        }
       }
     }
     
@@ -54,7 +59,8 @@ const BrandingCustomization = () => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      if (data.status) {
+      
+      if (data.status && data.data?.branding) {
         setBranding({
           name: data.data.branding?.name || data.data.name || '',
           logo: data.data.branding?.logo || null,
@@ -64,7 +70,11 @@ const BrandingCustomization = () => {
           fontFamily: data.data.branding?.fontFamily || 'Inter'
         });
         if (data.data.branding?.logo) {
-          setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${data.data.branding.logo}`);
+          if (data.data.branding.logo.startsWith('http')) {
+            setLogoPreview(data.data.branding.logo);
+          } else {
+            setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${data.data.branding.logo}`);
+          }
         }
       }
     } catch (error) {
@@ -114,20 +124,35 @@ const BrandingCustomization = () => {
       });
 
       const data = await response.json();
+      
       if (data.status) {
         setMessage('Branding updated successfully!');
-        // Update local state with the new values immediately
-        setBranding(prev => ({
-          ...prev,
-          primaryColor: prev.primaryColor,
-          secondaryColor: prev.secondaryColor,
-          accentColor: prev.accentColor,
-          fontFamily: prev.fontFamily
-        }));
+        
+        // Update local state with the response data
+        const updatedBranding = {
+          name: data.data?.branding?.name || branding.name,
+          logo: data.data?.branding?.logo || branding.logo,
+          primaryColor: data.data?.branding?.primaryColor || branding.primaryColor,
+          secondaryColor: data.data?.branding?.secondaryColor || branding.secondaryColor,
+          accentColor: data.data?.branding?.accentColor || branding.accentColor,
+          fontFamily: data.data?.branding?.fontFamily || branding.fontFamily
+        };
+        
+        setBranding(updatedBranding);
+        
+        // Update logo preview with the new Cloudinary URL
+        if (data.data?.branding?.logo) {
+          if (data.data.branding.logo.startsWith('http')) {
+            setLogoPreview(data.data.branding.logo);
+          } else {
+            setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${data.data.branding.logo}`);
+          }
+        }
+        
         // Refresh branding context to apply changes globally
         await fetchBranding();
         // Apply changes immediately to current page
-        applyBranding(branding);
+        applyBranding(updatedBranding);
       } else {
         setMessage(data.message || 'Failed to update branding');
       }

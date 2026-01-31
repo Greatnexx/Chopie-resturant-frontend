@@ -37,6 +37,16 @@ const EventImagePopup = ({ isOpen, onClose, restaurantId, branding }) => {
     }
   }, [events.length]);
 
+  const getEventImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+    if (imagePath.startsWith('http')) {
+      return imagePath; // Already a full URL (Cloudinary)
+    }
+    // Fallback for local images
+    const baseUrl = import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com';
+    return `${baseUrl}${imagePath}`;
+  };
+
   const isEventActive = (event) => {
     const now = new Date();
     const startDate = new Date(event.startDate);
@@ -112,7 +122,7 @@ const EventImagePopup = ({ isOpen, onClose, restaurantId, branding }) => {
           <div className="relative w-full h-full">
             {currentEvent.bannerImage ? (
               <img
-                src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
+                src={getEventImageUrl(currentEvent.bannerImage)}
                 alt={currentEvent.title || 'Event'}
                 className="w-full h-full object-contain"
                 onError={(e) => {

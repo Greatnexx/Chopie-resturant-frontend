@@ -37,10 +37,13 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
   // Environment-aware image URL construction
   const getImageUrl = () => {
     if (!item.image) return null;
+    
+    // If it's already a full URL (Cloudinary), use it directly
     if (item.image.startsWith('http')) {
-      return item.image; // Already a full URL
+      return item.image;
     }
     
+    // If it's a local path, add backend URL
     const baseUrl = getBaseUrl().replace('/api/v1', '');
     return `${baseUrl}${item.image}`;
   };

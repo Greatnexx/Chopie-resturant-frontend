@@ -69,7 +69,10 @@ export const BrandingProvider = ({ children }) => {
     root.style.setProperty('--primary-color', brandingData.primaryColor);
     root.style.setProperty('--secondary-color', brandingData.secondaryColor);
     root.style.setProperty('--accent-color', brandingData.accentColor);
-    root.style.setProperty('--font-family', brandingData.fontFamily);
+    root.style.setProperty('--font-family', `'${brandingData.fontFamily}'`);
+    
+    // Also apply to body for immediate effect
+    document.body.style.fontFamily = `'${brandingData.fontFamily}', sans-serif`;
   };
 
   useEffect(() => {

@@ -12,28 +12,47 @@ const EventPopup = () => {
 
   const fetchActiveEvents = async () => {
     try {
-      // Get restaurant ID from URL or other source
+      // Get restaurant ID from URL parameters or path
       const urlParams = new URLSearchParams(window.location.search);
-      const restaurantIdFromUrl = urlParams.get('restaurantId');
+      let restaurantIdFromUrl = urlParams.get('restaurantId');
+      
+      // If not in URL params, try to extract from path (for tenant routes like /r/subdomain)
+      if (!restaurantIdFromUrl) {
+        const pathSegments = window.location.pathname.split('/');
+        const rIndex = pathSegments.indexOf('r');
+        if (rIndex !== -1 && pathSegments[rIndex + 1]) {
+          // For tenant routes, we need to get restaurant ID by subdomain
+          const subdomain = pathSegments[rIndex + 1];
+          try {
+            const tenantResponse = await fetch(`${import.meta.env.VITE_API_URL}/tenant/resolve/${subdomain}`);
+            const tenantData = await tenantResponse.json();
+            if (tenantData.status && tenantData.data) {
+              restaurantIdFromUrl = tenantData.data._id;
+            }
+          } catch (error) {
+            console.error('Error fetching tenant info:', error);
+          }
+        }
+      }
       
       if (!restaurantIdFromUrl) {
-        console.log('No restaurant ID found in URL');
+        console.log('No restaurant ID found');
         return;
       }
 
+      console.log('Fetching events for restaurant:', restaurantIdFromUrl);
       const response = await fetch(`${import.meta.env.VITE_API_URL}/events/restaurant/${restaurantIdFromUrl}`);
       const data = await response.json();
 
       if (data.status && data.data.length > 0) {
-        // Filter events that are currently active (between start and end date)
+        // Show events that haven't ended yet (both upcoming and currently active)
         const now = new Date();
-        const activeEvents = data.data.filter(event => {
-          const startDate = new Date(event.startDate);
+        const visibleEvents = data.data.filter(event => {
           const endDate = new Date(event.endDate);
-          return now >= startDate && now <= endDate;
+          return endDate >= now; // Show if event hasn't ended
         });
         
-        setEvents(activeEvents);
+        setEvents(visibleEvents);
       }
     } catch (error) {
       console.error("Error fetching events:", error);

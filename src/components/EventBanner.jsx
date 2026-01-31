@@ -61,7 +61,7 @@ const EventBanner = ({ restaurantId }) => {
           <div className="flex-1 flex items-center space-x-4">
             {currentEvent.bannerImage && (
               <img
-                src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
+                src={currentEvent.bannerImage.startsWith('http') ? currentEvent.bannerImage : `${import.meta.env.VITE_API_URL.split('/api')[0]}${currentEvent.bannerImage}`}
                 alt={currentEvent.title}
                 className="w-16 h-16 object-cover rounded-lg border-2 border-white shadow-lg"
               />

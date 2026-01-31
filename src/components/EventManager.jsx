@@ -40,13 +40,15 @@ const EventManager = () => {
       
       const user = JSON.parse(userData).data || JSON.parse(userData);
       const token = user.token;
+      const restaurantId = user.restaurantId || user.restaurant?._id;
       
       if (!token) {
         console.error("Authentication token not found");
         return;
       }
 
-      const response = await fetch(`${getBaseUrl()}/events/active`, {
+      // Use the restaurant-specific endpoint to get all events for this restaurant
+      const response = await fetch(`${getBaseUrl()}/events/restaurant/${restaurantId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

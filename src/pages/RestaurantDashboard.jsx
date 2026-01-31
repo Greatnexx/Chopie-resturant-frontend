@@ -232,11 +232,10 @@ const RestaurantDashboard = () => {
 
   const handlePasswordChangeSuccess = () => {
     setShowPasswordModal(false);
-    // Update user data to reflect password change
-    const updatedUser = { ...user, isFirstLogin: false };
-    setUser(updatedUser);
-    sessionStorage.setItem("restaurantUser", JSON.stringify(updatedUser));
-    toast.success("You can now access all features!");
+    // Clear session and redirect to login page
+    sessionStorage.removeItem("restaurantUser");
+    toast.success("Password changed successfully! Please login with your new password.");
+    navigate("/restaurant/login");
   };
 
   const handleAcceptChat = async (chatRequest) => {

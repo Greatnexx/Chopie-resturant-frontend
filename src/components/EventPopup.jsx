@@ -12,12 +12,28 @@ const EventPopup = () => {
 
   const fetchActiveEvents = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/active`);
+      // Get restaurant ID from URL or other source
+      const urlParams = new URLSearchParams(window.location.search);
+      const restaurantIdFromUrl = urlParams.get('restaurantId');
+      
+      if (!restaurantIdFromUrl) {
+        console.log('No restaurant ID found in URL');
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/restaurant/${restaurantIdFromUrl}`);
       const data = await response.json();
 
       if (data.status && data.data.length > 0) {
-
-        setEvents(data.data);
+        // Filter events that are currently active (between start and end date)
+        const now = new Date();
+        const activeEvents = data.data.filter(event => {
+          const startDate = new Date(event.startDate);
+          const endDate = new Date(event.endDate);
+          return now >= startDate && now <= endDate;
+        });
+        
+        setEvents(activeEvents);
       }
     } catch (error) {
       console.error("Error fetching events:", error);
@@ -66,7 +82,7 @@ const EventPopup = () => {
       <div className="relative w-full h-64 md:h-80 lg:h-96 overflow-hidden rounded-xl shadow-lg">
         {currentEvent.bannerImage ? (
           <img
-            src={`${import.meta.env.VITE_API_URL.split('/api')[0]}/uploads/banners/${currentEvent.bannerImage}`}
+            src={currentEvent.bannerImage.startsWith('http') ? currentEvent.bannerImage : `${import.meta.env.VITE_API_URL.split('/api')[0]}${currentEvent.bannerImage}`}
             alt={currentEvent.title || 'Event Banner'}
             className="w-full h-full object-cover"
             onError={(e) => {

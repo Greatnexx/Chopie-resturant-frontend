@@ -27,21 +27,6 @@ const PasswordChangeModal = ({ isOpen, onSuccess }) => {
     try {
       const result = await changePassword({ newPassword }).unwrap();
       
-      // Update session storage with new token if provided
-      if (result.data?.token) {
-        const currentUser = JSON.parse(sessionStorage.getItem("restaurantUser") || "{}");
-        const updatedUser = {
-          ...currentUser,
-          data: {
-            ...currentUser.data,
-            ...result.data.user,
-            token: result.data.token,
-            isFirstLogin: false // Explicitly set to false after password change
-          }
-        };
-        sessionStorage.setItem("restaurantUser", JSON.stringify(updatedUser));
-      }
-      
       toast.success("Password changed successfully!");
       onSuccess();
     } catch (error) {

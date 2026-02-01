@@ -12,10 +12,6 @@ const EventPopup = () => {
 
   const fetchActiveEvents = async () => {
     try {
-      console.log('🔍 EventPopup: Starting fetch...');
-      console.log('🌐 Current URL:', window.location.href);
-      console.log('🔧 VITE_API_URL:', import.meta.env.VITE_API_URL);
-      
       // Get restaurant ID from URL parameters or path
       const urlParams = new URLSearchParams(window.location.search);
       let restaurantIdFromUrl = urlParams.get('restaurantId');
@@ -23,59 +19,42 @@ const EventPopup = () => {
       // If not in URL params, try to extract from path (for tenant routes like /r/subdomain)
       if (!restaurantIdFromUrl) {
         const pathSegments = window.location.pathname.split('/');
-        console.log('📍 Path segments:', pathSegments);
         const rIndex = pathSegments.indexOf('r');
         if (rIndex !== -1 && pathSegments[rIndex + 1]) {
           // For tenant routes, we need to get restaurant ID by subdomain
           const subdomain = pathSegments[rIndex + 1];
-          console.log('🏪 Found subdomain:', subdomain);
           try {
-            const tenantUrl = `${import.meta.env.VITE_API_URL}/tenant/resolve/${subdomain}`;
-            console.log('🔗 Tenant API call:', tenantUrl);
-            const tenantResponse = await fetch(tenantUrl);
+            const tenantResponse = await fetch(`${import.meta.env.VITE_API_URL}/tenant/resolve/${subdomain}`);
             const tenantData = await tenantResponse.json();
-            console.log('🏪 Tenant response:', tenantData);
             if (tenantData.status && tenantData.data) {
               restaurantIdFromUrl = tenantData.data._id;
-              console.log('✅ Restaurant ID from tenant:', restaurantIdFromUrl);
             }
           } catch (error) {
-            console.error('❌ Error fetching tenant info:', error);
+            console.error('Error fetching tenant info:', error);
           }
         }
       }
       
       if (!restaurantIdFromUrl) {
-        console.log('❌ No restaurant ID found');
         return;
       }
 
-      const eventsUrl = `${import.meta.env.VITE_API_URL}/events/restaurant/${restaurantIdFromUrl}`;
-      console.log('🎉 Events API call:', eventsUrl);
-      const response = await fetch(eventsUrl);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/events/restaurant/${restaurantIdFromUrl}`);
       const data = await response.json();
-      console.log('🎉 Events response:', data);
 
       if (data.status && data.data.length > 0) {
-        // Show events that haven't ended yet (both upcoming and currently active)
+        // Show events that should be displayed as banners (haven't ended yet)
         const now = new Date();
         const visibleEvents = data.data.filter(event => {
           const endDate = new Date(event.endDate);
-          // Show if event hasn't ended yet (includes future events)
+          // Show events that haven't ended yet (includes future and current events)
           return endDate >= now;
         });
         
-        console.log('✅ Visible events:', visibleEvents.length);
-        console.log('📅 Current time:', now);
-        visibleEvents.forEach(event => {
-          console.log(`📅 Event: ${event.title || 'Untitled'}, Start: ${event.startDate}, End: ${event.endDate}`);
-        });
         setEvents(visibleEvents);
-      } else {
-        console.log('❌ No events found or API error');
       }
     } catch (error) {
-      console.error('❌ Error fetching events:', error);
+      console.error("Error fetching events:", error);
     } finally {
       setLoading(false);
     }
@@ -110,24 +89,8 @@ const EventPopup = () => {
     });
   };
 
-  if (loading) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 mb-6">
-        <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-2 rounded text-sm">
-          🔄 Loading events...
-        </div>
-      </div>
-    );
-  }
-
-  if (events.length === 0) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 mb-6">
-        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded text-sm">
-          ⚠️ No events to display (EventPopup is working)
-        </div>
-      </div>
-    );
+  if (loading || events.length === 0) {
+    return null;
   }
 
   const currentEvent = events[currentEventIndex];

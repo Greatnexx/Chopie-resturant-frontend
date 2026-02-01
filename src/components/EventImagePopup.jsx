@@ -47,13 +47,12 @@ const EventImagePopup = ({ isOpen, onClose, restaurantId, branding }) => {
     return `${baseUrl}${imagePath}`;
   };
 
-  const isEventActive = (event) => {
+  const shouldShowEvent = (event) => {
     const now = new Date();
-    const startDate = new Date(event.startDate);
     const endDate = new Date(event.endDate);
     
-    // Event is active if current time is between start and end date
-    return now >= startDate && now <= endDate;
+    // Show events that haven't ended yet (includes future and current events)
+    return endDate >= now;
   };
 
   const fetchActiveEvents = async () => {
@@ -63,11 +62,11 @@ const EventImagePopup = ({ isOpen, onClose, restaurantId, branding }) => {
       const data = await response.json();
       
       if (data.status && data.data.length > 0) {
-        // Filter events that are currently active based on time/date
-        const activeEvents = data.data.filter(event => isEventActive(event));
+        // Filter events that should be displayed as banners
+        const visibleEvents = data.data.filter(event => shouldShowEvent(event));
         
-        if (activeEvents.length > 0) {
-          setEvents(activeEvents);
+        if (visibleEvents.length > 0) {
+          setEvents(visibleEvents);
           setShouldShowPopup(true);
         }
       }

@@ -61,10 +61,15 @@ const EventPopup = () => {
         const now = new Date();
         const visibleEvents = data.data.filter(event => {
           const endDate = new Date(event.endDate);
-          return endDate >= now; // Show if event hasn't ended
+          // Show if event hasn't ended yet (includes future events)
+          return endDate >= now;
         });
         
         console.log('✅ Visible events:', visibleEvents.length);
+        console.log('📅 Current time:', now);
+        visibleEvents.forEach(event => {
+          console.log(`📅 Event: ${event.title || 'Untitled'}, Start: ${event.startDate}, End: ${event.endDate}`);
+        });
         setEvents(visibleEvents);
       } else {
         console.log('❌ No events found or API error');
@@ -105,8 +110,24 @@ const EventPopup = () => {
     });
   };
 
-  if (loading || events.length === 0) {
-    return null;
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 mb-6">
+        <div className="bg-blue-100 border border-blue-300 text-blue-800 px-4 py-2 rounded text-sm">
+          🔄 Loading events...
+        </div>
+      </div>
+    );
+  }
+
+  if (events.length === 0) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 mb-6">
+        <div className="bg-yellow-100 border border-yellow-300 text-yellow-800 px-4 py-2 rounded text-sm">
+          ⚠️ No events to display (EventPopup is working)
+        </div>
+      </div>
+    );
   }
 
   const currentEvent = events[currentEventIndex];

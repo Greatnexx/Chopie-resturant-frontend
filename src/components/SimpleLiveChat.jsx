@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageCircle, Send, X } from 'lucide-react';
 import io from 'socket.io-client';
 import EmojiPicker from './EmojiPicker';
+import { getBaseUrl } from '../utils/apiUtils';
 
 const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNumber, restaurantId }) => {
   const [messages, setMessages] = useState([]);
@@ -18,57 +19,57 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
   }, [isOpen]);
 
   useEffect(() => {
-    if (chatId && !socket) {
-      const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''));
-      setSocket(newSocket);
+    if (!chatId) return;
 
-      // Join chat room with restaurant isolation
+    const newSocket = io(getBaseUrl().replace('/api/v1', ''), {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+    });
+    setSocket(newSocket);
+
+    // Join room on every connect/reconnect (covers initial connect too)
+    newSocket.on('connect', () => {
       newSocket.emit('joinChat', {
         chatId,
         userType: 'customer',
         userName: customerName,
         restaurantId: restaurantId || null
       });
+    });
 
-      // Listen for messages
-      newSocket.on('receiveMessage', (data) => {
-        if (data.chatId === chatId) {
-          // Show all messages except our own (avoid duplicates)
-          if (data.message.sender !== customerName) {
-            setMessages(prev => [...prev, {
-              id: Date.now() + Math.random(),
-              content: data.message.content,
-              sender: data.message.sender,
-              senderType: data.message.senderType,
-              timestamp: data.timestamp
-            }]);
-          }
-        }
-      });
-
-
-
-      newSocket.on('userTyping', (data) => {
-        if (data.userName !== customerName) {
-          setIsTyping(data.isTyping);
-        }
-      });
-
-      newSocket.on('chatAccepted', (data) => {
+    newSocket.on('receiveMessage', (data) => {
+      if (data.chatId === chatId && data.message.sender !== customerName) {
         setMessages(prev => [...prev, {
-          id: Date.now(),
-          content: `${data.staffName} has joined the chat and will assist you.`,
-          sender: 'System',
-          senderType: 'system',
-          timestamp: new Date().toISOString()
+          id: data.message._id || Date.now() + Math.random(),
+          content: data.message.content,
+          sender: data.message.sender,
+          senderType: data.message.senderType,
+          timestamp: data.timestamp
         }]);
-      });
+      }
+    });
 
-      return () => {
-        newSocket.disconnect();
-      };
-    }
-  }, [chatId, customerName]);
+    newSocket.on('userTyping', (data) => {
+      if (data.userName !== customerName) {
+        setIsTyping(data.isTyping);
+      }
+    });
+
+    newSocket.on('chatAccepted', (data) => {
+      setMessages(prev => [...prev, {
+        id: Date.now(),
+        content: `${data.staffName} has joined the chat and will assist you.`,
+        sender: 'System',
+        senderType: 'system',
+        timestamp: new Date().toISOString()
+      }]);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
+  }, [chatId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -76,7 +77,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
 
   const initializeChat = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/create`, {
+      const response = await fetch(`${getBaseUrl()}/chat/create`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -94,7 +95,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
         // Send initial greeting message
         setTimeout(async () => {
           try {
-            await fetch(`${import.meta.env.VITE_API_URL}/chat/${data.data.chatId}/messages`, {
+            await fetch(`${getBaseUrl()}/chat/${data.data.chatId}/messages`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -140,7 +141,7 @@ const SimpleLiveChat = ({ isOpen, onClose, customerName, customerEmail, orderNum
 
     try {
       // Save message to database first
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`, {
+      const response = await fetch(`${getBaseUrl()}/chat/${chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -131,9 +131,9 @@ const MenuItem = ({ item, tenantBranding, restaurantId, onAddToCart, isStaffInte
         {/* Content Section */}
         <div className="p-5 bg-gradient-to-b from-white to-gray-50/50">
           {/* Title and Price */}
-          <div className="flex justify-between items-start mb-3">
-            <h3 className="text-xl font-bold text-gray-800 leading-tight">{item.name}</h3>
-            <div className="bg-black text-white px-3 py-1 rounded-lg shadow-md">
+          <div className="flex justify-between items-start mb-3 gap-3">
+            <h3 className="text-xl font-bold text-gray-800 leading-tight flex-1 min-w-0 truncate" title={item.name}>{item.name}</h3>
+            <div className="bg-black text-white px-3 py-1 rounded-lg shadow-md flex-shrink-0">
               <span className="text-lg font-bold">
                 {formatCurrency(displayPrice)}
               </span>

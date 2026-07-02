@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useGetCategoriesQuery, useGetMenuItemsQuery } from '../slices/baseApiSlice';
+import { useGetRestaurantOrderQuery, useModifyOrderMutation } from '../slices/restaurantSlice';
 import MenuList from './MenuList';
 import CategoryTab from './CategoryTab';
 import StaffCartModal from './StaffCartModal';
 import { useBranding } from '../Context/BrandingContext';
+import { useSearchParams } from 'react-router-dom';
 
 const StaffOrderInterface = () => {
+  const [searchParams] = useSearchParams();
+  const editOrderId = searchParams.get('editOrder');
+  const isEditMode = !!editOrderId;
+  
   const [activeCategory, setActiveCategory] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -16,6 +22,12 @@ const StaffOrderInterface = () => {
   const [menuType, setMenuType] = useState('REGULAR');
   const { branding } = useBranding();
 
+  // Fetch existing order if in edit mode
+  const { data: existingOrderData } = useGetRestaurantOrderQuery(editOrderId, {
+    skip: !isEditMode
+  });
+  const [modifyOrder] = useModifyOrderMutation();
+
   // Fetch categories and menu items
   const { data: categoriesData, isLoading: categoriesLoading } = useGetCategoriesQuery();
   const { data: menuData, isLoading: menuLoading } = useGetMenuItemsQuery(activeCategory, {
@@ -24,6 +36,31 @@ const StaffOrderInterface = () => {
 
   const categories = categoriesData?.data || [];
   const menuItems = menuData?.data || [];
+
+  // Load existing order data when in edit mode
+  useEffect(() => {
+    if (isEditMode && existingOrderData?.data) {
+      const order = existingOrderData.data;
+      setTableNumber(order.tableNumber);
+      setCustomerName(order.customerName || '');
+      setCustomerNotes(order.customerNotes || '');
+      setPaymentMethod(order.paymentMethod);
+      
+      // Convert order items to cart format
+      const cartItems = order.items.map(item => ({
+        _id: item._id || item.name, // fallback for items without _id
+        name: item.name,
+        price: item.totalPrice / item.quantity, // calculate unit price
+        quantity: item.quantity,
+        specialInstructions: item.specialInstructions || ''
+      }));
+      setCart(cartItems);
+      
+      // Set menu type based on table number
+      const type = order.tableNumber.toUpperCase().startsWith('VIP') ? 'VIP' : 'REGULAR';
+      setMenuType(type);
+    }
+  }, [isEditMode, existingOrderData]);
 
   // Set first category as active by default
   useEffect(() => {
@@ -97,18 +134,22 @@ const StaffOrderInterface = () => {
       {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">Staff Order Interface</h1>
-              <p className="text-gray-600">Take orders for customers</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900">
+                {isEditMode ? 'Edit Order' : 'Staff Order Interface'}
+              </h1>
+              <p className="text-sm sm:text-base text-gray-600">
+                {isEditMode ? `Editing Order #${existingOrderData?.data?.orderNumber || editOrderId}` : 'Take orders for customers'}
+              </p>
             </div>
             
             <button
               onClick={() => setShowCart(true)}
-              className="relative text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all"
+              className="relative text-white px-4 py-2 rounded-lg hover:opacity-90 transition-all w-full sm:w-auto"
               style={{ backgroundColor: branding.primaryColor }}
             >
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                         d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9" />
@@ -128,7 +169,7 @@ const StaffOrderInterface = () => {
       {/* Order Details Form */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Table Number *
@@ -138,10 +179,11 @@ const StaffOrderInterface = () => {
                 value={tableNumber}
                 onChange={(e) => handleTableNumberChange(e.target.value)}
                 placeholder="e.g., 5 or VIP-1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                disabled={isEditMode}
                 required
               />
             </div>
@@ -155,7 +197,7 @@ const StaffOrderInterface = () => {
                 value={customerName}
                 onChange={(e) => setCustomerName(e.target.value)}
                 placeholder="Customer name"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -169,7 +211,7 @@ const StaffOrderInterface = () => {
               <select
                 value={paymentMethod}
                 onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -189,7 +231,7 @@ const StaffOrderInterface = () => {
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
                 placeholder="Special requests"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
@@ -203,12 +245,13 @@ const StaffOrderInterface = () => {
       {tableNumber && (
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+            <div className={`inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
               menuType === 'VIP' 
                 ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
                 : 'bg-blue-100 text-blue-800 border border-blue-300'
             }`}>
-              {menuType === 'VIP' ? '👑 VIP Pricing' : '🍽️ Regular Pricing'} - Table {tableNumber}
+              <span className="hidden sm:inline">{menuType === 'VIP' ? '👑 VIP Pricing' : '🍽️ Regular Pricing'} - Table {tableNumber}</span>
+              <span className="sm:hidden">{menuType === 'VIP' ? '👑 VIP' : '🍽️ Regular'} - T{tableNumber}</span>
             </div>
           </div>
         </div>
@@ -248,6 +291,12 @@ const StaffOrderInterface = () => {
           paymentMethod={paymentMethod}
           totalPrice={getTotalPrice()}
           onClearCart={clearCart}
+          isEditMode={isEditMode}
+          editOrderId={editOrderId}
+          onOrderUpdate={(updatedOrder) => {
+            // Handle successful order update
+            console.log('Order updated:', updatedOrder);
+          }}
         />
       )}
     </div>

@@ -334,20 +334,20 @@ const StaffChatPanel = ({ user }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md h-96 flex">
+    <div className="bg-white rounded-lg shadow-md h-96 flex flex-col sm:flex-row">
       {/* Chat List */}
-      <div className="w-1/3 border-r">
-        <div className="p-4 border-b bg-gray-50">
-          <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+      <div className={`${activeChat ? 'hidden sm:block' : 'block'} w-full sm:w-1/3 border-r sm:border-r border-b sm:border-b-0`}>
+        <div className="p-3 sm:p-4 border-b bg-gray-50">
+          <h3 className="font-semibold text-gray-800 flex items-center gap-2 text-sm sm:text-base">
             <Users className="w-4 h-4" />
             Customer Chats
           </h3>
         </div>
-        <div className="overflow-y-auto h-80">
+        <div className="overflow-y-auto h-64 sm:h-80">
           {chats.length === 0 ? (
             <div className="p-4 text-center text-gray-500">
-              <MessageCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No active chats</p>
+              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 opacity-50" />
+              <p className="text-xs sm:text-sm">No active chats</p>
             </div>
           ) : (
             chats.map((chat) => (
@@ -389,23 +389,31 @@ const StaffChatPanel = ({ user }) => {
       </div>
 
       {/* Chat Messages */}
-      <div className="flex-1 flex flex-col">
+      <div className={`${activeChat ? 'flex' : 'hidden sm:flex'} flex-1 flex-col`}>
         {activeChat ? (
           <>
             {/* Chat Header */}
-            <div className="p-4 border-b bg-gray-50">
-              <h4 className="font-semibold">{activeChat.customerName}</h4>
-              {activeChat.orderNumber && (
-                <p className="text-sm text-gray-600">
-                  Order: {activeChat.orderNumber}
-                </p>
-              )}
+            <div className="p-3 sm:p-4 border-b bg-gray-50 flex items-center gap-2">
+              <button
+                onClick={() => setActiveChat(null)}
+                className="sm:hidden p-1 hover:bg-gray-200 rounded"
+              >
+                ←
+              </button>
+              <div>
+                <h4 className="font-semibold text-sm sm:text-base">{activeChat.customerName}</h4>
+                {activeChat.orderNumber && (
+                  <p className="text-xs sm:text-sm text-gray-600">
+                    Order: {activeChat.orderNumber}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Messages */}
             <div 
               ref={messagesContainerRef}
-              className="flex-1 p-4 overflow-y-auto space-y-3 scroll-smooth" 
+              className="flex-1 p-3 sm:p-4 overflow-y-auto space-y-3 scroll-smooth" 
               style={{ scrollBehavior: 'smooth' }}
             >
               {messages.map((message) => (
@@ -418,7 +426,7 @@ const StaffChatPanel = ({ user }) => {
                   }`}
                 >
                   <div
-                    className={`max-w-xs px-3 py-2 rounded-lg ${
+                    className={`max-w-xs sm:max-w-sm px-3 py-2 rounded-lg text-sm ${
                       message.senderType === "staff"
                         ? "bg-primary text-white"
                         : "bg-gray-200 text-gray-800"
@@ -445,7 +453,7 @@ const StaffChatPanel = ({ user }) => {
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t">
+            <div className="p-3 sm:p-4 border-t">
               <div className="flex gap-2">
                 <div className="flex-1 relative">
                   <input
@@ -454,7 +462,7 @@ const StaffChatPanel = ({ user }) => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
-                    className="w-full border rounded-lg px-3 py-2 pr-10 focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                    className="w-full border rounded-lg px-3 py-2 pr-10 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary"
                   />
                   <div className="absolute right-2 top-1/2 transform -translate-y-1/2">
                     <EmojiPicker
@@ -477,8 +485,8 @@ const StaffChatPanel = ({ user }) => {
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             <div className="text-center">
-              <MessageCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>Select a chat to start messaging</p>
+              <MessageCircle className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-4 opacity-50" />
+              <p className="text-sm sm:text-base">Select a chat to start messaging</p>
             </div>
           </div>
         )}

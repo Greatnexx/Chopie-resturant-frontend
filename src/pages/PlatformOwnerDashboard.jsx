@@ -281,10 +281,10 @@ const PlatformOwnerDashboard = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-2xl font-bold text-gray-900">₦{analytics.revenue?.total?.toLocaleString() || 0}</p>
-                    <p className="text-xs text-green-600">₦{analytics.revenue?.today?.toLocaleString() || 0} today</p>
+                    <p className="text-2xl font-bold text-gray-900 truncate">₦{analytics.revenue?.total?.toLocaleString() || 0}</p>
+                    <p className="text-xs text-green-600 truncate">₦{analytics.revenue?.today?.toLocaleString() || 0} today</p>
                   </div>
                 </div>
               </div>

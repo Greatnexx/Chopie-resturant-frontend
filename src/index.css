@@ -4,6 +4,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Lato:wght@100;300;400;700;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+@font-face {
+  font-family: 'Satoshi';
+  src: url('./fonts/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff2') format('woff2'),
+       url('./fonts/Satoshi_Complete/Fonts/WEB/fonts/Satoshi-Variable.woff') format('woff');
+  font-weight: 300 900;
+  font-style: normal;
+}
 
 @tailwind base;
 @tailwind components;
@@ -14,7 +23,7 @@
   --primary-color: #ef4444;
   --secondary-color: #f97316;
   --accent-color: #10b981;
-  --font-family: 'Inter';
+  --font-family: 'Satoshi';
   --background-color: #ffffff;
   --surface-color: #f9fafb;
   --text-primary: #111827;

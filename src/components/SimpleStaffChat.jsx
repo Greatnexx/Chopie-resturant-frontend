@@ -4,6 +4,7 @@ import io from 'socket.io-client';
 import ChatRequestModal from './ChatRequestModal';
 import EmojiPicker from './EmojiPicker';
 import { toast } from 'sonner';
+import { getBaseUrl } from '../utils/apiUtils';
 
 const SimpleStaffChat = ({ user }) => {
   const [chats, setChats] = useState([]);
@@ -19,7 +20,7 @@ const SimpleStaffChat = ({ user }) => {
   useEffect(() => {
     loadChats();
     
-    const newSocket = io(import.meta.env.VITE_API_URL.replace('/api/v1', ''));
+    const newSocket = io(getBaseUrl().replace('/api/v1', ''), {
     setSocket(newSocket);
     
     // Join all existing chat rooms for instant message reception
@@ -27,7 +28,7 @@ const SimpleStaffChat = ({ user }) => {
       try {
         const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
         const token = restaurantUser.data?.token || restaurantUser.token;
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
+        const response = await fetch(`${getBaseUrl()}/chat/staff/chats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await response.json();
@@ -64,29 +65,29 @@ const SimpleStaffChat = ({ user }) => {
     });
 
     newSocket.on('receiveMessage', (data) => {
-      // Update messages if this is the active chat
-      if (activeChat && data.chatId === activeChat.chatId) {
-        setMessages(prev => {
-          // Check if message already exists to avoid duplicates
-          const messageExists = prev.some(msg => 
-            msg.content === data.message.content && 
-            msg.sender === data.message.sender &&
-            Math.abs(new Date(msg.timestamp).getTime() - new Date(data.timestamp).getTime()) < 1000
-          );
-          
-          if (!messageExists) {
-            return [...prev, {
-              id: data.message._id || Date.now() + Math.random(),
-              content: data.message.content,
-              sender: data.message.sender,
-              senderType: data.message.senderType,
-              timestamp: data.timestamp || new Date().toISOString()
-            }];
-          }
-          return prev;
-        });
-      }
-      // Always reload chats to update the chat list
+      // Use functional update to access latest activeChat via ref
+      setActiveChat(current => {
+        if (current && data.chatId === current.chatId) {
+          setMessages(prev => {
+            const messageExists = prev.some(msg => 
+              msg.content === data.message.content && 
+              msg.sender === data.message.sender &&
+              Math.abs(new Date(msg.timestamp).getTime() - new Date(data.timestamp).getTime()) < 1000
+            );
+            if (!messageExists) {
+              return [...prev, {
+                id: data.message._id || Date.now() + Math.random(),
+                content: data.message.content,
+                sender: data.message.sender,
+                senderType: data.message.senderType,
+                timestamp: data.timestamp || new Date().toISOString()
+              }];
+            }
+            return prev;
+          });
+        }
+        return current;
+      });
       loadChats();
     });
 
@@ -112,7 +113,7 @@ const SimpleStaffChat = ({ user }) => {
 
   const loadChatMessages = async (chatId) => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatId}/messages`);
+      const response = await fetch(`${getBaseUrl()}/chat/${chatId}/messages`);
       const data = await response.json();
       if (data.success && data.data.messages) {
         const formattedMessages = data.data.messages.map(msg => ({
@@ -138,7 +139,7 @@ const SimpleStaffChat = ({ user }) => {
     try {
       const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
       const token = restaurantUser.data?.token || restaurantUser.token;
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/staff/chats`, {
+      const response = await fetch(`${getBaseUrl()}/chat/staff/chats`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -155,7 +156,7 @@ const SimpleStaffChat = ({ user }) => {
 
     try {
       // Save message to database first
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${activeChat.chatId}/messages`, {
+      const response = await fetch(`${getBaseUrl()}/chat/${activeChat.chatId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -223,7 +224,7 @@ const SimpleStaffChat = ({ user }) => {
         return;
       }
       
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/chat/${chatRequest.chatId}/accept`, {
+      const response = await fetch(`${getBaseUrl()}/chat/${chatRequest.chatId}/accept`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`,

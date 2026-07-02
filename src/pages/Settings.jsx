@@ -209,54 +209,54 @@ const Settings = () => {
             
             {/* Settings Tabs */}
             {!isMenuManager && (
-              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+              <div className="flex flex-wrap sm:flex-nowrap gap-1 bg-gray-100 p-1 rounded-lg">
                 <button
                   onClick={() => setActiveTab('branding')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === 'branding' ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                   style={{
                     backgroundColor: activeTab === 'branding' ? branding.primaryColor : 'transparent'
                   }}
                 >
-                  <Palette className="w-4 h-4" />
-                  Branding
+                  <Palette className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:inline">Branding</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('hours')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === 'hours' ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                   style={{
                     backgroundColor: activeTab === 'hours' ? branding.primaryColor : 'transparent'
                   }}
                 >
-                  <Clock className="w-4 h-4" />
-                  Hours
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:inline">Hours</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('contact')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === 'contact' ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                   style={{
                     backgroundColor: activeTab === 'contact' ? branding.primaryColor : 'transparent'
                   }}
                 >
-                  <Phone className="w-4 h-4" />
-                  Contact
+                  <Phone className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:inline">Contact</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('account')}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 min-w-0 flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                     activeTab === 'account' ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                   style={{
                     backgroundColor: activeTab === 'account' ? branding.primaryColor : 'transparent'
                   }}
                 >
-                  <Lock className="w-4 h-4" />
-                  Account
+                  <Lock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline sm:inline">Account</span>
                 </button>
               </div>
             )}
@@ -286,39 +286,41 @@ const Settings = () => {
                     const dayData = operatingHours[dayKey] || { open: '09:00', close: '22:00', closed: false };
                     
                     return (
-                      <div key={day} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex items-center gap-4">
-                          <span className="font-medium w-20">{day}</span>
-                          <label className="flex items-center gap-2">
-                            <input 
-                              type="checkbox" 
-                              className="rounded" 
-                              checked={!dayData.closed}
-                              onChange={(e) => handleHoursChange(day, 'closed', !e.target.checked)}
-                            />
-                            <span className="text-sm text-gray-600">Open</span>
-                          </label>
-                        </div>
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-2">
-                            <label className="text-sm text-gray-600">Open:</label>
-                            <input 
-                              type="time" 
-                              value={dayData.open}
-                              onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
-                              disabled={dayData.closed}
-                              className="border rounded px-2 py-1 disabled:bg-gray-100" 
-                            />
+                      <div key={day} className="p-4 border rounded-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="flex items-center gap-4">
+                            <span className="font-medium w-20 text-sm sm:text-base">{day}</span>
+                            <label className="flex items-center gap-2">
+                              <input 
+                                type="checkbox" 
+                                className="rounded" 
+                                checked={!dayData.closed}
+                                onChange={(e) => handleHoursChange(day, 'closed', !e.target.checked)}
+                              />
+                              <span className="text-sm text-gray-600">Open</span>
+                            </label>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <label className="text-sm text-gray-600">Close:</label>
-                            <input 
-                              type="time" 
-                              value={dayData.close}
-                              onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
-                              disabled={dayData.closed}
-                              className="border rounded px-2 py-1 disabled:bg-gray-100" 
-                            />
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm text-gray-600 w-12">Open:</label>
+                              <input 
+                                type="time" 
+                                value={dayData.open}
+                                onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
+                                disabled={dayData.closed}
+                                className="border rounded px-2 py-1 disabled:bg-gray-100 text-sm" 
+                              />
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <label className="text-sm text-gray-600 w-12">Close:</label>
+                              <input 
+                                type="time" 
+                                value={dayData.close}
+                                onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
+                                disabled={dayData.closed}
+                                className="border rounded px-2 py-1 disabled:bg-gray-100 text-sm" 
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -351,7 +353,29 @@ const Settings = () => {
                   <p className="mt-2 text-gray-600">Loading contact info...</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <>
+                  {/* Restaurant URL Display */}
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h3 className="text-sm font-medium text-blue-900 mb-2">Your Restaurant URL</h3>
+                    <div className="flex items-center gap-2">
+                      <code className="text-sm bg-white px-3 py-2 rounded border flex-1">
+                        https://{settingsData?.data?.subdomain || 'your-restaurant'}.chopie-resturant-frontend.vercel.app
+                      </code>
+                      <button
+                        onClick={() => {
+                          const url = `https://${settingsData?.data?.subdomain}.chopie-resturant-frontend.vercel.app`;
+                          navigator.clipboard.writeText(url);
+                          toast.success('URL copied to clipboard!');
+                        }}
+                        className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Copy
+                      </button>
+                    </div>
+                    <p className="text-xs text-blue-700 mt-2">Share this URL with your customers to access your menu</p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
                     <input 
@@ -423,6 +447,7 @@ const Settings = () => {
                     />
                   </div>
                 </div>
+                </>
               )}
               
               <button 

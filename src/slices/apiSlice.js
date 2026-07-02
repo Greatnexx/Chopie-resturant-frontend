@@ -2,18 +2,11 @@ import { fetchBaseQuery, createApi } from "@reduxjs/toolkit/query/react";
 import { toast } from "sonner";
 
 const getBaseUrl = () => {
-  // Check for manual override in localStorage
-  const useRemote = localStorage.getItem('USE_REMOTE_SERVER');
-  
-  if (useRemote === 'true') {
-    return 'https://backend-chopie-project.onrender.com/api/v1';
-  }
-  
-  // Check if running locally (localhost:3000 or localhost:5173)
+  // Always use localhost when running locally
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:8000/api/v1';
   }
-  
+
   const storedURL = localStorage.getItem('RENDER_URL');
   return import.meta.env.VITE_API_URL || storedURL || 'https://backend-chopie-project.onrender.com/api/v1';
 };
@@ -66,12 +59,19 @@ const baseQuery = fetchBaseQuery({
       headers.set("Authorization", `Bearer ${restaurantToken}`);
     }
 
-    // For tenant routes, extract restaurant subdomain from URL and set header
-    const currentPath = window.location.pathname;
-    if (currentPath.startsWith('/r/')) {
-      const subdomain = currentPath.split('/')[2];
-      if (subdomain) {
-        headers.set("X-Tenant-Subdomain", subdomain);
+    // For tenant routes, extract subdomain from hostname (e.g. mama.localhost:3000)
+    // or from URL path (e.g. /r/mama)
+    const hostname = window.location.hostname;
+    const hostParts = hostname.split('.');
+    if (hostParts.length > 1 && hostParts[0] !== 'www') {
+      headers.set("X-Tenant-Subdomain", hostParts[0]);
+    } else {
+      const currentPath = window.location.pathname;
+      if (currentPath.startsWith('/r/')) {
+        const subdomain = currentPath.split('/')[2];
+        if (subdomain) {
+          headers.set("X-Tenant-Subdomain", subdomain);
+        }
       }
     }
 

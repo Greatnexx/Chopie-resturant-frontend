@@ -7,7 +7,7 @@ import { useBranding } from "../Context/BrandingContext";
 
 const RestaurantAnalytics = () => {
   const [period, setPeriod] = useState("day");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const navigate = useNavigate();
   const { branding } = useBranding();
   
@@ -82,12 +82,12 @@ const RestaurantAnalytics = () => {
             <>
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center">
-                    <div className="p-2 bg-green-100 rounded-lg">
+                <div className="bg-white rounded-lg shadow p-5">
+                  <div className="flex items-center ">
+                    <div className="bg-green-100 rounded-lg">
                       <DollarSign className="w-6 h-6 text-green-600" />
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-2">
                       <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                       <p className="text-2xl font-bold text-gray-900">{formatCurrency(analytics.totalRevenue)}</p>
                     </div>

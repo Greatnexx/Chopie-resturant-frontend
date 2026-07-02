@@ -41,6 +41,22 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["RestaurantOrders"],
     }),
+    modifyOrder: builder.mutation({
+      query: ({ orderId, items, totalAmount, customerNotes }) => ({
+        url: `/order/${orderId}`,
+        method: "PUT",
+        body: { items, totalAmount, customerNotes },
+      }),
+      invalidatesTags: ["RestaurantOrders"],
+    }),
+    cancelOrderMutation: builder.mutation({
+      query: ({ orderId, reason }) => ({
+        url: `/order/${orderId}/cancel`,
+        method: "POST",
+        body: { reason },
+      }),
+      invalidatesTags: ["RestaurantOrders"],
+    }),
     getRestaurantOrder: builder.query({
       query: (orderId) => `/restaurant/orders/${orderId}`,
     }),
@@ -185,6 +201,8 @@ export const {
   useAcceptOrderMutation,
   useRejectOrderMutation,
   useUpdateOrderStatusMutation,
+  useModifyOrderMutation,
+  useCancelOrderMutationMutation,
   useGetRestaurantOrderQuery,
   useGetAllUsersQuery,
   useToggleUserStatusMutation,

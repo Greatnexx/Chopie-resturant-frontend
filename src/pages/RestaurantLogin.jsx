@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLoginRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Mail, Lock, ChefHat, Eye, EyeOff } from "lucide-react";
 import { triggerBrandingRefresh } from "../Context/BrandingContext";
 
@@ -87,6 +87,15 @@ const RestaurantLogin = () => {
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
         </form>
+
+        <div className="text-center mt-6">
+          <p className="text-gray-600">
+            Don't have an account?{" "}
+            <Link to="/restaurant/register" className="text-red-500 hover:text-red-600 font-medium">
+              Register your restaurant
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -290,42 +290,44 @@ const BrandingCustomization = () => {
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Preview</h3>
             <div 
-              className="p-6 rounded-lg border-2"
+              className="p-4 sm:p-6 rounded-lg border-2"
               style={{ 
                 backgroundColor: branding.primaryColor + '10',
                 borderColor: branding.primaryColor,
                 fontFamily: branding.fontFamily
               }}
             >
-              <div className="flex items-center space-x-4 mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">
                 {logoPreview && (
-                  <img src={logoPreview} alt="Logo" className="w-12 h-12 object-cover rounded" />
+                  <img src={logoPreview} alt="Logo" className="w-10 h-10 sm:w-12 sm:h-12 object-cover rounded flex-shrink-0" />
                 )}
-                <h4 className="text-xl font-bold" style={{ color: branding.primaryColor }}>
+                <h4 className="text-lg sm:text-xl font-bold break-words" style={{ color: branding.primaryColor }}>
                   {branding.name || user?.restaurantName || 'Your Restaurant'}
                 </h4>
               </div>
-              <button 
-                type="button"
-                className="px-4 py-2 rounded-md text-white mr-2"
-                style={{ backgroundColor: branding.primaryColor }}
-              >
-                Primary Button
-              </button>
-              <button 
-                type="button"
-                className="px-4 py-2 rounded-md text-white mr-2"
-                style={{ backgroundColor: branding.secondaryColor }}
-              >
-                Secondary Button
-              </button>
-              <button 
-                type="button"
-                className="px-4 py-2 rounded-md text-white"
-                style={{ backgroundColor: branding.accentColor }}
-              >
-                Accent Button
-              </button>
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
+                <button 
+                  type="button"
+                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
+                  style={{ backgroundColor: branding.primaryColor }}
+                >
+                  Primary Button
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
+                  style={{ backgroundColor: branding.secondaryColor }}
+                >
+                  Secondary Button
+                </button>
+                <button 
+                  type="button"
+                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
+                  style={{ backgroundColor: branding.accentColor }}
+                >
+                  Accent Button
+                </button>
+              </div>
             </div>
           </div>
 

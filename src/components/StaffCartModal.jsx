@@ -11,7 +11,10 @@ const StaffCartModal = ({
   customerNotes, 
   paymentMethod,
   totalPrice,
-  onClearCart
+  onClearCart,
+  isEditMode = false,
+  editOrderId = null,
+  onOrderUpdate = null
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { branding } = useBranding();
@@ -57,45 +60,64 @@ const StaffCartModal = ({
         paymentMethod: paymentMethod
       };
 
-      // Submit order
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-
-      const response = await fetch(`${apiUrl}/staff-order`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'X-Restaurant-ID': restaurantId
-        },
-        body: JSON.stringify(orderData)
-      });
+      
+      let response;
+      if (isEditMode && editOrderId) {
+        // Update existing order
+        response = await fetch(`${apiUrl}/order/${editOrderId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'X-Restaurant-ID': restaurantId
+          },
+          body: JSON.stringify({
+            items: orderData.items,
+            totalAmount: totalPrice,
+            customerNotes: customerNotes.trim()
+          })
+        });
+      } else {
+        // Create new order
+        response = await fetch(`${apiUrl}/staff-order`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'X-Restaurant-ID': restaurantId
+          },
+          body: JSON.stringify(orderData)
+        });
+      }
 
       if (response.ok) {
-        const orderData = await response.json();
-        toast.success('Order submitted successfully!', {
-          description: `Order #${orderData.data?.orderNumber} for Table ${tableNumber}`
+        const responseData = await response.json();
+        const successMessage = isEditMode ? 'Order updated successfully!' : 'Order submitted successfully!';
+        const orderNumber = responseData.data?.orderNumber || editOrderId;
+        
+        toast.success(successMessage, {
+          description: `Order #${orderNumber} for Table ${tableNumber}`
         });
         
-        // Auto-redirect to dashboard after 3 seconds
+        if (isEditMode && onOrderUpdate) {
+          onOrderUpdate(responseData.data);
+        }
+        
+        // Auto-redirect to dashboard after 2 seconds
         setTimeout(() => {
-          // Use same-tab navigation to avoid popup blockers
           window.location.href = '/restaurant/dashboard';
-        }, 3000);
+        }, 2000);
         
         onClearCart && onClearCart();
         onClose();
       } else {
         const errorData = await response.json();
-        console.error('Order submission failed:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData
-        });
         throw new Error(`Server error: ${errorData.message || response.statusText}`);
       }
     } catch (error) {
       console.error('Error submitting order:', error);
-      toast.error('Failed to submit order', {
+      toast.error(isEditMode ? 'Failed to update order' : 'Failed to submit order', {
         description: 'Please try again or contact support'
       });
     } finally {
@@ -108,7 +130,9 @@ const StaffCartModal = ({
       <div className="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-bold">Order Summary</h2>
+          <h2 className="text-xl font-bold">
+            {isEditMode ? 'Update Order' : 'Order Summary'}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
@@ -209,7 +233,7 @@ const StaffCartModal = ({
               className="flex-1 px-4 py-2 text-white rounded-lg hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all"
               style={{ backgroundColor: branding.primaryColor }}
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Order'}
+              {isSubmitting ? (isEditMode ? 'Updating...' : 'Submitting...') : (isEditMode ? 'Update Order' : 'Submit Order')}
             </button>
           </div>
         </div>

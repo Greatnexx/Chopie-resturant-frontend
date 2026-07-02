@@ -219,21 +219,17 @@ const TenantMenuPage = () => {
               
               <button
                 onClick={() => setShowCart(true)}
-                className="relative p-2 sm:p-2.5 rounded-full text-white shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 border-2 border-white/20"
-                style={{ backgroundColor: branding?.primaryColor || '#ef4444' }}
+                className="relative p-1.5 rounded-full text-gray-600 hover:text-gray-800 transition-colors"
                 title="View Cart"
               >
-                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} 
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
                         d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9" />
                 </svg>
                 {cartItems.length > 0 && (
-                  <>
-                    <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center border-2 border-white shadow-lg animate-pulse">
-                      {cartItems.length}
-                    </span>
-                    <div className="absolute inset-0 rounded-full bg-white/20 animate-ping"></div>
-                  </>
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center border border-white">
+                    {cartItems.length}
+                  </span>
                 )}
               </button>
             </div>
@@ -353,6 +349,38 @@ const TenantMenuPage = () => {
         restaurantId={currentTenant._id}
         branding={branding}
       />
+
+      {/* Floating Cart Button */}
+      {cartItems.length > 0 && !showCart && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <button
+            onClick={() => setShowCart(true)}
+            className="relative bg-white text-gray-800 px-4 py-3 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 hover:scale-105 border-2 flex items-center space-x-3 min-w-[140px]"
+            style={{ 
+              borderColor: branding?.primaryColor || '#ef4444',
+              boxShadow: `0 10px 25px -5px ${branding?.primaryColor || '#ef4444'}40, 0 10px 10px -5px ${branding?.primaryColor || '#ef4444'}20`,
+              animation: 'bounce 2s infinite'
+            }}
+          >
+            <div className="relative">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} 
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5 6m0 0h9" />
+              </svg>
+              <span 
+                className="absolute -top-2 -right-2 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center border-2 border-white shadow-lg animate-pulse"
+                style={{ backgroundColor: branding?.primaryColor || '#ef4444' }}
+              >
+                {cartItems.length}
+              </span>
+            </div>
+            <div className="text-left">
+              <div className="text-sm font-semibold">View Cart</div>
+              <div className="text-xs opacity-75">{cartItems.length} item{cartItems.length > 1 ? 's' : ''}</div>
+            </div>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

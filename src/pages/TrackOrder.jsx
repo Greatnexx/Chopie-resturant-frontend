@@ -199,7 +199,7 @@ const TrackOrder = () => {
             </h1>
           </button>
           <p className="text-gray-600 text-base sm:text-lg max-w-2xl mx-auto mb-2 px-4">
-            Enter your order number or phone number to track your order status.
+            Track your order using any of the following: order number, phone number, or customer name.
           </p>
           <p className="text-xs sm:text-sm text-gray-500 px-4">
             💡 Click the logo or restaurant name above to return to the menu
@@ -209,16 +209,31 @@ const TrackOrder = () => {
         {/* Search Section */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
           <div className="max-w-2xl mx-auto">
-            <label
-              htmlFor="searchTerm"
-              className="block text-sm font-medium text-gray-700 mb-3"
-            >
-              Order Number or Phone
-            </label>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6 text-center">Track Your Order</h2>
+            
+            {/* Search Options */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Package className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm font-medium text-gray-700">Order Number</p>
+                <p className="text-xs text-gray-500">e.g., ORD-12345</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Phone className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm font-medium text-gray-700">Phone Number</p>
+                <p className="text-xs text-gray-500">e.g., 08012345678</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-lg">
+                <Search className="w-6 h-6 mx-auto mb-2 text-gray-600" />
+                <p className="text-sm font-medium text-gray-700">Customer Name</p>
+                <p className="text-xs text-gray-500">e.g., John Doe</p>
+              </div>
+            </div>
+            
             <div className="flex flex-col sm:flex-row gap-4">
               <div className="flex-1 relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                  <Package className="h-5 w-5 text-gray-400" />
+                  <Search className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
                   type="text"
@@ -226,7 +241,7 @@ const TrackOrder = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="Enter order number or phone"
+                  placeholder="Enter order number, phone number, or customer name"
                   className="block w-full pl-12 pr-4 py-4 text-base sm:text-lg border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors"
                   disabled={isSearching}
                 />

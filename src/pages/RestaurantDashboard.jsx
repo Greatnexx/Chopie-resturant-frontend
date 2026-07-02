@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation, useGetAnalyticsQuery } from "../slices/restaurantSlice";
+import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation, useGetAnalyticsQuery, useCancelOrderMutationMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { Bell, Clock, CheckCircle, ChefHat, User, X, Check, Menu } from "lucide-react";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -31,6 +31,7 @@ const RestaurantDashboard = () => {
   const [acceptOrder] = useAcceptOrderMutation();
   const [rejectOrder] = useRejectOrderMutation();
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
+  const [cancelOrderMutation] = useCancelOrderMutationMutation();
 
   const analytics = analyticsData?.data || {};
 
@@ -125,31 +126,15 @@ const RestaurantDashboard = () => {
         if (showNotification?.orderId === data.orderId) {
           setShowNotification(null);
         }
-        refetch();
+        // Remove refetch() - RTK Query will handle cache invalidation
       });
 
       socket.on('orderRejected', (data) => {
-        refetch();
+        // Remove refetch() - RTK Query will handle cache invalidation
       });
       
       socket.on('orderStatusUpdated', (data) => {
-        refetch();
-      });
-
-      socket.on('orderAccepted', (data) => {
-        setNotifications(prev => prev.filter(n => n.orderId !== data.orderId));
-        if (showNotification?.orderId === data.orderId) {
-          setShowNotification(null);
-        }
-        refetch();
-      });
-
-      socket.on('orderRejected', (data) => {
-        refetch();
-      });
-      
-      socket.on('orderStatusUpdated', (data) => {
-        refetch();
+        // Remove refetch() - RTK Query will handle cache invalidation
       });
 
       return () => {
@@ -170,7 +155,7 @@ const RestaurantDashboard = () => {
       await acceptOrder(orderId).unwrap();
       toast.success("Order accepted!");
       setNotifications(prev => prev.filter(n => n.orderId !== orderId));
-      refetch();
+      // Remove refetch() - RTK Query invalidatesTags will handle cache update
     } catch (error) {
       toast.error(error?.data?.message || "Failed to accept order");
     }
@@ -181,7 +166,7 @@ const RestaurantDashboard = () => {
       await rejectOrder(orderId).unwrap();
       toast.info("Order rejected");
       setNotifications(prev => prev.filter(n => n.orderId !== orderId));
-      refetch();
+      // Remove refetch() - RTK Query invalidatesTags will handle cache update
     } catch (error) {
       toast.error(error?.data?.message || "Failed to reject order");
     }
@@ -192,11 +177,19 @@ const RestaurantDashboard = () => {
     try {
       await updateOrderStatus(orderId).unwrap();
       toast.success("Order status updated!");
-      refetch();
     } catch (error) {
       toast.error(error?.data?.message || "Failed to update status");
     } finally {
       setLoadingOrderId(null);
+    }
+  };
+
+  const handleCancelOrder = async (orderId, reason) => {
+    try {
+      await cancelOrderMutation({ orderId, reason }).unwrap();
+      toast.success("Order cancelled successfully!");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to cancel order");
     }
   };
 
@@ -330,9 +323,9 @@ const RestaurantDashboard = () => {
                       <path d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" />
                     </svg>
                   </div>
-                  <div className="ml-4">
+                  <div className="ml-4 min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p className="text-2xl font-semibold text-gray-900">{formatCurrency(analytics.totalRevenue || 0)}</p>
+                    <p className="text-2xl font-semibold text-gray-900 truncate">{formatCurrency(analytics.totalRevenue || 0)}</p>
                   </div>
                 </div>
               </div>
@@ -449,15 +442,15 @@ const RestaurantDashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold text-sm">1</span>
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-600 font-semibold text-sm">1</span>
                 </div>
                 <h3 className="font-semibold text-gray-900">Upload Logo</h3>
               </div>
               <p className="text-sm text-gray-600 mb-3">Add your restaurant logo and brand colors</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Go to Settings
               </button>
@@ -465,15 +458,18 @@ const RestaurantDashboard = () => {
             
             <div className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <span className="text-green-600 font-semibold text-sm">2</span>
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-600 font-semibold text-sm">2</span>
                 </div>
                 <h3 className="font-semibold text-gray-900">Create Menu</h3>
               </div>
               <p className="text-sm text-gray-600 mb-3">Add categories and menu items</p>
               <button 
                 onClick={() => navigate('/restaurant/menu-manager')}
-                className="w-full bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                style={{ backgroundColor: branding.primaryColor }}
+                onMouseEnter={(e) => e.target.style.opacity = '0.9'}
+                onMouseLeave={(e) => e.target.style.opacity = '1'}
               >
                 Manage Menu
               </button>
@@ -481,15 +477,15 @@ const RestaurantDashboard = () => {
             
             <div className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <span className="text-purple-600 font-semibold text-sm">3</span>
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-600 font-semibold text-sm">3</span>
                 </div>
                 <h3 className="font-semibold text-gray-900">Add Staff</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Create accounts for your team</p>
+              <p className="text-sm text-gray-600 mb-3">Create accounts for your team members</p>
               <button 
-                onClick={() => navigate('/restaurant/users')}
-                className="w-full bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                onClick={() => navigate('/restauracnt/users')}
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Manage Users
               </button>
@@ -497,15 +493,15 @@ const RestaurantDashboard = () => {
             
             <div className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <span className="text-orange-600 font-semibold text-sm">4</span>
+                <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <span className="text-gray-600 font-semibold text-sm">4</span>
                 </div>
                 <h3 className="font-semibold text-gray-900">Set Hours</h3>
               </div>
               <p className="text-sm text-gray-600 mb-3">Configure your operating hours</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
+                className="w-full bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
               >
                 Set Hours
               </button>
@@ -604,28 +600,51 @@ const RestaurantDashboard = () => {
                       <div className="text-lg font-bold">
                         Total: {formatCurrency(order.totalAmount || 0)}
                       </div>
-                      {order.status === "pending" && !order.assignedTo ? (
-                        <OrderActionButtons
-                          orderId={order._id}
-                          onAccept={handleAcceptOrder}
-                          onReject={handleRejectOrder}
-                        />
-                      ) : getNextAction(order.status) ? (
-                        <button
-                          onClick={() => handleUpdateStatus(order._id)}
-                          disabled={loadingOrderId === order._id}
-                          className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 focus:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {loadingOrderId === order._id ? (
-                            <>
-                              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                              Updating...
-                            </>
-                          ) : (
-                            getNextAction(order.status)
-                          )}
-                        </button>
-                      ) : null}
+                      <div className="flex gap-2">
+                        {order.status === "pending" && !order.assignedTo ? (
+                          <OrderActionButtons
+                            orderId={order._id}
+                            onAccept={handleAcceptOrder}
+                            onReject={handleRejectOrder}
+                          />
+                        ) : getNextAction(order.status) ? (
+                          <button
+                            onClick={() => handleUpdateStatus(order._id)}
+                            disabled={loadingOrderId === order._id}
+                            className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 focus:opacity-90 focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                          >
+                            {loadingOrderId === order._id ? (
+                              <>
+                                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                Updating...
+                              </>
+                            ) : (
+                              getNextAction(order.status)
+                            )}
+                          </button>
+                        ) : null}
+                        
+                        {/* Modify/Cancel buttons for accepted and preparing orders */}
+                        {['accepted', 'Preparing'].includes(order.status) && (
+                          <>
+                            <button
+                              onClick={() => window.open(`/restaurant/staff-orders?editOrder=${order._id}`, '_blank')}
+                              className="px-3 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 text-sm"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => {
+                                const reason = prompt('Reason for cancellation:');
+                                if (reason) handleCancelOrder(order._id, reason);
+                              }}
+                              className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+                            >
+                              Cancel
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 ))}

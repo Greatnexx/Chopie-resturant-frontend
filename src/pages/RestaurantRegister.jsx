@@ -2,32 +2,38 @@ import { useState } from "react";
 import { useRegisterRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-import { Store, Mail, Phone, MapPin, Globe, ChefHat } from "lucide-react";
+import { Store, Mail, Phone, MapPin, Globe, ChefHat, User, Lock, Eye, EyeOff } from "lucide-react";
 
 const RestaurantRegister = () => {
   const [formData, setFormData] = useState({
     name: "",
+    ownerName: "",
     email: "",
     phone: "",
     address: "",
-    subdomain: ""
+    subdomain: "",
+    password: "",
+    confirmPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerRestaurant, { isLoading }] = useRegisterRestaurantMutation();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
     try {
-      const result = await registerRestaurant(formData).unwrap();
-      const credentials = result.data?.loginCredentials;
-      if (credentials) {
-        toast.success(
-          `Restaurant registered! Login with: ${credentials.email} / ${credentials.password}`,
-          { duration: 10000 }
-        );
-      } else {
-        toast.success("Restaurant registered successfully! You can now login.");
-      }
+      const { confirmPassword, ...submitData } = formData;
+      await registerRestaurant(submitData).unwrap();
+      toast.success("Restaurant registered successfully! You can now login.");
       navigate("/restaurant/login");
     } catch (error) {
       toast.error(error?.data?.message || "Registration failed");
@@ -52,9 +58,7 @@ const RestaurantRegister = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Restaurant Name
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
             <div className="relative">
               <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -69,9 +73,22 @@ const RestaurantRegister = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Owner Name</label>
+            <div className="relative">
+              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                required
+                value={formData.ownerName}
+                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Enter owner name"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -86,9 +103,7 @@ const RestaurantRegister = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Phone Number
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -103,9 +118,7 @@ const RestaurantRegister = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Address
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
             <div className="relative">
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -120,9 +133,7 @@ const RestaurantRegister = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subdomain
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Subdomain</label>
             <div className="relative">
               <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -135,8 +146,46 @@ const RestaurantRegister = () => {
               />
             </div>
             <p className="text-xs text-gray-500 mt-1">
-              Your restaurant will be accessible at: {formData.subdomain}.chopie.com
+              Your restaurant will be accessible at: {formData.subdomain}.chopie-resturant-frontend.vercel.app
             </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type={showPassword ? "text" : "password"}
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Create a password"
+              />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                placeholder="Confirm your password"
+              />
+              <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              </button>
+            </div>
           </div>
 
           <button

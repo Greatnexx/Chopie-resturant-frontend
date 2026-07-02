@@ -554,15 +554,16 @@ const RestaurantDashboard = () => {
             ) : (
               <div className="grid gap-6">
                 {orders.map((order) => (
-                  <div key={order._id} className="bg-white rounded-lg shadow-md p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
+                  <div key={order._id} className="bg-white rounded-lg shadow-md p-4 lg:p-6">
+                    <div className="flex justify-between items-start mb-4 gap-2">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 truncate">
                           Order #{order.orderNumber}
                         </h3>
-                        <p className="text-gray-600">
-                          {order.customerName} • Table {order.tableNumber} • {order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}
+                        <p className="text-gray-600 text-sm break-words">
+                          {order.customerName} • Table {order.tableNumber}
                         </p>
+                        <p className="text-gray-600 text-sm">{order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}</p>
                         <p className="text-sm text-gray-500">
                           {order.createdAt && typeof order.createdAt === 'string' ? 
                             new Date(order.createdAt).toLocaleString() : 
@@ -570,9 +571,9 @@ const RestaurantDashboard = () => {
                           }
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center gap-1 shrink-0">
                         {getStatusIcon(order.status)}
-                        <span className="font-medium capitalize">{order.status}</span>
+                        <span className="font-medium capitalize text-sm">{order.status}</span>
                       </div>
                     </div>
 
@@ -580,27 +581,27 @@ const RestaurantDashboard = () => {
                       <h4 className="font-medium text-gray-900 mb-2">Items:</h4>
                       <div className="space-y-2">
                         {order.items.map((item, index) => (
-                          <div key={index} className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded">
-                            <div>
-                              <span className="font-medium">{item.name}</span>
+                          <div key={index} className="flex justify-between items-start py-2 px-3 bg-gray-50 rounded gap-2">
+                            <div className="min-w-0 flex-1">
+                              <span className="font-medium break-words">{item.name}</span>
                               <span className="text-gray-600"> × {item.quantity}</span>
                               {item.specialInstructions && (
-                                <p className="text-sm text-orange-600 mt-1">
+                                <p className="text-sm text-orange-600 mt-1 break-words">
                                   Note: {item.specialInstructions}
                                 </p>
                               )}
                             </div>
-                            <span className="font-medium">{formatCurrency(item.totalPrice || 0)}</span>
+                            <span className="font-medium shrink-0">{formatCurrency(item.totalPrice || 0)}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <div className="flex justify-between items-center pt-4 border-t">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center pt-4 border-t gap-3">
                       <div className="text-lg font-bold">
                         Total: {formatCurrency(order.totalAmount || 0)}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2">
                         {order.status === "pending" && !order.assignedTo ? (
                           <OrderActionButtons
                             orderId={order._id}

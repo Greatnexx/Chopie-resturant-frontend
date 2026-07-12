@@ -4,10 +4,16 @@ export const orderApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createOrder: builder.mutation({
       query: (orderData) => {
-        const hostParts = window.location.hostname.split('.');
-        const subdomain = hostParts.length > 1 && hostParts[0] !== 'www'
-          ? hostParts[0]
-          : window.location.pathname.split('/')[1] === 'r' ? window.location.pathname.split('/')[2] : null;
+        const hostname = window.location.hostname;
+        const baseDomain = 'chopie-resturant-frontend.vercel.app';
+        let subdomain = null;
+
+        if (hostname.endsWith('.' + baseDomain)) {
+          subdomain = hostname.replace('.' + baseDomain, '');
+        } else if (window.location.pathname.split('/')[1] === 'r') {
+          subdomain = window.location.pathname.split('/')[2];
+        }
+
         return {
           url: "/order",
           method: "POST",

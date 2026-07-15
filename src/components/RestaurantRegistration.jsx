@@ -139,23 +139,6 @@ const RestaurantRegistration = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Subdomain</label>
-              <div className="mt-1 flex rounded-md shadow-sm">
-                <input
-                  name="subdomain"
-                  type="text"
-                  required
-                  value={formData.subdomain}
-                  onChange={handleChange}
-                  className="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                />
-                <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                  .chopie-resturant-frontend.vercel.app
-                </span>
-              </div>
-            </div>
-
-            <div>
               <label className="block text-sm font-medium text-gray-700">Owner Name</label>
               <input
                 name="ownerName"

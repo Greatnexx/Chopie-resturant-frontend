@@ -136,6 +136,23 @@ const Settings = () => {
     navigate("/restaurant/login");
   };
 
+  const formatTo12h = (time24) => {
+    if (!time24) return { hour: '9', minute: '00', period: 'AM' };
+    const [h, m] = time24.split(':').map(Number);
+    return {
+      hour: String(h === 0 ? 12 : h > 12 ? h - 12 : h),
+      minute: String(m).padStart(2, '0'),
+      period: h < 12 ? 'AM' : 'PM'
+    };
+  };
+
+  const formatTo24h = ({ hour, minute, period }) => {
+    let h = parseInt(hour);
+    if (period === 'AM' && h === 12) h = 0;
+    if (period === 'PM' && h !== 12) h += 12;
+    return `${String(h).padStart(2, '0')}:${minute}`;
+  };
+
   const handleHoursChange = (day, field, value) => {
     setOperatingHours(prev => ({
       ...prev,
@@ -301,26 +318,45 @@ const Settings = () => {
                             </label>
                           </div>
                           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                            <div className="flex items-center gap-2">
-                              <label className="text-sm text-gray-600 w-12">Open:</label>
-                              <input 
-                                type="time" 
-                                value={dayData.open}
-                                onChange={(e) => handleHoursChange(day, 'open', e.target.value)}
-                                disabled={dayData.closed}
-                                className="border rounded px-2 py-1 disabled:bg-gray-100 text-sm" 
-                              />
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <label className="text-sm text-gray-600 w-12">Close:</label>
-                              <input 
-                                type="time" 
-                                value={dayData.close}
-                                onChange={(e) => handleHoursChange(day, 'close', e.target.value)}
-                                disabled={dayData.closed}
-                                className="border rounded px-2 py-1 disabled:bg-gray-100 text-sm" 
-                              />
-                            </div>
+                            {['open', 'close'].map((field) => {
+                              const t = formatTo12h(dayData[field]);
+                              return (
+                                <div key={field} className="flex items-center gap-2">
+                                  <label className="text-sm text-gray-600 w-12 capitalize">{field === 'open' ? 'Open:' : 'Close:'}</label>
+                                  <div className="flex gap-1">
+                                    <select
+                                      disabled={dayData.closed}
+                                      value={t.hour}
+                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, hour: e.target.value }))}
+                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
+                                    >
+                                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(h => (
+                                        <option key={h} value={String(h)}>{h}</option>
+                                      ))}
+                                    </select>
+                                    <select
+                                      disabled={dayData.closed}
+                                      value={t.minute}
+                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, minute: e.target.value }))}
+                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
+                                    >
+                                      {['00','15','30','45'].map(m => (
+                                        <option key={m} value={m}>{m}</option>
+                                      ))}
+                                    </select>
+                                    <select
+                                      disabled={dayData.closed}
+                                      value={t.period}
+                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, period: e.target.value }))}
+                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
+                                    >
+                                      <option value="AM">AM</option>
+                                      <option value="PM">PM</option>
+                                    </select>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>

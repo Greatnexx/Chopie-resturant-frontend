@@ -377,8 +377,8 @@ const UserManagement = () => {
                   />
                   <div className="text-xs lg:text-sm text-gray-600 p-3 bg-blue-50 rounded-lg border border-blue-200">
                     <p className="font-medium text-blue-800 mb-1">📋 Password Generation:</p>
-                    <p>• Password will be the user's <strong>surname in UPPERCASE</strong></p>
-                    <p>• Example: "John Smith" → Password: "SMITH"</p>
+                    <p>• Password will be the user's <strong>surname with capital first letter</strong></p>
+                    <p>• Example: "John Smith" → Password: "Smith"</p>
                     <p>• User must change password on first login</p>
                   </div>
                   <select

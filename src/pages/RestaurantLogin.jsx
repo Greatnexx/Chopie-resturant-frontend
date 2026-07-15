@@ -86,6 +86,12 @@ const RestaurantLogin = () => {
           >
             {isLoading ? "Signing in..." : "Sign In"}
           </button>
+
+          <div className="text-right">
+            <Link to="/restaurant/forgot-password" className="text-sm text-red-500 hover:text-red-600">
+              Forgot password?
+            </Link>
+          </div>
         </form>
 
         <div className="text-center mt-6">

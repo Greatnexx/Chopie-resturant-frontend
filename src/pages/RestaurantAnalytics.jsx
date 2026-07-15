@@ -1,21 +1,43 @@
 import { useState } from "react";
 import { useGetAnalyticsQuery } from "../slices/restaurantSlice";
-import { BarChart3, DollarSign, Clock, TrendingUp, Menu } from "lucide-react";
+import { BarChart3, DollarSign, Clock, TrendingUp, Menu, Calendar } from "lucide-react";
 import RestaurantSidebar from "../components/RestaurantSidebar";
 import { useNavigate } from "react-router-dom";
 import { useBranding } from "../Context/BrandingContext";
 
 const RestaurantAnalytics = () => {
   const [period, setPeriod] = useState("day");
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
+  const [useCustomRange, setUseCustomRange] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
   const { branding } = useBranding();
   
   const userData = sessionStorage.getItem("restaurantUser");
   const user = userData ? JSON.parse(userData).data || JSON.parse(userData) : {};
   
-  const { data: analyticsData, isLoading } = useGetAnalyticsQuery(period);
+  const analyticsParams = useCustomRange && dateRange.startDate && dateRange.endDate
+    ? { startDate: dateRange.startDate, endDate: dateRange.endDate }
+    : period;
+
+  const { data: analyticsData, isLoading } = useGetAnalyticsQuery(analyticsParams);
   const analytics = analyticsData?.data || {};
+
+  const handlePeriodChange = (p) => {
+    setPeriod(p);
+    setUseCustomRange(false);
+  };
+
+  const handleApplyRange = () => {
+    if (dateRange.startDate && dateRange.endDate) {
+      setUseCustomRange(true);
+    }
+  };
+
+  const handleClearRange = () => {
+    setDateRange({ startDate: "", endDate: "" });
+    setUseCustomRange(false);
+  };
 
   const handleLogout = () => {
     sessionStorage.removeItem("restaurantUser");
@@ -55,22 +77,67 @@ const RestaurantAnalytics = () => {
             </div>
             
             {/* Period Selector */}
-            <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
-              {['day', 'week', 'month', 'year'].map((p) => (
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+                {['day', 'week', 'month', 'year'].map((p) => (
+                  <button
+                    key={p}
+                    onClick={() => handlePeriodChange(p)}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      period === p && !useCustomRange ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                    style={{
+                      backgroundColor: period === p && !useCustomRange ? branding.primaryColor : 'transparent'
+                    }}
+                  >
+                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                  </button>
+                ))}
+              </div>
+
+              {/* Date Range Picker */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-3 py-1.5">
+                  <Calendar className="w-4 h-4 text-gray-400" />
+                  <input
+                    type="date"
+                    value={dateRange.startDate}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                    className="text-sm text-gray-700 outline-none"
+                  />
+                  <span className="text-gray-400 text-sm">to</span>
+                  <input
+                    type="date"
+                    value={dateRange.endDate}
+                    min={dateRange.startDate}
+                    onChange={(e) => setDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                    className="text-sm text-gray-700 outline-none"
+                  />
+                </div>
                 <button
-                  key={p}
-                  onClick={() => setPeriod(p)}
-                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                    period === p ? 'text-white shadow-sm' : 'text-gray-600 hover:text-gray-900'
-                  }`}
-                  style={{
-                    backgroundColor: period === p ? branding.primaryColor : 'transparent'
-                  }}
+                  onClick={handleApplyRange}
+                  disabled={!dateRange.startDate || !dateRange.endDate}
+                  className="px-3 py-1.5 text-sm text-white rounded-lg disabled:opacity-40 transition-colors"
+                  style={{ backgroundColor: branding.primaryColor }}
                 >
-                  {p.charAt(0).toUpperCase() + p.slice(1)}
+                  Apply
                 </button>
-              ))}
+                {useCustomRange && (
+                  <button
+                    onClick={handleClearRange}
+                    className="px-3 py-1.5 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
             </div>
+
+            {useCustomRange && (
+              <p className="text-sm text-gray-500 mt-2">
+                Showing results from <strong>{new Date(dateRange.startDate).toLocaleDateString()}</strong> to <strong>{new Date(dateRange.endDate).toLocaleDateString()}</strong>
+              </p>
+            )}
           </div>
 
           {isLoading ? (

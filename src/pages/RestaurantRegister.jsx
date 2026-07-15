@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRegisterRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-import { Store, Mail, Phone, MapPin, Globe, ChefHat, User, Lock, Eye, EyeOff } from "lucide-react";
+import { Store, Mail, Phone, MapPin, ChefHat, User, Lock, Eye, EyeOff } from "lucide-react";
 
 const RestaurantRegister = () => {
   const [formData, setFormData] = useState({
@@ -19,6 +19,15 @@ const RestaurantRegister = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registerRestaurant, { isLoading }] = useRegisterRestaurantMutation();
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "name" && { subdomain: value.toLowerCase().replace(/[^a-z0-9]/g, "") }),
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,11 +49,6 @@ const RestaurantRegister = () => {
     }
   };
 
-  const handleSubdomainChange = (e) => {
-    const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, '');
-    setFormData({ ...formData, subdomain: value });
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
@@ -63,9 +67,10 @@ const RestaurantRegister = () => {
               <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                name="name"
                 required
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter restaurant name"
               />
@@ -78,9 +83,10 @@ const RestaurantRegister = () => {
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                name="ownerName"
                 required
                 value={formData.ownerName}
-                onChange={(e) => setFormData({ ...formData, ownerName: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter owner name"
               />
@@ -93,9 +99,10 @@ const RestaurantRegister = () => {
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="email"
+                name="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter email address"
               />
@@ -108,9 +115,10 @@ const RestaurantRegister = () => {
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="tel"
+                name="phone"
                 required
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter phone number"
               />
@@ -123,31 +131,14 @@ const RestaurantRegister = () => {
               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
+                name="address"
                 required
                 value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Enter restaurant address"
               />
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Subdomain</label>
-            <div className="relative">
-              <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                required
-                value={formData.subdomain}
-                onChange={handleSubdomainChange}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="yourrestaurant"
-              />
-            </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Your restaurant will be accessible at: {formData.subdomain}.chopie-resturant-frontend.vercel.app
-            </p>
           </div>
 
           <div>
@@ -156,9 +147,10 @@ const RestaurantRegister = () => {
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={showPassword ? "text" : "password"}
+                name="password"
                 required
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Create a password"
               />
@@ -175,9 +167,10 @@ const RestaurantRegister = () => {
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type={showConfirmPassword ? "text" : "password"}
+                name="confirmPassword"
                 required
                 value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                onChange={handleChange}
                 className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                 placeholder="Confirm your password"
               />

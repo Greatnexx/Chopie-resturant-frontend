@@ -30,6 +30,8 @@ import RestaurantRegistration from "./components/RestaurantRegistration";
 import TenantRouter from "./components/TenantRouter";
 import TenantDemo from "./components/TenantDemo";
 import StaffOrderInterface from "./components/StaffOrderInterface";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const App = () => {
   const router = createBrowserRouter(
@@ -55,6 +57,8 @@ const App = () => {
         <Route path="/restaurant/register" element={<RestaurantRegister />} />
         <Route path="/register" element={<RestaurantRegistration />} />
         <Route path="/restaurant/login" element={<RestaurantLogin />} />
+        <Route path="/restaurant/forgot-password" element={<ForgotPassword />} />
+        <Route path="/restaurant/reset-password/:token" element={<ResetPassword />} />
         <Route path="/restaurant/dashboard" element={<RestaurantDashboard />} />
         <Route path="/restaurant/super-admin" element={<SuperAdminDashboard />} />
         <Route path="/restaurant/audit-trail" element={<AuditTrail />} />

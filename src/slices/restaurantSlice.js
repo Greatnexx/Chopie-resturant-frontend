@@ -80,7 +80,12 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
       invalidatesTags: ["Users"],
     }),
     getAnalytics: builder.query({
-      query: (period = "day") => `/restaurant/analytics?period=${period}`,
+      query: (params) => {
+        if (typeof params === 'object' && params.startDate && params.endDate) {
+          return `/restaurant/analytics?startDate=${params.startDate}&endDate=${params.endDate}`;
+        }
+        return `/restaurant/analytics?period=${params || 'day'}`;
+      },
     }),
     getAuditLogs: builder.query({
       query: () => "/restaurant/audit",

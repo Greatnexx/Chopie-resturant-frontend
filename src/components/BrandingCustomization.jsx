@@ -17,11 +17,9 @@ const BrandingCustomization = () => {
   const [logoPreview, setLogoPreview] = useState(null);
 
   useEffect(() => {
-    // Initialize with context branding if available
     if (contextBranding) {
       setBranding(contextBranding);
       if (contextBranding.logo) {
-        // Check if logo is already a full URL (Cloudinary) or needs backend URL prefix
         if (contextBranding.logo.startsWith('http')) {
           setLogoPreview(contextBranding.logo);
         } else {
@@ -29,32 +27,31 @@ const BrandingCustomization = () => {
         }
       }
     }
-    
-    // Get restaurant name from session storage
+
     const userData = sessionStorage.getItem('restaurantUser');
     if (userData) {
-      const user = JSON.parse(userData);
-      const restaurantName = user?.data?.restaurantName || user?.restaurantName;
+      const u = JSON.parse(userData);
+      const restaurantName = u?.data?.restaurantName || u?.restaurantName;
       if (restaurantName && !branding.name) {
         setBranding(prev => ({ ...prev, name: restaurantName }));
       }
     }
-    
+
     fetchBrandingData();
   }, [contextBranding]);
 
   const fetchBrandingData = async () => {
     try {
       const userData = sessionStorage.getItem('restaurantUser');
-      const user = userData ? JSON.parse(userData) : null;
-      const token = user?.data?.token || user?.token;
-      
+      const u = userData ? JSON.parse(userData) : null;
+      const token = u?.data?.token || u?.token;
+
       const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-chopie-project.onrender.com/api/v1';
       const response = await fetch(`${apiUrl}/restaurant/branding`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
-      
+
       if (data.status && data.data?.branding) {
         setBranding({
           name: data.data.branding?.name || data.data.name || '',
@@ -106,8 +103,8 @@ const BrandingCustomization = () => {
       formData.append('accentColor', branding.accentColor);
 
       const userData = sessionStorage.getItem('restaurantUser');
-      const user = userData ? JSON.parse(userData) : null;
-      const token = user?.data?.token || user?.token;
+      const u = userData ? JSON.parse(userData) : null;
+      const token = u?.data?.token || u?.token;
 
       const apiUrl = import.meta.env.VITE_API_URL || 'https://backend-chopie-project.onrender.com/api/v1';
       const response = await fetch(`${apiUrl}/restaurant/branding`, {
@@ -117,11 +114,10 @@ const BrandingCustomization = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.status) {
         setMessage('Branding updated successfully!');
-        
-        // Update local state with the response data
+
         const updatedBranding = {
           name: data.data?.branding?.name || branding.name,
           logo: data.data?.branding?.logo || branding.logo,
@@ -129,10 +125,9 @@ const BrandingCustomization = () => {
           secondaryColor: data.data?.branding?.secondaryColor || branding.secondaryColor,
           accentColor: data.data?.branding?.accentColor || branding.accentColor
         };
-        
+
         setBranding(updatedBranding);
-        
-        // Update logo preview with the new Cloudinary URL
+
         if (data.data?.branding?.logo) {
           if (data.data.branding.logo.startsWith('http')) {
             setLogoPreview(data.data.branding.logo);
@@ -140,10 +135,8 @@ const BrandingCustomization = () => {
             setLogoPreview(`${import.meta.env.VITE_API_URL?.split('/api')[0] || 'https://backend-chopie-project.onrender.com'}${data.data.branding.logo}`);
           }
         }
-        
-        // Refresh branding context to apply changes globally
+
         await fetchBranding();
-        // Apply changes immediately to current page
         applyBranding(updatedBranding);
       } else {
         setMessage(data.message || 'Failed to update branding');
@@ -159,7 +152,7 @@ const BrandingCustomization = () => {
     <div className="max-w-4xl mx-auto p-6">
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Brand Customization</h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Restaurant Name */}
           <div>
@@ -182,9 +175,9 @@ const BrandingCustomization = () => {
             </label>
             <div className="flex items-center space-x-4">
               {logoPreview && (
-                <img 
-                  src={logoPreview} 
-                  alt="Logo preview" 
+                <img
+                  src={logoPreview}
+                  alt="Logo preview"
                   className="w-16 h-16 object-cover rounded-lg border"
                 />
               )}
@@ -260,12 +253,12 @@ const BrandingCustomization = () => {
             </div>
           </div>
 
-          {/* Preview Section */}
+          {/* Preview */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Preview</h3>
-            <div 
+            <div
               className="p-4 sm:p-6 rounded-lg border-2"
-              style={{ 
+              style={{
                 backgroundColor: branding.primaryColor + '10',
                 borderColor: branding.primaryColor
               }}
@@ -278,26 +271,14 @@ const BrandingCustomization = () => {
                   {branding.name || user?.restaurantName || 'Your Restaurant'}
                 </h4>
               </div>
-              <div className="flex flex-col sm:flex-row gap-2 sm:gap-2">
-                <button 
-                  type="button"
-                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
-                  style={{ backgroundColor: branding.primaryColor }}
-                >
+              <div className="flex flex-col sm:flex-row gap-2">
+                <button type="button" className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium" style={{ backgroundColor: branding.primaryColor }}>
                   Primary Button
                 </button>
-                <button 
-                  type="button"
-                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
-                  style={{ backgroundColor: branding.secondaryColor }}
-                >
+                <button type="button" className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium" style={{ backgroundColor: branding.secondaryColor }}>
                   Secondary Button
                 </button>
-                <button 
-                  type="button"
-                  className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium"
-                  style={{ backgroundColor: branding.accentColor }}
-                >
+                <button type="button" className="px-3 py-2 sm:px-4 sm:py-2 rounded-md text-white text-sm font-medium" style={{ backgroundColor: branding.accentColor }}>
                   Accent Button
                 </button>
               </div>

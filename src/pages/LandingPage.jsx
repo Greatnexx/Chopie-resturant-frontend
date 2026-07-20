@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Users, TrendingUp, Shield, Zap, Globe, ClipboardList, MessageSquare, BarChart2, Palette, Bell, Lock } from 'lucide-react';
+import { ArrowRight, Users, TrendingUp, Shield, Zap, Globe, ClipboardList, MessageSquare, BarChart2, Palette, Bell, Lock } from 'lucide-react';
 
 const LandingPage = () => {
   return (
@@ -157,26 +157,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing */}
-      <section id="pricing" className="py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="inline-flex items-center space-x-2 bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-6">
-            <Star className="w-4 h-4" />
-            <span>Pricing Coming Soon</span>
-          </div>
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-          <p className="text-xl text-gray-500 mb-8">We're putting the finishing touches on our pricing plans. For now, registration is completely free — get started today and lock in early access.</p>
-          <Link
-            to="/restaurant/register"
-            className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center space-x-2"
-          >
-            <span>Get Early Access — It's Free</span>
-            <ArrowRight className="w-5 h-5" />
-          </Link>
-        </div>
-      </section>
-
-      {/* CTA Section */}
+      {/* CTA Section */
       <section className="py-20 bg-gradient-to-r from-red-600 to-orange-600">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
@@ -214,7 +195,6 @@ const LandingPage = () => {
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
               </ul>
             </div>
             <div>

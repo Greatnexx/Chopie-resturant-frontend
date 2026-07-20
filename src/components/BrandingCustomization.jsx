@@ -260,7 +260,7 @@ const BrandingCustomization = () => {
             </div>
           </div>
 
-          {/* Preview Section */
+          {/* Preview Section */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Preview</h3>
             <div 

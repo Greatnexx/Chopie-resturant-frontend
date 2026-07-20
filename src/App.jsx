@@ -50,8 +50,8 @@ const App = () => {
         </Route>
         
         {/* Platform Owner routes */}
-        <Route path="/platform-login" element={<PlatformOwnerLogin />} />
-        <Route path="/platform-dashboard" element={<PlatformOwnerDashboard />} />
+        <Route path="/platform-owner/login" element={<PlatformOwnerLogin />} />
+        <Route path="/platform-owner/dashboard" element={<PlatformOwnerDashboard />} />
         
         {/* Restaurant management routes */}
         <Route path="/restaurant/register" element={<RestaurantRegister />} />

@@ -59,19 +59,20 @@ const baseQuery = fetchBaseQuery({
       headers.set("Authorization", `Bearer ${restaurantToken}`);
     }
 
-    // For tenant routes, extract subdomain from hostname (e.g. mama.localhost:3000)
-    // or from URL path (e.g. /r/mama)
+    // Extract subdomain from hostname (mama.localhost, mama.chopie.ng)
+    // or from URL path (/r/mama)
     const hostname = window.location.hostname;
     const hostParts = hostname.split('.');
-    if (hostParts.length > 1 && hostParts[0] !== 'www') {
+    const isChopieNg = hostname.endsWith('chopie.ng') && hostParts.length === 3;
+    const isLocalSubdomain = hostname.includes('localhost') && hostParts.length > 1 && hostParts[0] !== 'localhost';
+
+    if (isChopieNg || isLocalSubdomain) {
       headers.set("X-Tenant-Subdomain", hostParts[0]);
     } else {
       const currentPath = window.location.pathname;
       if (currentPath.startsWith('/r/')) {
         const subdomain = currentPath.split('/')[2];
-        if (subdomain) {
-          headers.set("X-Tenant-Subdomain", subdomain);
-        }
+        if (subdomain) headers.set("X-Tenant-Subdomain", subdomain);
       }
     }
 

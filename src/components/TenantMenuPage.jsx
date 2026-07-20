@@ -327,6 +327,7 @@ const TenantMenuPage = () => {
           orderData={orderConfirmationData}
           onClose={() => setShowOrderConfirmation(false)}
           onPlaceAnother={handlePlaceAnotherOrder}
+          restaurantName={currentTenant?.name}
         />
       )}
 

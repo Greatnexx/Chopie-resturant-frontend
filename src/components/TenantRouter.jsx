@@ -30,9 +30,10 @@ const TenantRouter = ({ children }) => {
                               !hostname.startsWith('localhost') &&
                               !hostname.startsWith('www.');
       
-      const isProdSubdomain = hostname.includes('.chopie-resturant-frontend.vercel.app') && 
-                             !hostname.startsWith('chopie-resturant-frontend.vercel.app') &&
-                             !hostname.startsWith('www.');
+      const isProdSubdomain = (
+        hostname.endsWith('.chopie.ng') ||
+        hostname.endsWith('.chopie-resturant-frontend.vercel.app')
+      ) && !hostname.startsWith('www.');
       
       if (isLocalSubdomain || isProdSubdomain) {
         tenantIdentifier = hostname.split('.')[0];
@@ -109,7 +110,8 @@ const TenantRouter = ({ children }) => {
 
   // If we have a tenant and we're on a tenant route, show the tenant menu page
   if (currentTenant && (location.pathname.startsWith('/r/') || 
-                       window.location.hostname.includes('.chopie-resturant-frontend.vercel.app') ||
+                       window.location.hostname.endsWith('.chopie.ng') ||
+                       window.location.hostname.endsWith('.chopie-resturant-frontend.vercel.app') ||
                        window.location.hostname.includes('.localhost'))) {
     // Check if this is a specific route that should not be handled by TenantMenuPage
     const isSpecificRoute = location.pathname.includes('/trackorder') || 

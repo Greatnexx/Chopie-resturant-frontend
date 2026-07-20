@@ -44,7 +44,7 @@ const PlatformOwnerLogin = () => {
           user: data.data.owner,
           token: data.data.token
         }));
-        navigate('/platform-dashboard');
+        navigate('/platform-owner/dashboard');
       } else {
         setError(data.message || 'Login failed');
       }

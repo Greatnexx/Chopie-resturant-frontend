@@ -172,6 +172,7 @@ const Header = () => {
             orderData={orderData}
             onClose={handleCloseConfirmation}
             onPlaceAnother={handlePlaceAnother}
+            restaurantName={activeBranding?.name}
           />
     </>
   );

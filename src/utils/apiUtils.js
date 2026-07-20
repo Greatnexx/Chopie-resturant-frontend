@@ -1,10 +1,6 @@
 export const getBaseUrl = () => {
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    return 'http://localhost:8000/api/v1';
-  }
-  // On subdomains like mama.localhost or production
   const hostname = window.location.hostname;
-  if (hostname.includes('localhost')) {
+  if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.includes('localhost')) {
     return 'http://localhost:8000/api/v1';
   }
   const storedURL = localStorage.getItem('RENDER_URL');

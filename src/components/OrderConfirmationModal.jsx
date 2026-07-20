@@ -2,8 +2,9 @@ import { CheckCircle, Clock, ShoppingBag, Eye, Copy, Download, Check } from "luc
 import { useNavigate, useLocation } from "react-router-dom";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useState } from "react";
+import jsPDF from "jspdf";
 
-const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) => {
+const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, restaurantName }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [copied, setCopied] = useState(false);
@@ -19,11 +20,8 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
 
   const handleTrackOrder = () => {
     const restaurantId = getRestaurantId();
-    if (restaurantId) {
-      navigate(`/r/${restaurantId}/trackorder`);
-    } else {
-      navigate(`/trackorder`);
-    }
+    const base = restaurantId ? `/r/${restaurantId}/trackorder` : `/trackorder`;
+    navigate(`${base}?order=${orderData.orderNumber}`);
     onClose();
   };
 
@@ -38,49 +36,93 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother }) 
   };
 
   const handleDownloadReceipt = () => {
-    const receiptContent = `
-===========================================
-           LaQuinta Club 
-           ORDER CONFIRMATION
-===========================================
+    const doc = new jsPDF({ unit: 'mm', format: 'a5' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const margin = 14;
+    const contentW = pageW - margin * 2;
+    let y = 16;
 
-Order Number: ${orderData.orderNumber}
-Date: ${new Date().toLocaleDateString()}
-Time: ${new Date().toLocaleTimeString()}
+    const line = () => { doc.setDrawColor(220, 220, 220); doc.line(margin, y, pageW - margin, y); y += 5; };
+    const text = (str, x, size = 10, style = 'normal', color = [40, 40, 40]) => {
+      doc.setFontSize(size); doc.setFont('helvetica', style); doc.setTextColor(...color);
+      doc.text(str, x, y);
+    };
 
-Customer Details:
-Name: ${orderData.customerName}
-Phone: ${orderData.customerPhone || 'N/A'}
-Table: ${orderData.tableNumber}
+    // Header
+    doc.setFillColor(239, 68, 68);
+    doc.roundedRect(margin, y - 6, contentW, 18, 3, 3, 'F');
+    doc.setFontSize(16); doc.setFont('helvetica', 'bold'); doc.setTextColor(255, 255, 255);
+    doc.text(restaurantName || 'Chopie', pageW / 2, y + 4, { align: 'center' });
+    y += 18;
 
--------------------------------------------
-                ORDER ITEMS
--------------------------------------------
-${orderData.items?.map(item => 
-  `${item.name} x${item.quantity} - ${formatCurrency(item.totalPrice)}${item.specialInstructions ? `\n  Note: ${item.specialInstructions}` : ''}`
-).join('\n')}
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120);
+    doc.text('Order Confirmation Receipt', pageW / 2, y, { align: 'center' });
+    y += 8;
 
--------------------------------------------
-TOTAL AMOUNT: ${formatCurrency(orderData.totalAmount)}
--------------------------------------------
+    line();
 
-Estimated Time: 5-10 minutes
+    // Order meta
+    text(`Order #${orderData.orderNumber}`, margin, 11, 'bold', [30, 30, 30]);
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120);
+    doc.text(`${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, pageW - margin, y, { align: 'right' });
+    y += 8;
 
-Thank you for choosing LaQuinta Club!
-We appreciate your business.
+    // Customer info
+    doc.setFillColor(249, 250, 251);
+    doc.roundedRect(margin, y, contentW, 18, 2, 2, 'F');
+    y += 5;
+    text(`Customer: ${orderData.customerName}`, margin + 3, 9, 'normal', [60, 60, 60]);
+    y += 5;
+    text(`Table: ${orderData.tableNumber}`, margin + 3, 9, 'normal', [60, 60, 60]);
+    if (orderData.customerPhone) { y += 5; text(`Phone: ${orderData.customerPhone}`, margin + 3, 9, 'normal', [60, 60, 60]); }
+    y += 8;
 
-===========================================
-    `;
+    line();
 
-    const blob = new Blob([receiptContent], { type: 'text/plain' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `Chopie-Receipt-${orderData.orderNumber}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
+    // Items header
+    text('Item', margin, 9, 'bold', [100, 100, 100]);
+    doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(100, 100, 100);
+    doc.text('Qty', pageW - margin - 28, y, { align: 'right' });
+    doc.text('Price', pageW - margin, y, { align: 'right' });
+    y += 6;
+
+    // Items
+    orderData.items?.forEach(item => {
+      const nameLines = doc.splitTextToSize(item.name, contentW - 40);
+      text(nameLines[0], margin, 10, 'normal', [30, 30, 30]);
+      doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30);
+      doc.text(`x${item.quantity}`, pageW - margin - 28, y, { align: 'right' });
+      doc.text(formatCurrency(item.totalPrice), pageW - margin, y, { align: 'right' });
+      y += 5;
+      if (item.specialInstructions) {
+        doc.setFontSize(8); doc.setTextColor(180, 100, 0);
+        doc.text(`Note: ${item.specialInstructions}`, margin + 3, y);
+        y += 4;
+      }
+    });
+
+    y += 2;
+    line();
+
+    // Total
+    text('Total Amount', margin, 12, 'bold', [30, 30, 30]);
+    doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(239, 68, 68);
+    doc.text(formatCurrency(orderData.totalAmount), pageW - margin, y, { align: 'right' });
+    y += 10;
+
+    // Estimated time
+    doc.setFillColor(239, 246, 255);
+    doc.roundedRect(margin, y, contentW, 10, 2, 2, 'F');
+    y += 6;
+    doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(59, 130, 246);
+    doc.text(' Estimated Time: 5-10 minutes', pageW / 2, y, { align: 'center' });
+    y += 12;
+
+    // Footer
+    doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(150, 150, 150);
+    doc.text(`Thank you for your order! - ${restaurantName || 'Chopie'}`, pageW / 2, y, { align: 'center' });
+
+    doc.save(`${restaurantName || 'Chopie'}-Receipt-${orderData.orderNumber}.pdf`);
   };
 
   return (

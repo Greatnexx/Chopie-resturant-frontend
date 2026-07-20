@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Users, TrendingUp, Shield, Zap, Globe } from 'lucide-react';
+import { ArrowRight, Star, Users, TrendingUp, Shield, Zap, Globe, ClipboardList, MessageSquare, BarChart2, Palette, Bell, Lock } from 'lucide-react';
 
 const LandingPage = () => {
   return (
@@ -57,12 +57,7 @@ const LandingPage = () => {
                 <span>Start Your Journey</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
-              <button className="text-gray-600 hover:text-red-600 font-medium flex items-center space-x-2 transition-colors">
-                <span>Watch Demo</span>
-                <div className="w-8 h-8 border-2 border-current rounded-full flex items-center justify-center">
-                  <div className="w-0 h-0 border-l-[6px] border-l-current border-y-[4px] border-y-transparent ml-1"></div>
-                </div>
-              </button>
+
             </div>
           </div>
         </div>
@@ -98,28 +93,86 @@ const LandingPage = () => {
       </section>
 
       {/* Features */}
-      <section className="py-16 bg-gradient-to-r from-red-50 to-orange-50">
+      <section id="features" className="py-20 bg-gradient-to-r from-red-50 to-orange-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Why Choose Chopie?</h2>
-            <p className="text-xl text-gray-600">Everything you need to run your business efficiently</p>
+          <div className="text-center mb-14">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Everything You Need, Built In</h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">Chopie gives your business a complete digital backbone — from the first order to the last report.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
-              { icon: <Zap className="w-8 h-8" />, title: "Lightning Fast", desc: "Quick setup and instant deployment" },
-              { icon: <Users className="w-8 h-8" />, title: "Multi-Tenant", desc: "Isolated data for each business" },
-              { icon: <TrendingUp className="w-8 h-8" />, title: "Analytics", desc: "Real-time insights and reporting" },
-              { icon: <Shield className="w-8 h-8" />, title: "Secure", desc: "Enterprise-grade security" },
-              { icon: <Globe className="w-8 h-8" />, title: "Custom Domains", desc: "Your brand, your domain" },
-              { icon: <Star className="w-8 h-8" />, title: "24/7 Support", desc: "Always here to help you succeed" }
+              {
+                icon: <ClipboardList className="w-7 h-7" />,
+                title: "Smart Order Management",
+                desc: "Receive, track, and manage orders in real time. Staff get instant notifications so nothing slips through the cracks."
+              },
+              {
+                icon: <Palette className="w-7 h-7" />,
+                title: "Menu Builder",
+                desc: "Create and update your menu with categories, images, and pricing. Set VIP and regular pricing tiers effortlessly."
+              },
+              {
+                icon: <Users className="w-7 h-7" />,
+                title: "Staff & Role Management",
+                desc: "Add kitchen staff, managers, and admins with role-based access. Everyone sees only what they need."
+              },
+              {
+                icon: <MessageSquare className="w-7 h-7" />,
+                title: "Live Customer Chat",
+                desc: "Chat with customers in real time directly from your dashboard. Resolve issues fast and keep customers happy."
+              },
+              {
+                icon: <BarChart2 className="w-7 h-7" />,
+                title: "Analytics & Reports",
+                desc: "Track revenue, order trends, and staff performance with clear, actionable dashboards."
+              },
+              {
+                icon: <Bell className="w-7 h-7" />,
+                title: "Real-Time Notifications",
+                desc: "Instant alerts for new orders, status changes, and customer messages — so your team is always in sync."
+              },
+              {
+                icon: <Globe className="w-7 h-7" />,
+                title: "Your Own Subdomain",
+                desc: "Every business gets a unique branded URL. Share your menu link with customers and start taking orders immediately."
+              },
+              {
+                icon: <Shield className="w-7 h-7" />,
+                title: "Secure & Reliable",
+                desc: "Your data is isolated, encrypted, and protected. Each tenant is completely separated from others on the platform."
+              },
+              {
+                icon: <Zap className="w-7 h-7" />,
+                title: "Quick Setup",
+                desc: "Register, get approved, and go live in minutes. No technical knowledge required — just fill in your details and start."
+              },
             ].map((feature, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-                <div className="text-red-500 mb-4">{feature.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.desc}</p>
+              <div key={index} className="bg-white p-7 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+                <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-red-500 mb-5">{feature.icon}</div>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-500 text-sm leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section id="pricing" className="py-20 bg-white">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="inline-flex items-center space-x-2 bg-orange-100 text-orange-600 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <Star className="w-4 h-4" />
+            <span>Pricing Coming Soon</span>
+          </div>
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
+          <p className="text-xl text-gray-500 mb-8">We're putting the finishing touches on our pricing plans. For now, registration is completely free — get started today and lock in early access.</p>
+          <Link
+            to="/restaurant/register"
+            className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-red-600 hover:to-orange-600 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105 inline-flex items-center space-x-2"
+          >
+            <span>Get Early Access — It's Free</span>
+            <ArrowRight className="w-5 h-5" />
+          </Link>
         </div>
       </section>
 
@@ -160,25 +213,21 @@ const LandingPage = () => {
             <div>
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Features</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Demo</a></li>
+                <li><a href="#features" className="hover:text-white transition-colors">Features</a></li>
+                <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">Help Center</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Status</a></li>
+                <li><a href="mailto:godwindanielgodwin@gmail.com" className="hover:text-white transition-colors">godwindanielgodwin@gmail.com</a></li>
+                <li><a href="tel:+2348066870296" className="hover:text-white transition-colors">08066870296</a></li>
               </ul>
             </div>
             <div>
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">About</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Careers</a></li>
+                <li><p className="text-gray-400">Chopie is a multi-tenant digital platform built for restaurants, clubs, hotels, and events — helping businesses manage orders, menus, and customers all in one place.</p></li>
               </ul>
             </div>
           </div>

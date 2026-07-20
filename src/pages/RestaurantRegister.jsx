@@ -11,7 +11,6 @@ const RestaurantRegister = () => {
     email: "",
     phone: "",
     address: "",
-    subdomain: "",
     password: "",
     confirmPassword: "",
   });
@@ -22,11 +21,7 @@ const RestaurantRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-      ...(name === "name" && { subdomain: value.toLowerCase().replace(/[^a-z0-9]/g, "") }),
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {

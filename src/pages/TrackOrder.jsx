@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { selectCurrentTenant } from "../slices/tenantSlice";
 import {
@@ -21,12 +21,13 @@ import SimpleLiveChat from "../components/SimpleLiveChat";
 import { getBaseUrl } from "../utils/apiUtils";
 
 const TrackOrder = () => {
-  const { restaurantId } = useParams(); // Get restaurant ID from URL
-  const currentTenant = useSelector(selectCurrentTenant); // Get tenant data from Redux
+  const { restaurantId } = useParams();
+  const currentTenant = useSelector(selectCurrentTenant);
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('order') || "");
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [searchTriggered, setSearchTriggered] = useState(false);
+  const [searchTriggered, setSearchTriggered] = useState(!!searchParams.get('order'));
   const [showChat, setShowChat] = useState(false);
   
   const getLogoUrl = (logoPath) => {
@@ -127,6 +128,7 @@ const TrackOrder = () => {
   const handleSearch = () => {
     if (searchTerm.trim()) {
       setSearchTriggered(true);
+      setSearchParams({ order: searchTerm.trim() });
     }
   };
 

@@ -10,16 +10,11 @@ const BrandingCustomization = () => {
     logo: null,
     primaryColor: '#ef4444',
     secondaryColor: '#f97316',
-    accentColor: '#eab308',
-    fontFamily: 'Inter'
+    accentColor: '#eab308'
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [logoPreview, setLogoPreview] = useState(null);
-
-  const fontOptions = [
-    'Inter', 'Roboto', 'Open Sans', 'Lato', 'Montserrat', 'Poppins'
-  ];
 
   useEffect(() => {
     // Initialize with context branding if available
@@ -66,8 +61,7 @@ const BrandingCustomization = () => {
           logo: data.data.branding?.logo || null,
           primaryColor: data.data.branding?.primaryColor || '#ef4444',
           secondaryColor: data.data.branding?.secondaryColor || '#f97316',
-          accentColor: data.data.branding?.accentColor || '#eab308',
-          fontFamily: data.data.branding?.fontFamily || 'Inter'
+          accentColor: data.data.branding?.accentColor || '#eab308'
         });
         if (data.data.branding?.logo) {
           if (data.data.branding.logo.startsWith('http')) {
@@ -110,7 +104,6 @@ const BrandingCustomization = () => {
       formData.append('primaryColor', branding.primaryColor);
       formData.append('secondaryColor', branding.secondaryColor);
       formData.append('accentColor', branding.accentColor);
-      formData.append('fontFamily', branding.fontFamily);
 
       const userData = sessionStorage.getItem('restaurantUser');
       const user = userData ? JSON.parse(userData) : null;
@@ -134,8 +127,7 @@ const BrandingCustomization = () => {
           logo: data.data?.branding?.logo || branding.logo,
           primaryColor: data.data?.branding?.primaryColor || branding.primaryColor,
           secondaryColor: data.data?.branding?.secondaryColor || branding.secondaryColor,
-          accentColor: data.data?.branding?.accentColor || branding.accentColor,
-          fontFamily: data.data?.branding?.fontFamily || branding.fontFamily
+          accentColor: data.data?.branding?.accentColor || branding.accentColor
         };
         
         setBranding(updatedBranding);
@@ -268,33 +260,14 @@ const BrandingCustomization = () => {
             </div>
           </div>
 
-          {/* Font Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Font Family
-            </label>
-            <select
-              value={branding.fontFamily}
-              onChange={(e) => setBranding(prev => ({ ...prev, fontFamily: e.target.value }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {fontOptions.map(font => (
-                <option key={font} value={font} style={{ fontFamily: font }}>
-                  {font}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Preview Section */}
+          {/* Preview Section */
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Preview</h3>
             <div 
               className="p-4 sm:p-6 rounded-lg border-2"
               style={{ 
                 backgroundColor: branding.primaryColor + '10',
-                borderColor: branding.primaryColor,
-                fontFamily: branding.fontFamily
+                borderColor: branding.primaryColor
               }}
             >
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mb-4">

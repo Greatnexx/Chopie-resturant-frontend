@@ -37,6 +37,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
 
   const handleDownloadReceipt = () => {
     const doc = new jsPDF({ unit: 'mm', format: 'a5' });
+    const fmt = (amount) => `N${parseFloat(amount).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     const pageW = doc.internal.pageSize.getWidth();
     const margin = 14;
     const contentW = pageW - margin * 2;
@@ -92,7 +93,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
       text(nameLines[0], margin, 10, 'normal', [30, 30, 30]);
       doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(30, 30, 30);
       doc.text(`x${item.quantity}`, pageW - margin - 28, y, { align: 'right' });
-      doc.text(formatCurrency(item.totalPrice), pageW - margin, y, { align: 'right' });
+      doc.text(fmt(item.totalPrice), pageW - margin, y, { align: 'right' });
       y += 5;
       if (item.specialInstructions) {
         doc.setFontSize(8); doc.setTextColor(180, 100, 0);
@@ -107,7 +108,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
     // Total
     text('Total Amount', margin, 12, 'bold', [30, 30, 30]);
     doc.setFontSize(12); doc.setFont('helvetica', 'bold'); doc.setTextColor(239, 68, 68);
-    doc.text(formatCurrency(orderData.totalAmount), pageW - margin, y, { align: 'right' });
+    doc.text(fmt(orderData.totalAmount), pageW - margin, y, { align: 'right' });
     y += 10;
 
     // Estimated time

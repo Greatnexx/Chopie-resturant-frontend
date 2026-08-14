@@ -6,6 +6,7 @@ import { formatCurrency } from "../utils/formatCurrency";
 const OrderManagement = () => {
   const { data: ordersData, isLoading, error, refetch } = useGetAllOrdersQuery();
   const [filter, setFilter] = useState("all");
+  const [tableFilter, setTableFilter] = useState("");
 
   const orders = ordersData?.data || [];
 
@@ -39,9 +40,11 @@ const OrderManagement = () => {
     }
   };
 
-  const filteredOrders = orders.filter(order => 
-    filter === "all" || order.status === filter
-  );
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = filter === "all" || order.status === filter;
+    const matchesTable = !tableFilter || order.tableNumber.toLowerCase().includes(tableFilter.toLowerCase());
+    return matchesStatus && matchesTable;
+  });
 
   if (isLoading) {
     return (
@@ -70,6 +73,22 @@ const OrderManagement = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">Order Management</h1>
         
+        {/* Table Number Filter */}
+        <div className="mb-4">
+          <input
+            type="text"
+            value={tableFilter}
+            onChange={(e) => setTableFilter(e.target.value)}
+            placeholder="Filter by table number..."
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-48"
+          />
+          {tableFilter && (
+            <span className="ml-2 text-sm text-gray-500">
+              {filteredOrders.length} order{filteredOrders.length !== 1 ? 's' : ''} for table "{tableFilter}"
+            </span>
+          )}
+        </div>
+
         {/* Filter Buttons */}
         <div className="flex gap-2 mb-4">
           {["all", "pending", "Preparing", "completed", "cancelled"].map((status) => (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation, useGetAnalyticsQuery, useCancelOrderMutationMutation } from "../slices/restaurantSlice";
+import { useGetRestaurantOrdersQuery, useAcceptOrderMutation, useRejectOrderMutation, useUpdateOrderStatusMutation, useUpdatePaymentStatusMutation, useGetAnalyticsQuery, useCancelOrderMutationMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { Bell, Clock, CheckCircle, ChefHat, User, X, Check, Menu } from "lucide-react";
 import { formatCurrency } from "../utils/formatCurrency";
@@ -11,6 +11,7 @@ import OrderActionButtons from "../components/OrderActionButtons";
 import PasswordChangeModal from "../components/PasswordChangeModal";
 import ChatRequestModal from "../components/ChatRequestModal";
 import StaffChatPanel from "../components/StaffChatPanel";
+import PaymentModal from "../components/PaymentModal";
 import { useBranding } from "../Context/BrandingContext";
 
 const RestaurantDashboard = () => {
@@ -31,6 +32,7 @@ const RestaurantDashboard = () => {
   const [acceptOrder] = useAcceptOrderMutation();
   const [rejectOrder] = useRejectOrderMutation();
   const [updateOrderStatus] = useUpdateOrderStatusMutation();
+  const [updatePaymentStatus] = useUpdatePaymentStatusMutation();
   const [cancelOrderMutation] = useCancelOrderMutationMutation();
 
   const analytics = analyticsData?.data || {};
@@ -198,21 +200,45 @@ const RestaurantDashboard = () => {
       case "pending": return <Clock className="w-5 h-5 text-yellow-500" />;
       case "accepted": return <User className="w-5 h-5 text-blue-500" />;
       case "Preparing": return <ChefHat className="w-5 h-5 text-orange-500" />;
+      case "served": return <CheckCircle className="w-5 h-5 text-green-500" />;
       case "completed": return <CheckCircle className="w-5 h-5 text-green-500" />;
       default: return <Clock className="w-5 h-5 text-gray-400" />;
     }
   };
 
-  const getNextAction = (status) => {
-    switch (status) {
+  const getNextAction = (orderStatus) => {
+    switch (orderStatus) {
       case "pending": return "Accept Order";
       case "accepted": return "Start Preparing";
-      case "Preparing": return "Mark Complete";
+      case "Preparing": return "Mark Served";
       default: return null;
     }
   };
 
+  const getPaymentBadge = (paymentStatus) => {
+    switch (paymentStatus) {
+      case "paid": return <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-700 font-medium">Paid</span>;
+      case "partial": return <span className="px-2 py-0.5 text-xs rounded-full bg-yellow-100 text-yellow-700 font-medium">Partial</span>;
+      default: return <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-700 font-medium">Unpaid</span>;
+    }
+  };
+
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [paymentOrder, setPaymentOrder] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  const handleConfirmPayment = async ({ orderId, paymentStatus, cash, transfer }) => {
+    setPaymentLoading(true);
+    try {
+      await updatePaymentStatus({ orderId, paymentStatus, cash, transfer }).unwrap();
+      toast.success(`Payment marked as ${paymentStatus}`);
+      setPaymentOrder(null);
+    } catch {
+      toast.error('Failed to update payment');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     setShowLogoutModal(true);
@@ -438,7 +464,7 @@ const RestaurantDashboard = () => {
         {user?.role !== 'TransactionAdmin' && user?.role !== 'MenuManager' && (
         <div className="mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-2">Quick Setup</h2>
-          <p className="text-gray-600 mb-6">Get your restaurant ready to receive orders</p>
+          <p className="text-gray-600 mb-6">Get your business ready to receive orders</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <div className="bg-white p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors">
               <div className="flex items-center gap-3 mb-3">
@@ -447,7 +473,7 @@ const RestaurantDashboard = () => {
                 </div>
                 <h3 className="font-semibold text-gray-900">Upload Logo</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Add your restaurant logo and brand colors</p>
+              <p className="text-sm text-gray-600 mb-3">Add your business logo and brand colors</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
@@ -463,7 +489,7 @@ const RestaurantDashboard = () => {
                 </div>
                 <h3 className="font-semibold text-gray-900">Create Menu</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Add categories and menu items</p>
+              <p className="text-sm text-gray-600 mb-3">Add categories and menu items to your restaurant</p>
               <button 
                 onClick={() => navigate('/restaurant/menu-manager')}
                 className="w-full text-white px-3 py-2 rounded text-sm font-medium transition-colors"
@@ -498,7 +524,7 @@ const RestaurantDashboard = () => {
                 </div>
                 <h3 className="font-semibold text-gray-900">Set Hours</h3>
               </div>
-              <p className="text-sm text-gray-600 mb-3">Configure your operating hours</p>
+              <p className="text-sm text-gray-600 mb-3">Configure your operating hours to match your schedule</p>
               <button 
                 onClick={() => navigate('/restaurant/settings')}
                 className="w-full bg-gray-500 hover:bg-gray-600 text-white px-3 py-2 rounded text-sm font-medium transition-colors"
@@ -572,8 +598,9 @@ const RestaurantDashboard = () => {
                         </p>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
-                        {getStatusIcon(order.status)}
-                        <span className="font-medium capitalize text-sm">{order.status}</span>
+                        {getStatusIcon(order.orderStatus || order.status)}
+                        <span className="font-medium capitalize text-sm">{order.orderStatus || order.status}</span>
+                        {getPaymentBadge(order.paymentStatus || 'unpaid')}
                       </div>
                     </div>
 
@@ -608,7 +635,7 @@ const RestaurantDashboard = () => {
                             onAccept={handleAcceptOrder}
                             onReject={handleRejectOrder}
                           />
-                        ) : getNextAction(order.status) ? (
+                        ) : getNextAction(order.orderStatus || order.status) ? (
                           <button
                             onClick={() => handleUpdateStatus(order._id)}
                             disabled={loadingOrderId === order._id}
@@ -620,13 +647,22 @@ const RestaurantDashboard = () => {
                                 Updating...
                               </>
                             ) : (
-                              getNextAction(order.status)
+                              getNextAction(order.orderStatus || order.status)
                             )}
                           </button>
                         ) : null}
                         
+                        {['served', 'completed'].includes(order.orderStatus || order.status) && order.paymentStatus !== 'paid' && (
+                          <button
+                            onClick={() => setPaymentOrder(order)}
+                            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                          >
+                            Mark Paid
+                          </button>
+                        )}
+                        
                         {/* Modify/Cancel buttons for accepted and preparing orders */}
-                        {['accepted', 'Preparing'].includes(order.status) && (
+                        {['accepted', 'Preparing'].includes(order.orderStatus || order.status) && (
                           <>
                             <button
                               onClick={() => window.open(`/restaurant/staff-orders?editOrder=${order._id}`, '_blank')}
@@ -704,6 +740,13 @@ const RestaurantDashboard = () => {
         onDecline={handleDeclineChat}
       />
       
+      <PaymentModal
+        order={paymentOrder}
+        onConfirm={handleConfirmPayment}
+        onClose={() => setPaymentOrder(null)}
+        isLoading={paymentLoading}
+      />
+
       {/* Password Change Modal */}
       <PasswordChangeModal 
         isOpen={showPasswordModal}

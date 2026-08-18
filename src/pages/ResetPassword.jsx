@@ -48,7 +48,7 @@ const ResetPassword = () => {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ChefHat className="w-8 h-8 text-white" />
+            <Lock className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-800">Reset Password</h1>
           <p className="text-gray-600 text-sm mt-1">Enter your new password below</p>

@@ -67,6 +67,7 @@ const App = () => {
         <Route path="/restaurant/audit" element={<AuditTrail />} />
         <Route path="/restaurant/menu-manager" element={<MenuManager />} />
         <Route path="/restaurant/staff-orders" element={<StaffOrderInterface />} />
+        <Route path="/restaurant/order-management" element={<OrderManagement />} />
         <Route path="/restaurant/events" element={<EventManagement />} />
         <Route path="/restaurant/settings" element={<Settings />} />
         <Route path="/restaurant/users" element={<UserManagement />} />

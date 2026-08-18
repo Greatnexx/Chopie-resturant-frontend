@@ -41,6 +41,7 @@ const RestaurantSidebar = ({ user, onLogout, isOpen, onClose, onChatToggle, show
     { icon: Users, label: "User Management", path: "/restaurant/users", roles: ["SuperAdmin"] },
     { icon: ChefHat, label: "Menu Management", path: "/restaurant/menu-manager", roles: ["SuperAdmin", "MenuManager"] },
     { icon: ShoppingCart, label: "Staff Orders", path: "/restaurant/staff-orders", roles: ["SuperAdmin", "MenuManager", "SubUser"] },
+    { icon: FileText, label: "Order Management", path: "/restaurant/order-management", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager"] },
     { icon: FileText, label: "Event Management", path: "/restaurant/events", roles: ["SuperAdmin", "MenuManager"] },
     { icon: FileText, label: "Audit Trail", path: "/restaurant/audit", roles: ["SuperAdmin", "TransactionAdmin"] },
     { icon: Settings, label: "Settings", path: "/restaurant/settings", roles: ["SuperAdmin", "TransactionAdmin", "MenuManager", "SubUser"] },

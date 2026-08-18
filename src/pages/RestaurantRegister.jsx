@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRegisterRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-import { Store, Mail, Phone, MapPin, ChefHat, User, Lock, Eye, EyeOff } from "lucide-react";
+import { Store, Mail, Phone, MapPin, User, Lock, Eye, EyeOff } from "lucide-react";
 
 const RestaurantRegister = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +37,7 @@ const RestaurantRegister = () => {
     try {
       const { confirmPassword, ...submitData } = formData;
       await registerRestaurant(submitData).unwrap();
-      toast.success("Restaurant registered successfully! You can now login.");
+      toast.success("Business registered successfully! You can now login.");
       navigate("/restaurant/login");
     } catch (error) {
       toast.error(error?.data?.message || "Registration failed");
@@ -49,15 +49,15 @@ const RestaurantRegister = () => {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ChefHat className="w-8 h-8 text-white" />
+            <Store className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Register Your Restaurant</h1>
-          <p className="text-gray-600">Join Chopie and start managing your restaurant</p>
+          <h1 className="text-2xl font-bold text-gray-800">Register Your Business</h1>
+          <p className="text-gray-600">Join Chopie and start managing your business</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
             <div className="relative">
               <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
@@ -67,7 +67,7 @@ const RestaurantRegister = () => {
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                placeholder="Enter restaurant name"
+                placeholder="Enter business name"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ const RestaurantRegister = () => {
             disabled={isLoading}
             className="w-full bg-red-500 text-white py-3 rounded-lg hover:bg-red-600 focus:ring-4 focus:ring-red-200 disabled:opacity-50 font-medium"
           >
-            {isLoading ? "Registering..." : "Register Restaurant"}
+            {isLoading ? "Registering..." : "Register Business"}
           </button>
         </form>
 

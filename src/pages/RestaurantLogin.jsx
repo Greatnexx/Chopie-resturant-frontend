@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLoginRestaurantMutation } from "../slices/restaurantSlice";
 import { toast } from "sonner";
 import { useNavigate, Link } from "react-router-dom";
-import { Mail, Lock, ChefHat, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, Store, Eye, EyeOff } from "lucide-react";
 import { triggerBrandingRefresh } from "../Context/BrandingContext";
 
 const RestaurantLogin = () => {
@@ -31,10 +31,10 @@ const RestaurantLogin = () => {
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8">
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ChefHat className="w-8 h-8 text-white" />
+            <Store className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Restaurant Login</h1>
-          <p className="text-gray-600">Access your restaurant dashboard</p>
+          <h1 className="text-2xl font-bold text-gray-800">Business Login</h1>
+          <p className="text-gray-600">Access your business dashboard</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -98,7 +98,7 @@ const RestaurantLogin = () => {
           <p className="text-gray-600">
             Don't have an account?{" "}
             <Link to="/restaurant/register" className="text-red-500 hover:text-red-600 font-medium">
-              Register your restaurant
+              Register your business
             </Link>
           </p>
         </div>

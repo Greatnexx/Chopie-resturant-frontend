@@ -16,8 +16,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
     name: "",
     phone: "",
   });
-  const [paymentMethod, setPaymentMethod] = useState("");
-
   const [errors, setErrors] = useState({});
   const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const [duplicateOrderInfo, setDuplicateOrderInfo] = useState(null);
@@ -79,10 +77,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       newErrors.tableNumber = "Table number is required";
     }
 
-    if (!paymentMethod) {
-      newErrors.paymentMethod = "Payment method is required";
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -91,7 +85,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
     tableNumber,
     customerName: customerInfo.name,
     customerPhone: customerInfo.phone || null,
-    paymentMethod,
     items: cartItems.map(item => ({
       productId: item._id,
       name: item.name,
@@ -144,7 +137,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       clearCart();
       setCustomerInfo({ name: "", phone: "" });
       setTableNumber("");
-      setPaymentMethod("");
       setErrors({});
       setShowDuplicateModal(false);
 
@@ -367,84 +359,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                       </div>
                     </div>
 
-                    {/* Payment Method Field */}
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-700">
-                        Payment Method *
-                      </label>
-                      <div className="grid grid-cols-2 gap-4">
-                        <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                          paymentMethod === 'cash' 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="cash"
-                            checked={paymentMethod === 'cash'}
-                            onChange={(e) => {
-                              setPaymentMethod(e.target.value);
-                              if (errors.paymentMethod) {
-                                setErrors((prev) => ({ ...prev, paymentMethod: "" }));
-                              }
-                            }}
-                            className="sr-only"
-                          />
-                          <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                              paymentMethod === 'cash' ? 'border-primary' : 'border-gray-300'
-                            }`}>
-                              {paymentMethod === 'cash' && (
-                                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-800">💵 Cash</p>
-                              <p className="text-xs text-gray-500">Pay with cash on delivery</p>
-                            </div>
-                          </div>
-                        </label>
-                        
-                        <label className={`flex items-center p-4 border rounded-lg cursor-pointer transition-colors ${
-                          paymentMethod === 'transfer' 
-                            ? 'border-primary bg-primary/10' 
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="paymentMethod"
-                            value="transfer"
-                            checked={paymentMethod === 'transfer'}
-                            onChange={(e) => {
-                              setPaymentMethod(e.target.value);
-                              if (errors.paymentMethod) {
-                                setErrors((prev) => ({ ...prev, paymentMethod: "" }));
-                              }
-                            }}
-                            className="sr-only"
-                          />
-                          <div className="flex items-center gap-3">
-                            <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                              paymentMethod === 'transfer' ? 'border-primary' : 'border-gray-300'
-                            }`}>
-                              {paymentMethod === 'transfer' && (
-                                <div className="w-2 h-2 bg-primary rounded-full"></div>
-                              )}
-                            </div>
-                            <div>
-                              <p className="font-medium text-gray-800">🏦 Transfer</p>
-                              <p className="text-xs text-gray-500">Pay via bank transfer</p>
-                            </div>
-                          </div>
-                        </label>
-                      </div>
-                      {errors.paymentMethod && (
-                        <p className="text-red-600 text-sm">
-                          {errors.paymentMethod}
-                        </p>
-                      )}
-                    </div>
                   </div>
 
                   {/* Place Order Button */}

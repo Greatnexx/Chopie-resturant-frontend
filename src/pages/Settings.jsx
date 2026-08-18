@@ -16,13 +16,13 @@ const Settings = () => {
     confirmPassword: "",
   });
   const [operatingHours, setOperatingHours] = useState({
-    monday: { open: '09:00', close: '22:00', closed: false },
-    tuesday: { open: '09:00', close: '22:00', closed: false },
-    wednesday: { open: '09:00', close: '22:00', closed: false },
-    thursday: { open: '09:00', close: '22:00', closed: false },
-    friday: { open: '09:00', close: '23:00', closed: false },
-    saturday: { open: '09:00', close: '23:00', closed: false },
-    sunday: { open: '10:00', close: '21:00', closed: false }
+    monday: { open: '09:00', close: '22:00', closed: false, is24Hours: false },
+    tuesday: { open: '09:00', close: '22:00', closed: false, is24Hours: false },
+    wednesday: { open: '09:00', close: '22:00', closed: false, is24Hours: false },
+    thursday: { open: '09:00', close: '22:00', closed: false, is24Hours: false },
+    friday: { open: '09:00', close: '23:00', closed: false, is24Hours: false },
+    saturday: { open: '09:00', close: '23:00', closed: false, is24Hours: false },
+    sunday: { open: '10:00', close: '21:00', closed: false, is24Hours: false }
   });
   const [contactInfo, setContactInfo] = useState({
     name: '',
@@ -67,7 +67,16 @@ const Settings = () => {
     if (settingsData?.data) {
       const { operatingHours: hours, contactInfo: contact } = settingsData.data;
       if (hours) {
-        setOperatingHours(hours);
+        const normalized = {};
+        Object.keys(hours).forEach(day => {
+          normalized[day] = {
+            open: hours[day].open || '09:00',
+            close: hours[day].close || '22:00',
+            closed: hours[day].closed || false,
+            is24Hours: hours[day].is24Hours || false
+          };
+        });
+        setOperatingHours(normalized);
       }
       if (contact) {
         setContactInfo({
@@ -153,6 +162,23 @@ const Settings = () => {
     return `${String(h).padStart(2, '0')}:${minute}`;
   };
 
+  const getDayStatus = (dayData) => {
+    if (dayData.closed) return 'closed';
+    if (dayData.is24Hours) return '24hours';
+    return 'open';
+  };
+
+  const handleDayStatusChange = (day, status) => {
+    setOperatingHours(prev => ({
+      ...prev,
+      [day.toLowerCase()]: {
+        ...prev[day.toLowerCase()],
+        closed: status === 'closed',
+        is24Hours: status === '24hours'
+      }
+    }));
+  };
+
   const handleHoursChange = (day, field, value) => {
     setOperatingHours(prev => ({
       ...prev,
@@ -219,8 +245,8 @@ const Settings = () => {
                 <Menu className="w-6 h-6 text-gray-600" />
               </button>
               <div className="flex-1">
-                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Restaurant Settings</h1>
-                <p className="text-gray-600 text-sm lg:text-base">Customize your restaurant and manage settings</p>
+                <h1 className="text-2xl lg:text-3xl font-bold text-gray-900">Business Settings</h1>
+                <p className="text-gray-600 text-sm lg:text-base">Customize your business and manage settings</p>
               </div>
             </div>
             
@@ -289,7 +315,7 @@ const Settings = () => {
           {!isMenuManager && activeTab === 'hours' && (
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Operating Hours</h2>
-              <p className="text-gray-600 mb-6">Set your restaurant's operating hours</p>
+              <p className="text-gray-600 mb-6">Set your business operating hours</p>
               
               {settingsLoading ? (
                 <div className="text-center py-8">
@@ -300,64 +326,71 @@ const Settings = () => {
                 <div className="space-y-4">
                   {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
                     const dayKey = day.toLowerCase();
-                    const dayData = operatingHours[dayKey] || { open: '09:00', close: '22:00', closed: false };
-                    
+                    const dayData = operatingHours[dayKey] || { open: '09:00', close: '22:00', closed: false, is24Hours: false };
+                    const status = getDayStatus(dayData);
+
                     return (
                       <div key={day} className="p-4 border rounded-lg">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                          <div className="flex items-center gap-4">
-                            <span className="font-medium w-20 text-sm sm:text-base">{day}</span>
-                            <label className="flex items-center gap-2">
-                              <input 
-                                type="checkbox" 
-                                className="rounded" 
-                                checked={!dayData.closed}
-                                onChange={(e) => handleHoursChange(day, 'closed', !e.target.checked)}
-                              />
-                              <span className="text-sm text-gray-600">Open</span>
-                            </label>
+                        <div className="flex flex-col gap-3">
+                          <div className="flex items-center justify-between">
+                            <span className="font-medium text-sm sm:text-base w-24">{day}</span>
+                            <select
+                              value={status}
+                              onChange={(e) => handleDayStatusChange(day, e.target.value)}
+                              className="border rounded px-2 py-1 text-sm"
+                            >
+                              <option value="open">Open</option>
+                              <option value="24hours">24 Hours</option>
+                              <option value="closed">Closed</option>
+                            </select>
+                            {status === '24hours' && (
+                              <span className="text-sm text-green-600 font-medium">Open 24 Hours</span>
+                            )}
+                            {status === 'closed' && (
+                              <span className="text-sm text-red-500 font-medium">Closed</span>
+                            )}
                           </div>
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-                            {['open', 'close'].map((field) => {
-                              const t = formatTo12h(dayData[field]);
-                              return (
-                                <div key={field} className="flex items-center gap-2">
-                                  <label className="text-sm text-gray-600 w-12 capitalize">{field === 'open' ? 'Open:' : 'Close:'}</label>
-                                  <div className="flex gap-1">
-                                    <select
-                                      disabled={dayData.closed}
-                                      value={t.hour}
-                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, hour: e.target.value }))}
-                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
-                                    >
-                                      {[1,2,3,4,5,6,7,8,9,10,11,12].map(h => (
-                                        <option key={h} value={String(h)}>{h}</option>
-                                      ))}
-                                    </select>
-                                    <select
-                                      disabled={dayData.closed}
-                                      value={t.minute}
-                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, minute: e.target.value }))}
-                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
-                                    >
-                                      {['00','15','30','45'].map(m => (
-                                        <option key={m} value={m}>{m}</option>
-                                      ))}
-                                    </select>
-                                    <select
-                                      disabled={dayData.closed}
-                                      value={t.period}
-                                      onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, period: e.target.value }))}
-                                      className="border rounded px-1 py-1 text-sm disabled:bg-gray-100"
-                                    >
-                                      <option value="AM">AM</option>
-                                      <option value="PM">PM</option>
-                                    </select>
+
+                          {status === 'open' && (
+                            <div className="grid grid-cols-2 gap-2">
+                              {['open', 'close'].map((field) => {
+                                const t = formatTo12h(dayData[field]);
+                                return (
+                                  <div key={field} className="flex flex-col gap-1">
+                                    <label className="text-xs text-gray-500 capitalize">{field === 'open' ? 'Opens' : 'Closes'}</label>
+                                    <div className="flex gap-1">
+                                      <select
+                                        value={t.hour}
+                                        onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, hour: e.target.value }))}
+                                        className="border rounded px-1 py-1 text-sm flex-1 min-w-0"
+                                      >
+                                        {[1,2,3,4,5,6,7,8,9,10,11,12].map(h => (
+                                          <option key={h} value={String(h)}>{h}</option>
+                                        ))}
+                                      </select>
+                                      <select
+                                        value={t.minute}
+                                        onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, minute: e.target.value }))}
+                                        className="border rounded px-1 py-1 text-sm flex-1 min-w-0"
+                                      >
+                                        {['00','15','30','45'].map(m => (
+                                          <option key={m} value={m}>{m}</option>
+                                        ))}
+                                      </select>
+                                      <select
+                                        value={t.period}
+                                        onChange={(e) => handleHoursChange(day, field, formatTo24h({ ...t, period: e.target.value }))}
+                                        className="border rounded px-1 py-1 text-sm"
+                                      >
+                                        <option value="AM">AM</option>
+                                        <option value="PM">PM</option>
+                                      </select>
+                                    </div>
                                   </div>
-                                </div>
-                              );
-                            })}
-                          </div>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -381,7 +414,7 @@ const Settings = () => {
           {!isMenuManager && activeTab === 'contact' && (
             <div className="bg-white rounded-lg shadow p-6">
               <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
-              <p className="text-gray-600 mb-6">Update your restaurant's contact details</p>
+              <p className="text-gray-600 mb-6">Update your business contact details</p>
               
               {settingsLoading ? (
                 <div className="text-center py-8">
@@ -392,15 +425,20 @@ const Settings = () => {
                 <>
                   {/* Restaurant URL Display */}
                   <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <h3 className="text-sm font-medium text-blue-900 mb-2">Your Restaurant URL</h3>
+                    <h3 className="text-sm font-medium text-blue-900 mb-2">Your Business URL</h3>
                     <div className="flex items-center gap-2">
                       <code className="text-sm bg-white px-3 py-2 rounded border flex-1">
-                        https://{settingsData?.data?.subdomain || 'your-restaurant'}.chopie-resturant-frontend.vercel.app
+                        {(() => {
+                          const subdomain = settingsData?.data?.subdomain || 'your-restaurant';
+                          const domain = import.meta.env.VITE_MAIN_DOMAIN || 'chopie.com';
+                          return `https://${subdomain}.${domain}`;
+                        })()}
                       </code>
                       <button
                         onClick={() => {
-                          const url = `https://${settingsData?.data?.subdomain}.chopie-resturant-frontend.vercel.app`;
-                          navigator.clipboard.writeText(url);
+                          const subdomain = settingsData?.data?.subdomain;
+                          const domain = import.meta.env.VITE_MAIN_DOMAIN || 'chopie.com';
+                          navigator.clipboard.writeText(`https://${subdomain}.${domain}`);
                           toast.success('URL copied to clipboard!');
                         }}
                         className="px-3 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700"
@@ -413,11 +451,11 @@ const Settings = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Restaurant Name</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Business Name</label>
                     <input 
                       type="text" 
                       className="w-full border rounded-lg px-3 py-2" 
-                      placeholder="Restaurant Name"
+                      placeholder="Business Name"
                       value={contactInfo.name}
                       onChange={(e) => handleContactChange('name', e.target.value)}
                     />

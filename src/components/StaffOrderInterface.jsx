@@ -16,7 +16,6 @@ const StaffOrderInterface = () => {
   const [tableNumber, setTableNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
   const [customerNotes, setCustomerNotes] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('cash');
   const [showCart, setShowCart] = useState(false);
   const [cart, setCart] = useState([]);
   const [menuType, setMenuType] = useState('REGULAR');
@@ -44,7 +43,6 @@ const StaffOrderInterface = () => {
       setTableNumber(order.tableNumber);
       setCustomerName(order.customerName || '');
       setCustomerNotes(order.customerNotes || '');
-      setPaymentMethod(order.paymentMethod);
       
       // Convert order items to cart format
       const cartItems = order.items.map(item => ({
@@ -206,24 +204,6 @@ const StaffOrderInterface = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Payment Method *
-              </label>
-              <select
-                value={paymentMethod}
-                onChange={(e) => setPaymentMethod(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
-                style={{ '--tw-ring-color': branding.primaryColor + '33' }}
-                onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
-                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                required
-              >
-                <option value="cash">💵 Cash</option>
-                <option value="transfer">🏦 Transfer</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Notes (Optional)
               </label>
               <input
@@ -288,7 +268,6 @@ const StaffOrderInterface = () => {
           tableNumber={tableNumber}
           customerName={customerName}
           customerNotes={customerNotes}
-          paymentMethod={paymentMethod}
           totalPrice={getTotalPrice()}
           onClearCart={clearCart}
           isEditMode={isEditMode}

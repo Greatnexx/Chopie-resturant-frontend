@@ -9,7 +9,6 @@ const StaffCartModal = ({
   tableNumber, 
   customerName, 
   customerNotes, 
-  paymentMethod,
   totalPrice,
   onClearCart,
   isEditMode = false,
@@ -57,7 +56,6 @@ const StaffCartModal = ({
         orderSource: 'staff',
         createdBy: userId,
         totalAmount: totalPrice,
-        paymentMethod: paymentMethod
       };
 
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
@@ -151,9 +149,6 @@ const StaffCartModal = ({
             </div>
             <div>
               <span className="font-medium">Customer:</span> {customerName || 'Walk-in Customer'}
-            </div>
-            <div>
-              <span className="font-medium">Payment:</span> {paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}
             </div>
             {customerNotes && (
               <div className="col-span-2">

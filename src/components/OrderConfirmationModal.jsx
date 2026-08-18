@@ -57,7 +57,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
     y += 18;
 
     doc.setFontSize(9); doc.setFont('helvetica', 'normal'); doc.setTextColor(120, 120, 120);
-    doc.text('Order Confirmation Receipt', pageW / 2, y, { align: 'center' });
+    doc.text('Order Summary', pageW / 2, y, { align: 'center' });
     y += 8;
 
     line();
@@ -121,9 +121,9 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
 
     // Footer
     doc.setFontSize(9); doc.setFont('helvetica', 'italic'); doc.setTextColor(150, 150, 150);
-    doc.text(`Thank you for your order! - ${restaurantName || 'Chopie'}`, pageW / 2, y, { align: 'center' });
+    doc.text(`Payment due at the table - ${restaurantName || 'Chopie'}`, pageW / 2, y, { align: 'center' });
 
-    doc.save(`${restaurantName || 'Chopie'}-Receipt-${orderData.orderNumber}.pdf`);
+    doc.save(`${restaurantName || 'Chopie'}-Order-Summary-${orderData.orderNumber}.pdf`);
   };
 
   return (
@@ -230,7 +230,7 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
               className="w-full flex items-center justify-center gap-2 bg-purple-500 text-white py-3 px-4 rounded-lg hover:bg-purple-600 transition-colors font-medium shadow-md hover:shadow-lg"
             >
               <Download className="w-4 h-4" />
-              Download Receipt
+              Download Order Summary
             </button>
             
             <button

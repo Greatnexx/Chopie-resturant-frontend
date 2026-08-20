@@ -63,11 +63,12 @@ const baseQuery = fetchBaseQuery({
     // or from URL path (/r/mama)
     const hostname = window.location.hostname;
     const hostParts = hostname.split('.');
-    const isChopieNg = hostname.endsWith('chopie.ng') && hostParts.length === 3;
+    const isChopieNg = hostname.endsWith('chopie.ng') && hostParts.length >= 3;
     const isLocalSubdomain = hostname.includes('localhost') && hostParts.length > 1 && hostParts[0] !== 'localhost';
 
     if (isChopieNg || isLocalSubdomain) {
-      headers.set("X-Tenant-Subdomain", hostParts[0]);
+      const subdomain = hostname.replace('.chopie.ng', '').split('.')[0];
+      headers.set("X-Tenant-Subdomain", subdomain);
     } else {
       const currentPath = window.location.pathname;
       if (currentPath.startsWith('/r/')) {

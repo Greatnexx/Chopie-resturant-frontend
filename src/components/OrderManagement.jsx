@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useGetAllOrdersQuery } from "../slices/orderSlice";
 import { useUpdatePaymentStatusMutation } from "../slices/restaurantSlice";
-import { Clock, CheckCircle, ChefHat, XCircle, ArrowLeft, User } from "lucide-react";
+import { Clock, CheckCircle, ChefHat, XCircle, ArrowLeft, User, Receipt } from "lucide-react";
+import { downloadReceipt } from "../utils/printReceipt";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -17,6 +18,8 @@ const OrderManagement = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
   const navigate = useNavigate();
+  const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
+  const restaurantName = restaurantUser?.data?.restaurantName || restaurantUser?.restaurantName || 'Restaurant';
 
   const orders = ordersData?.data || [];
 
@@ -280,6 +283,12 @@ const OrderManagement = () => {
                       Mark Paid
                     </button>
                   )}
+                  <button
+                    onClick={() => downloadReceipt(order, restaurantName)}
+                    className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 flex items-center gap-1"
+                  >
+                    <Receipt className="w-3.5 h-3.5" /> Receipt
+                  </button>
                 </div>
               </div>
             </div>

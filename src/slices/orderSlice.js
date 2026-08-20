@@ -3,28 +3,11 @@ import { apiSlice } from "./apiSlice";
 export const orderApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     createOrder: builder.mutation({
-      query: (orderData) => {
-        const hostname = window.location.hostname;
-        const hostParts = hostname.split('.');
-        let subdomain = null;
-
-        if (hostname.endsWith('.chopie.ng') && hostParts.length === 3) {
-          subdomain = hostParts[0];
-        } else if (hostname.endsWith('.chopie-resturant-frontend.vercel.app')) {
-          subdomain = hostname.replace('.chopie-resturant-frontend.vercel.app', '');
-        } else if (hostname.includes('.localhost')) {
-          subdomain = hostParts[0];
-        } else if (window.location.pathname.split('/')[1] === 'r') {
-          subdomain = window.location.pathname.split('/')[2];
-        }
-
-        return {
-          url: "/order",
-          method: "POST",
-          body: orderData,
-          headers: subdomain ? { 'X-Tenant-Subdomain': subdomain } : {},
-        };
-      },
+      query: (orderData) => ({
+        url: "/order",
+        method: "POST",
+        body: orderData,
+      }),
     }),
     trackOrder: builder.query({
       query: (orderParam) => {

@@ -5,12 +5,14 @@ import MenuList from './MenuList';
 import CategoryTab from './CategoryTab';
 import StaffCartModal from './StaffCartModal';
 import { useBranding } from '../Context/BrandingContext';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 const StaffOrderInterface = () => {
   const [searchParams] = useSearchParams();
   const editOrderId = searchParams.get('editOrder');
   const isEditMode = !!editOrderId;
+  const navigate = useNavigate();
   
   const [activeCategory, setActiveCategory] = useState('');
   const [tableNumber, setTableNumber] = useState('');
@@ -129,8 +131,17 @@ const StaffOrderInterface = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Back Button */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back
+        </button>
+      </div>
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white shadow-sm border-b mt-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>

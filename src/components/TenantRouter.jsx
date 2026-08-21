@@ -51,27 +51,22 @@ const TenantRouter = ({ children }) => {
 
         if (data.status && data.data) {
           dispatch(setTenant(data.data));
-          
-          // Apply tenant branding
           applyTenantBranding(data.data.branding);
         } else {
-          // Tenant not found, redirect to main site
           navigate('/404');
           return;
         }
       } else {
-        // No tenant identifier, this is the main site
         dispatch(setTenant(null));
       }
     } catch (error) {
       console.error('Failed to identify tenant:', error);
-      // On error, allow access to main site
     } finally {
       setLoading(false);
     }
   };
 
-  const applyTenantBranding = (branding) => {
+const applyTenantBranding = (branding) => {
     if (!branding) return;
 
     const root = document.documentElement;

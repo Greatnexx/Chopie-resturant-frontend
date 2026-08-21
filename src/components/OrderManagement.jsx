@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGetAllOrdersQuery } from "../slices/orderSlice";
 import { useUpdatePaymentStatusMutation } from "../slices/restaurantSlice";
-import { Clock, CheckCircle, ChefHat, XCircle, ArrowLeft, User, Receipt } from "lucide-react";
+import { Clock, CheckCircle, ChefHat, XCircle, ArrowLeft, User, Printer } from "lucide-react";
 import { downloadReceipt } from "../utils/printReceipt";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,8 @@ const OrderManagement = () => {
   const [filter, setFilter] = useState("all");
   const [tableFilter, setTableFilter] = useState("");
   const [customerFilter, setCustomerFilter] = useState("");
+  const [phoneFilter, setPhoneFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [paymentOrder, setPaymentOrder] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
@@ -93,14 +95,16 @@ const OrderManagement = () => {
     setBulkLoading(false);
   };
 
-  const isFilterActive = tableFilter || customerFilter;
+  const isFilterActive = tableFilter || customerFilter || phoneFilter || dateFilter;
 
   const filteredOrders = orders.filter(order => {
     const effectiveStatus = order.orderStatus || order.status;
     const matchesStatus = filter === "all" || effectiveStatus === filter;
     const matchesTable = !tableFilter || (order.tableNumber || '').toLowerCase().includes(tableFilter.toLowerCase());
     const matchesCustomer = !customerFilter || (order.customerName || '').toLowerCase().includes(customerFilter.toLowerCase());
-    return matchesStatus && matchesTable && matchesCustomer;
+    const matchesPhone = !phoneFilter || (order.customerPhone || '').includes(phoneFilter);
+    const matchesDate = !dateFilter || new Date(order.createdAt).toLocaleDateString('en-CA') === dateFilter;
+    return matchesStatus && matchesTable && matchesCustomer && matchesPhone && matchesDate;
   });
 
   const grandTotal = filteredOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
@@ -158,6 +162,19 @@ const OrderManagement = () => {
             onChange={(e) => setCustomerFilter(e.target.value)}
             placeholder="Filter by customer name"
             className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-52"
+          />
+          <input
+            type="text"
+            value={phoneFilter}
+            onChange={(e) => setPhoneFilter(e.target.value)}
+            placeholder="Filter by phone number"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-52"
+          />
+          <input
+            type="date"
+            value={dateFilter}
+            onChange={(e) => setDateFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
           />
         </div>
 
@@ -223,8 +240,13 @@ const OrderManagement = () => {
                   <h3 className="text-xl font-semibold text-gray-800">
                     Order #{order.orderNumber}
                   </h3>
-                  <p className="text-gray-600">
-                    {order.customerName} • Table {order.tableNumber} • {order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}
+                  <p className="text-gray-600 flex items-center gap-2 flex-wrap">
+                    {order.customerName} •
+                    {order.tableNumber?.toUpperCase().startsWith('VIP')
+                      ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border border-orange-300">👑 {order.tableNumber}</span>
+                      : <span>Table {order.tableNumber}</span>
+                    }
+                    • {order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}
                   </p>
                   <p className="text-sm text-gray-500">
                     {order.createdAt ? new Date(order.createdAt).toLocaleString() : 'Date not available'}
@@ -285,9 +307,10 @@ const OrderManagement = () => {
                   )}
                   <button
                     onClick={() => downloadReceipt(order, restaurantName)}
-                    className="px-3 py-1.5 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-900 flex items-center gap-1"
+                    className="p-1.5 text-gray-500 hover:text-gray-800 transition-colors"
+                    title="Download Receipt"
                   >
-                    <Receipt className="w-3.5 h-3.5" /> Receipt
+                    <Printer className="w-4 h-4" />
                   </button>
                 </div>
               </div>

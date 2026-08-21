@@ -207,7 +207,11 @@ const TenantMenuPage = () => {
             
             <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
               <button
-                onClick={() => window.open(`/r/${currentTenant.subdomain}/track`, '_blank')}
+                onClick={() => {
+                  const table = new URLSearchParams(window.location.search).get('table');
+                  const url = `/r/${currentTenant.subdomain}/track${table ? `?table=${table}` : ''}`;
+                  window.open(url, '_blank');
+                }}
                 className="px-2 py-1.5 sm:px-3 sm:py-2 rounded-full text-white hover:opacity-80 transition-opacity flex items-center space-x-1 sm:space-x-2"
                 style={{ backgroundColor: branding?.primaryColor || '#ef4444' }}
                 title="Track Order"
@@ -237,24 +241,15 @@ const TenantMenuPage = () => {
         </div>
       </header>
 
-      {/* Menu Type Indicator */}
+      {/* Menu Type Indicator - only shown for VIP tables */}
       {(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const tableNumber = urlParams.get('table');
-        const menuType = tableNumber?.toUpperCase().startsWith('VIP') ? 'VIP' : 'REGULAR';
-        
-        return tableNumber && (
+        const tableNumber = new URLSearchParams(window.location.search).get('table');
+        const isVip = tableNumber?.toUpperCase().startsWith('VIP');
+        return isVip && (
           <div className="bg-white border-b">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-              <div className={`inline-block px-4 py-2 rounded-full text-sm font-semibold ${
-                menuType === 'VIP' 
-                  ? 'bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border border-orange-300' 
-                  : 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border border-blue-300'
-              }`}>
-                {menuType === 'VIP' ? '👑 VIP Menu - Premium Pricing' : '🍽️ Regular Menu'} - Table {tableNumber}
-                <span className="ml-2 text-xs opacity-75">
-                  
-                </span>
+              <div className="inline-block px-4 py-2 rounded-full text-sm font-semibold bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border border-orange-300">
+                👑 VIP Menu - Premium Pricing - Table {tableNumber}
               </div>
             </div>
           </div>

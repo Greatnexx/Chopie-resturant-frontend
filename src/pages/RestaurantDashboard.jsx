@@ -586,10 +586,16 @@ const RestaurantDashboard = () => {
                         <h3 className="text-lg font-semibold text-gray-900 truncate">
                           Order #{order.orderNumber}
                         </h3>
-                        <p className="text-gray-600 text-sm break-words">
-                          {order.customerName} • Table {order.tableNumber}
+                        <p className="text-gray-600 text-sm break-words flex items-center gap-2 flex-wrap">
+                          {order.customerName} •
+                          {order.tableNumber?.toUpperCase().startsWith('VIP')
+                            ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-800 border border-orange-300">👑 {order.tableNumber}</span>
+                            : <span>Table {order.tableNumber}</span>
+                          }
                         </p>
-                        <p className="text-gray-600 text-sm">{order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}</p>
+                        {order.paymentMethod && (
+                          <p className="text-gray-600 text-sm">{order.paymentMethod === 'cash' ? '💵 Cash' : '🏦 Transfer'}</p>
+                        )}
                         <p className="text-sm text-gray-500">
                           {order.createdAt && typeof order.createdAt === 'string' ? 
                             new Date(order.createdAt).toLocaleString() : 

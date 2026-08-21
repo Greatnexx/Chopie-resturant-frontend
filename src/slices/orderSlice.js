@@ -31,6 +31,7 @@ export const orderApiSlice = apiSlice.injectEndpoints({
     }),
     getAllOrders: builder.query({
       query: () => "/order",
+      providesTags: ['Orders'],
     }),
   }),
 });

@@ -232,17 +232,13 @@ const StaffOrderInterface = () => {
         </div>
       </div>
 
-      {/* Menu Type Indicator */}
-      {tableNumber && (
+      {/* Menu Type Indicator - only shown for VIP tables */}
+      {menuType === 'VIP' && tableNumber && (
         <div className="bg-white border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
-            <div className={`inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
-              menuType === 'VIP' 
-                ? 'bg-yellow-100 text-yellow-800 border border-yellow-300' 
-                : 'bg-blue-100 text-blue-800 border border-blue-300'
-            }`}>
-              <span className="hidden sm:inline">{menuType === 'VIP' ? '👑 VIP Pricing' : '🍽️ Regular Pricing'} - Table {tableNumber}</span>
-              <span className="sm:hidden">{menuType === 'VIP' ? '👑 VIP' : '🍽️ Regular'} - T{tableNumber}</span>
+            <div className="inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300">
+              <span className="hidden sm:inline">👑 VIP Pricing - Table {tableNumber}</span>
+              <span className="sm:hidden">👑 VIP - T{tableNumber}</span>
             </div>
           </div>
         </div>

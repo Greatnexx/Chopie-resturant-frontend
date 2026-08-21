@@ -25,21 +25,21 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
         url: `/restaurant/orders/${orderId}/accept`,
         method: "PATCH",
       }),
-      invalidatesTags: ["RestaurantOrders"],
+      invalidatesTags: ["RestaurantOrders", "Orders", "Analytics"],
     }),
     rejectOrder: builder.mutation({
       query: (orderId) => ({
         url: `/restaurant/orders/${orderId}/reject`,
         method: "PATCH",
       }),
-      invalidatesTags: ["RestaurantOrders"],
+      invalidatesTags: ["RestaurantOrders", "Orders", "Analytics"],
     }),
     updateOrderStatus: builder.mutation({
       query: (orderId) => ({
         url: `/restaurant/orders/${orderId}/status`,
         method: "PATCH",
       }),
-      invalidatesTags: ["RestaurantOrders"],
+      invalidatesTags: ["RestaurantOrders", "Orders", "Analytics"],
     }),
     updatePaymentStatus: builder.mutation({
       query: ({ orderId, paymentStatus, cash, transfer }) => ({
@@ -47,7 +47,7 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
         method: "PATCH",
         body: { paymentStatus, cash, transfer },
       }),
-      invalidatesTags: ["RestaurantOrders"],
+      invalidatesTags: ["RestaurantOrders", "Orders", "Analytics"],
     }),
     modifyOrder: builder.mutation({
       query: ({ orderId, items, totalAmount, customerNotes }) => ({
@@ -94,6 +94,7 @@ export const restaurantApiSlice = apiSlice.injectEndpoints({
         }
         return `/restaurant/analytics?period=${params || 'day'}`;
       },
+      providesTags: ['Analytics'],
     }),
     getAuditLogs: builder.query({
       query: () => "/restaurant/audit",

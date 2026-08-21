@@ -73,6 +73,10 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
       newErrors.name = "Name is required";
     }
 
+    if (!customerInfo.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    }
+
     if (!tableNumber.trim()) {
       newErrors.tableNumber = "Table number is required";
     }
@@ -341,7 +345,7 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                         htmlFor="phone"
                         className="block text-sm font-medium text-gray-700"
                       >
-                        Phone Number (Optional)
+                        Phone Number *
                       </label>
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
@@ -354,9 +358,15 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
                           placeholder="Enter phone number"
                           value={customerInfo.phone}
                           onChange={handleInputChange}
-                          className="relative z-0 block w-full pl-11 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary/30 focus:border-primary bg-white transition-colors"
+                          required
+                          className={`relative z-0 block w-full pl-11 pr-4 py-3 border rounded-lg shadow-sm placeholder-gray-400 focus:ring-2 focus:ring-primary/30 focus:border-primary transition-colors ${
+                            errors.phone ? "border-red-300 bg-red-50" : "border-gray-300 bg-white"
+                          }`}
                         />
                       </div>
+                      {errors.phone && (
+                        <p className="text-red-600 text-sm">{errors.phone}</p>
+                      )}
                     </div>
 
                   </div>

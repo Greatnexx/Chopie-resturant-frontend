@@ -162,7 +162,8 @@ const TrackOrder = () => {
           <button
             onClick={() => {
               const subdomain = currentTenant?.subdomain || restaurantId;
-              navigate(`/r/${subdomain}`);
+              const table = searchParams.get('table');
+              navigate(`/r/${subdomain}${table ? `?table=${table}` : ''}`);
             }}
             className="inline-flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-2 bg-white border-2 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm sm:text-base"
             style={{ borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
@@ -191,7 +192,8 @@ const TrackOrder = () => {
           <button 
             onClick={() => {
               const subdomain = currentTenant?.subdomain || restaurantId;
-              navigate(`/r/${subdomain}`);
+              const table = searchParams.get('table');
+              navigate(`/r/${subdomain}${table ? `?table=${table}` : ''}`);
             }}
             className="hover:opacity-80 transition-opacity group"
             title="Click to go back to menu"

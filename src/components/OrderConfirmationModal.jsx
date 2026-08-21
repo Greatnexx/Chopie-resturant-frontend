@@ -21,7 +21,8 @@ const OrderConfirmationModal = ({ isOpen, orderData, onClose, onPlaceAnother, re
   const handleTrackOrder = () => {
     const restaurantId = getRestaurantId();
     const base = restaurantId ? `/r/${restaurantId}/trackorder` : `/trackorder`;
-    navigate(`${base}?order=${orderData.orderNumber}`);
+    const table = new URLSearchParams(window.location.search).get('table');
+    navigate(`${base}?order=${orderData.orderNumber}${table ? `&table=${table}` : ''}`);
     onClose();
   };
 

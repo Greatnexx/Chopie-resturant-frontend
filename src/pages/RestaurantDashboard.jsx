@@ -153,24 +153,32 @@ const RestaurantDashboard = () => {
   }, [navigate, refetch]);
 
   const handleAcceptOrder = async (orderId) => {
+    if (loadingOrderId === orderId) return;
+    setLoadingOrderId(orderId);
     try {
       await acceptOrder(orderId).unwrap();
       toast.success("Order accepted!");
       setNotifications(prev => prev.filter(n => n.orderId !== orderId));
-      // Remove refetch() - RTK Query invalidatesTags will handle cache update
+      if (showNotification?.orderId === orderId) setShowNotification(null);
     } catch (error) {
       toast.error(error?.data?.message || "Failed to accept order");
+    } finally {
+      setLoadingOrderId(null);
     }
   };
 
   const handleRejectOrder = async (orderId) => {
+    if (loadingOrderId === orderId) return;
+    setLoadingOrderId(orderId);
     try {
       await rejectOrder(orderId).unwrap();
       toast.info("Order rejected");
       setNotifications(prev => prev.filter(n => n.orderId !== orderId));
-      // Remove refetch() - RTK Query invalidatesTags will handle cache update
+      if (showNotification?.orderId === orderId) setShowNotification(null);
     } catch (error) {
       toast.error(error?.data?.message || "Failed to reject order");
+    } finally {
+      setLoadingOrderId(null);
     }
   };
 

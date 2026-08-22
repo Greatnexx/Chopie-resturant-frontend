@@ -139,7 +139,6 @@ const CartModal = ({ isOpen, onClose, onOrderSuccess }) => {
 
       // ✅ Then clear the form data
       clearCart();
-      setCustomerInfo({ name: "", phone: "" });
       setTableNumber("");
       setErrors({});
       setShowDuplicateModal(false);

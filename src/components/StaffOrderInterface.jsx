@@ -17,6 +17,7 @@ const StaffOrderInterface = () => {
   const [activeCategory, setActiveCategory] = useState('');
   const [tableNumber, setTableNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
   const [customerNotes, setCustomerNotes] = useState('');
   const [showCart, setShowCart] = useState(false);
   const [cart, setCart] = useState([]);
@@ -44,6 +45,7 @@ const StaffOrderInterface = () => {
       const order = existingOrderData.data;
       setTableNumber(order.tableNumber);
       setCustomerName(order.customerName || '');
+      setCustomerPhone(order.customerPhone || '');
       setCustomerNotes(order.customerNotes || '');
       
       // Convert order items to cart format
@@ -199,7 +201,7 @@ const StaffOrderInterface = () => {
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Customer Name (Optional)
+                Customer Name *
               </label>
               <input
                 type="text"
@@ -210,6 +212,24 @@ const StaffOrderInterface = () => {
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
                 onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number (Optional)
+              </label>
+              <input
+                type="tel"
+                value={customerPhone}
+                onChange={(e) => setCustomerPhone(e.target.value)}
+                placeholder="e.g. 08012345678"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
+                style={{ '--tw-ring-color': branding.primaryColor + '33' }}
+                onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
+                onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+                required
               />
             </div>
             
@@ -221,7 +241,7 @@ const StaffOrderInterface = () => {
                 type="text"
                 value={customerNotes}
                 onChange={(e) => setCustomerNotes(e.target.value)}
-                placeholder="Special requests"
+                placeholder="e.g. special requests, instructions, customer description"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 transition-all text-sm sm:text-base"
                 style={{ '--tw-ring-color': branding.primaryColor + '33' }}
                 onFocus={(e) => e.target.style.borderColor = branding.primaryColor}
@@ -274,6 +294,7 @@ const StaffOrderInterface = () => {
           onUpdateItem={updateCartItem}
           tableNumber={tableNumber}
           customerName={customerName}
+          customerPhone={customerPhone}
           customerNotes={customerNotes}
           totalPrice={getTotalPrice()}
           onClearCart={clearCart}

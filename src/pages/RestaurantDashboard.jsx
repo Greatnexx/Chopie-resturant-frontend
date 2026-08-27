@@ -648,6 +648,8 @@ const RestaurantDashboard = () => {
                             orderId={order._id}
                             onAccept={handleAcceptOrder}
                             onReject={handleRejectOrder}
+                            isAccepting={loadingOrderId === order._id}
+                            isRejecting={loadingOrderId === order._id}
                           />
                         ) : getNextAction(order.orderStatus || order.status) ? (
                           <button
@@ -710,11 +712,13 @@ const RestaurantDashboard = () => {
         <OrderNotification
           order={showNotification}
           onClose={() => setShowNotification(null)}
-          onAccept={(orderId) => {
+          onAccept={async (orderId) => {
+            await handleAcceptOrder(orderId);
             setNotifications(prev => prev.filter(n => n.orderId !== orderId));
             refetch();
           }}
-          onReject={(orderId) => {
+          onReject={async (orderId) => {
+            await handleRejectOrder(orderId);
             setNotifications(prev => prev.filter(n => n.orderId !== orderId));
             refetch();
           }}

@@ -8,6 +8,7 @@ const StaffCartModal = ({
   onUpdateItem, 
   tableNumber, 
   customerName, 
+  customerPhone,
   customerNotes, 
   totalPrice,
   onClearCart,
@@ -21,6 +22,11 @@ const StaffCartModal = ({
   const handleSubmitOrder = async () => {
     if (!tableNumber.trim()) {
       toast.error('Please enter a table number');
+      return;
+    }
+
+    if (!customerName.trim()) {
+      toast.error('Please enter the customer name');
       return;
     }
 
@@ -51,7 +57,8 @@ const StaffCartModal = ({
           image: item.image
         })),
         tableNumber: tableNumber.trim(),
-        customerName: customerName.trim() || 'Walk-in Customer',
+        customerName: customerName.trim(),
+        customerPhone: customerPhone.trim(),
         notes: customerNotes.trim(),
         orderSource: 'staff',
         createdBy: userId,
@@ -149,6 +156,9 @@ const StaffCartModal = ({
             </div>
             <div>
               <span className="font-medium">Customer:</span> {customerName || 'Walk-in Customer'}
+            </div>
+            <div>
+              <span className="font-medium">Phone:</span> {customerPhone || 'Not provided'}
             </div>
             {customerNotes && (
               <div className="col-span-2">

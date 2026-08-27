@@ -7,6 +7,7 @@ import { formatCurrency } from "../utils/formatCurrency";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import PaymentModal from "./PaymentModal";
+import { useBranding } from "../Context/BrandingContext";
 
 const OrderManagement = () => {
   const { data: ordersData, isLoading, error, refetch } = useGetAllOrdersQuery();
@@ -20,6 +21,7 @@ const OrderManagement = () => {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [bulkLoading, setBulkLoading] = useState(false);
   const navigate = useNavigate();
+  const { branding } = useBranding();
   const restaurantUser = JSON.parse(sessionStorage.getItem('restaurantUser') || '{}');
   const restaurantName = restaurantUser?.data?.restaurantName || restaurantUser?.restaurantName || 'Restaurant';
 
@@ -116,7 +118,7 @@ const OrderManagement = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderBottomColor: branding.primaryColor }}></div>
       </div>
     );
   }
@@ -127,7 +129,8 @@ const OrderManagement = () => {
         <p className="text-red-600">Error loading orders: {error.message}</p>
         <button 
           onClick={refetch}
-          className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+          className="mt-4 px-4 py-2 text-white rounded-lg hover:opacity-90"
+          style={{ backgroundColor: branding.primaryColor }}
         >
           Retry
         </button>
@@ -154,27 +157,27 @@ const OrderManagement = () => {
             value={tableFilter}
             onChange={(e) => setTableFilter(e.target.value)}
             placeholder="Filter by table (e.g. Table 5)"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-52"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 w-52"
           />
           <input
             type="text"
             value={customerFilter}
             onChange={(e) => setCustomerFilter(e.target.value)}
             placeholder="Filter by customer name"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-52"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 w-52"
           />
           <input
             type="text"
             value={phoneFilter}
             onChange={(e) => setPhoneFilter(e.target.value)}
             placeholder="Filter by phone number"
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300 w-52"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 w-52"
           />
           <input
             type="date"
             value={dateFilter}
             onChange={(e) => setDateFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-300"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
           />
         </div>
 
@@ -217,9 +220,10 @@ const OrderManagement = () => {
               onClick={() => setFilter(status)}
               className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                 filter === status
-                  ? "bg-red-500 text-white"
+                  ? "text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
+              style={filter === status ? { backgroundColor: branding.primaryColor } : {}}
             >
               {status === "all" ? "All Orders" : status.charAt(0).toUpperCase() + status.slice(1)}
             </button>

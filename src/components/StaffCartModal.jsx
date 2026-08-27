@@ -58,7 +58,7 @@ const StaffCartModal = ({
         })),
         tableNumber: tableNumber.trim(),
         customerName: customerName.trim(),
-        customerPhone: customerPhone.trim(),
+        customerPhone: customerPhone?.trim() || '',
         notes: customerNotes.trim(),
         orderSource: 'staff',
         createdBy: userId,

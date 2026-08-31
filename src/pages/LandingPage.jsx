@@ -162,8 +162,8 @@ const LandingPage = () => {
             <div>
               <h3 className="font-semibold mb-4">Support</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="mailto:godwindanielgodwin@gmail.com" className="hover:text-white transition-colors">godwindanielgodwin@gmail.com</a></li>
-                <li><a href="tel:+2348066870296" className="hover:text-white transition-colors">08066870296</a></li>
+                <li><a href="mailto:info@chopie.ng" className="hover:text-white transition-colors">info@chopie.ng</a></li>
+                <li><a href="tel:+2348066870296" className="hover:text-white transition-colors">+234 806 687 0296</a></li>
               </ul>
             </div>
             <div>
@@ -174,7 +174,7 @@ const LandingPage = () => {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Chopie. All rights reserved.</p>
+            <p>&copy; 2026 Chopie. All rights reserved.</p>
           </div>
         </div>
       </footer>
